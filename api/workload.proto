@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package workload.v1;
+
+service WorkloadService {
+  rpc Execute(ExecuteRequest) returns (ExecuteResponse);
+}
+
+message ExecuteRequest {
+  string run_id = 1;
+  string request_id = 2;
+}
+
+message ExecuteResponse {
+  string backend_id = 1;
+}

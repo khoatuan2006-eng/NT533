@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "name": "high",
+  "rps": 180,
+  "duration_s": 60,
+  "warmup_s": 10,
+  "max_in_flight": 300,
+  "timeout_s": 2.0,
+  "repetitions": 3,
+  "seed": 533
+}
