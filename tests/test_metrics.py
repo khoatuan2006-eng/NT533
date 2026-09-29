@@ -113,3 +113,174 @@ def test_telemetry_writer_context_manager(tmp_path: Path) -> None:
     records = read_telemetry(log_file)
     assert len(records) == 1
     assert records[0]["policy"] == "least_request"
+
+
+# ---------------------------------------------------------------------------
+# Unit tests for Summarize module
+# ---------------------------------------------------------------------------
+
+from grpc_lb.summarize import (
+    AggregatedSummary,
+    RunSummary,
+    aggregate_runs,
+    compute_percentiles,
+    format_summary_table,
+    summarize_file,
+    summarize_records,
+)
+
+
+def test_compute_percentiles_accuracy() -> None:
+    # Với dãy số từ 1 đến 100
+    values = list(range(1, 101))
+    pcts = compute_percentiles(values, [50.0, 95.0, 99.0])
+
+    # Rank của p50 là 0.5 * 99 = 49.5 -> nội suy giữa 50 và 51 -> 50.5
+    assert pcts[50.0] == 50.5
+    # Rank của p95 là 0.95 * 99 = 94.05 -> nội suy giữa 95 và 96 -> 95.05
+    assert pcts[95.0] == 95.05
+    # Rank của p99 là 0.99 * 99 = 98.01 -> nội suy giữa 99 và 100 -> 99.01
+    assert pcts[99.0] == 99.01
+
+
+def test_compute_percentiles_empty_and_single() -> None:
+    assert compute_percentiles([]) == {50.0: 0.0, 95.0: 0.0, 99.0: 0.0}
+    assert compute_percentiles([42.0]) == {50.0: 42.0, 95.0: 42.0, 99.0: 42.0}
+
+
+def test_summarize_records_metrics() -> None:
+    # Tạo 10 bản ghi: 8 ok, 1 timeout, 1 no_backend
+    records = [
+        {
+            "run_id": "test-run",
+            "request_id": f"req-{i}",
+            "policy": "round_robin",
+            "backend_id": f"replica-{(i % 3) + 1}",
+            "started_at_unix_ns": 1_000_000_000 + i * 100_000_000,  # 0.1s mỗi req -> 0.9s duration
+            "latency_ms": float(10 + i * 5),
+            "status": "ok",
+        }
+        for i in range(8)
+    ]
+    records.append(
+        {
+            "run_id": "test-run",
+            "request_id": "req-8",
+            "policy": "round_robin",
+            "backend_id": "replica-2",
+            "started_at_unix_ns": 1_800_000_000,
+            "latency_ms": 2000.0,
+            "status": "timeout",
+        }
+    )
+    records.append(
+        {
+            "run_id": "test-run",
+            "request_id": "req-9",
+            "policy": "round_robin",
+            "backend_id": None,
+            "started_at_unix_ns": 1_900_000_000,
+            "latency_ms": 0.5,
+            "status": "no_backend",
+        }
+    )
+
+    summary = summarize_records(records)
+
+    assert summary.total_requests == 10
+    assert summary.ok_count == 8
+    assert summary.timeout_count == 1
+    assert summary.no_backend_count == 1
+    assert summary.ok_rate_pct == 80.0
+    assert summary.timeout_rate_pct == 10.0
+    assert summary.error_rate_pct == 10.0
+    assert summary.duration_s == 0.9
+    assert summary.throughput_rps == round(8 / 0.9, 2)
+    assert summary.p50_latency_ms > 0
+    assert summary.backend_distribution["replica-1"] == 3
+    assert summary.backend_distribution["replica-2"] == 4
+    assert summary.backend_distribution["replica-3"] == 2
+    assert summary.backend_distribution["none"] == 1
+
+
+def test_summarize_file_and_format_table(tmp_path: Path) -> None:
+    log_file = tmp_path / "run_table.jsonl"
+    with TelemetryWriter(log_file) as writer:
+        for i in range(5):
+            writer.record(
+                CallResult(
+                    run_id="run-table",
+                    request_id=f"r-{i}",
+                    policy="least_request",
+                    backend_id="replica-1",
+                    started_at_unix_ns=1_000_000_000 + i * 200_000_000,
+                    latency_ms=10.0 + i,
+                    status=CallStatus.OK,
+                )
+            )
+
+    summary = summarize_file(log_file)
+    assert summary.total_requests == 5
+    assert summary.ok_count == 5
+
+    table_text = format_summary_table(summary)
+    assert "RUN SUMMARY: run-table" in table_text
+    assert "Policy: least_request" in table_text
+    assert "Throughput" in table_text
+    assert "replica-1" in table_text
+
+
+def test_aggregate_runs() -> None:
+    s1 = RunSummary(
+        run_id="run-1",
+        policy="round_robin",
+        total_requests=100,
+        ok_count=98,
+        timeout_count=2,
+        error_count=0,
+        no_backend_count=0,
+        ok_rate_pct=98.0,
+        timeout_rate_pct=2.0,
+        error_rate_pct=0.0,
+        duration_s=10.0,
+        throughput_rps=9.8,
+        p50_latency_ms=10.0,
+        p95_latency_ms=20.0,
+        p99_latency_ms=30.0,
+        mean_latency_ms=11.0,
+        min_latency_ms=5.0,
+        max_latency_ms=35.0,
+        backend_distribution={"replica-1": 50, "replica-2": 50},
+        backend_distribution_pct={"replica-1": 50.0, "replica-2": 50.0},
+    )
+    s2 = RunSummary(
+        run_id="run-2",
+        policy="round_robin",
+        total_requests=100,
+        ok_count=100,
+        timeout_count=0,
+        error_count=0,
+        no_backend_count=0,
+        ok_rate_pct=100.0,
+        timeout_rate_pct=0.0,
+        error_rate_pct=0.0,
+        duration_s=10.0,
+        throughput_rps=10.0,
+        p50_latency_ms=12.0,
+        p95_latency_ms=22.0,
+        p99_latency_ms=32.0,
+        mean_latency_ms=12.0,
+        min_latency_ms=6.0,
+        max_latency_ms=36.0,
+        backend_distribution={"replica-1": 50, "replica-2": 50},
+        backend_distribution_pct={"replica-1": 50.0, "replica-2": 50.0},
+    )
+
+    agg = aggregate_runs([s1, s2])
+    assert agg.runs_count == 2
+    assert agg.policy == "round_robin"
+    assert agg.mean_throughput_rps == 9.9
+    assert agg.mean_p50_latency_ms == 11.0
+    assert agg.mean_ok_rate_pct == 99.0
+    assert agg.aggregated_backend_distribution == {"replica-1": 100, "replica-2": 100}
+
