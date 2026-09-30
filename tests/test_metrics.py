@@ -284,3 +284,99 @@ def test_aggregate_runs() -> None:
     assert agg.mean_ok_rate_pct == 99.0
     assert agg.aggregated_backend_distribution == {"replica-1": 100, "replica-2": 100}
 
+
+# ---------------------------------------------------------------------------
+# Unit tests for Load Generator module
+# ---------------------------------------------------------------------------
+
+from grpc_lb.client import WorkloadClient
+from grpc_lb.loadgen import LoadGenReport, WorkloadConfig, WorkloadGenerator
+from test_client import LocalTestCluster
+
+
+def test_workload_config_parsing() -> None:
+    cfg = WorkloadConfig.from_file("configs/low.json")
+    assert cfg.name == "low"
+    assert cfg.rps == 30.0
+    assert cfg.duration_s == 60.0
+    assert cfg.warmup_s == 10.0
+    assert cfg.max_in_flight == 100
+    assert cfg.timeout_s == 2.0
+    assert cfg.repetitions == 3
+    assert cfg.seed == 533
+
+
+@pytest.mark.asyncio
+async def test_loadgen_execution_and_telemetry(tmp_path: Path) -> None:
+    cluster = LocalTestCluster()
+    try:
+        await cluster.add_server("replica-1")
+        await cluster.add_server("replica-2")
+
+        log_file = tmp_path / "loadgen_test.jsonl"
+        with TelemetryWriter(log_file) as telemetry:
+            async with WorkloadClient(
+                backends=cluster.backend_configs,
+                policy="round_robin",
+            ) as client:
+                loadgen = WorkloadGenerator(client, telemetry=telemetry)
+                # 50 RPS trong 0.2s -> 10 requests, warmup 0.1s -> 5 requests
+                cfg = WorkloadConfig(
+                    name="test",
+                    rps=50.0,
+                    duration_s=0.2,
+                    warmup_s=0.1,
+                    max_in_flight=50,
+                    timeout_s=1.0,
+                )
+                report = await loadgen.run(cfg, run_id="run-lg-test")
+
+                assert report.total_scheduled == 10
+                assert report.total_dispatched == 10
+                assert report.total_dropped == 0
+                assert report.total_completed == 10
+                assert report.actual_rps > 0
+                assert report.warmup_requests == 5
+
+        # Xác nhận đúng 10 bản ghi trong file log (warmup không được ghi vào file)
+        records = read_telemetry(log_file)
+        assert len(records) == 10
+        for r in records:
+            assert r["run_id"] == "run-lg-test"
+            assert r["status"] == "ok"
+    finally:
+        await cluster.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_loadgen_concurrency_saturation_drop() -> None:
+    cluster = LocalTestCluster()
+    try:
+        # Server có delay 0.2s để gây nghẽn hàng đợi
+        await cluster.add_server("replica-slow", delay_s=0.2)
+
+        async with WorkloadClient(
+            backends=cluster.backend_configs,
+            policy="round_robin",
+        ) as client:
+            loadgen = WorkloadGenerator(client, telemetry=None)
+            # 100 RPS trong 0.1s -> 10 requests, nhưng max_in_flight chỉ bằng 1
+            cfg = WorkloadConfig(
+                name="test-saturated",
+                rps=100.0,
+                duration_s=0.1,
+                warmup_s=0.0,
+                max_in_flight=1,
+                timeout_s=1.0,
+            )
+            report = await loadgen.run(cfg, run_id="run-saturated")
+
+            assert report.total_scheduled == 10
+            # Khi max_in_flight=1 và server trễ 0.2s, các request sau sẽ bị drop
+            assert report.total_dropped > 0
+            assert report.total_dispatched + report.total_dropped == 10
+            assert report.total_completed == report.total_dispatched
+    finally:
+        await cluster.shutdown()
+
+
