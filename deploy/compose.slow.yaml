@@ -1,0 +1,64 @@
+# =============================================================================
+# Cấu hình Docker Compose: Cụm Có 1 Replica Chậm (Straggler / Heterogeneous Cluster)
+# Đồ án M1: Nền tảng gRPC và Cân bằng tải phía Client
+#
+# Mục đích:
+# - replica-1 & replica-3: Độ trễ xử lý bình thường (SERVICE_DELAY_MS=5ms).
+# - replica-2: Độ trễ xử lý cao (SERVICE_DELAY_MS=50ms), mô phỏng Straggler node.
+# - Dùng để kiểm chứng: Least Request tự động né replica-2, trong khi Round Robin
+#   vẫn tiếp tục chia đều tải vào replica-2 làm tăng mạnh p95/p99 latency.
+# =============================================================================
+
+services:
+  replica-1:
+    container_name: replica-1
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    environment:
+      - BACKEND_ID=replica-1
+      - SERVICE_DELAY_MS=5
+      - CONCURRENCY_LIMIT=50
+      - PORT=50051
+    ports:
+      - "50051:50051"
+    networks:
+      - grpc_net
+    restart: unless-stopped
+
+  replica-2:
+    container_name: replica-2
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    environment:
+      - BACKEND_ID=replica-2
+      - SERVICE_DELAY_MS=50  # Node chậm (Straggler): Chậm gấp 10 lần replica-1 và replica-3
+      - CONCURRENCY_LIMIT=50
+      - PORT=50051
+    ports:
+      - "50052:50051"
+    networks:
+      - grpc_net
+    restart: unless-stopped
+
+  replica-3:
+    container_name: replica-3
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    environment:
+      - BACKEND_ID=replica-3
+      - SERVICE_DELAY_MS=5
+      - CONCURRENCY_LIMIT=50
+      - PORT=50051
+    ports:
+      - "50053:50051"
+    networks:
+      - grpc_net
+    restart: unless-stopped
+
+networks:
+  grpc_net:
+    name: grpc_net
+    driver: bridge
