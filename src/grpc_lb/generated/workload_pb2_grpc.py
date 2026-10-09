@@ -8,7 +8,8 @@ try:
 except ImportError:
     import workload_pb2 as workload__pb2
 
-GRPC_GENERATED_VERSION = '1.71.2'
+
+GRPC_GENERATED_VERSION = '1.84.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -21,14 +22,14 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in workload_pb2_grpc.py depends on'
+        + ' but the generated code in workload_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
-class WorkloadServiceStub(object):
+class WorkloadServiceStub:
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -44,7 +45,7 @@ class WorkloadServiceStub(object):
                 _registered_method=True)
 
 
-class WorkloadServiceServicer(object):
+class WorkloadServiceServicer:
     """Missing associated documentation comment in .proto file."""
 
     def Execute(self, request, context):
@@ -69,7 +70,7 @@ def add_WorkloadServiceServicer_to_server(servicer, server):
 
 
  # This class is part of an EXPERIMENTAL API.
-class WorkloadService(object):
+class WorkloadService:
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod

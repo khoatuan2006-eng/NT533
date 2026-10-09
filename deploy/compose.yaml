@@ -1,0 +1,58 @@
+# =============================================================================
+# Cấu hình Docker Compose: Cụm 3 Replica Đồng Nhất (Homogeneous Cluster)
+# Đồ án M1: Nền tảng gRPC và Cân bằng tải phía Client
+# =============================================================================
+
+services:
+  replica-1:
+    container_name: replica-1
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    environment:
+      - BACKEND_ID=replica-1
+      - SERVICE_DELAY_MS=5
+      - CONCURRENCY_LIMIT=50
+      - PORT=50051
+    ports:
+      - "50051:50051"
+    networks:
+      - grpc_net
+    restart: unless-stopped
+
+  replica-2:
+    container_name: replica-2
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    environment:
+      - BACKEND_ID=replica-2
+      - SERVICE_DELAY_MS=5
+      - CONCURRENCY_LIMIT=50
+      - PORT=50051
+    ports:
+      - "50052:50051"
+    networks:
+      - grpc_net
+    restart: unless-stopped
+
+  replica-3:
+    container_name: replica-3
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    environment:
+      - BACKEND_ID=replica-3
+      - SERVICE_DELAY_MS=5
+      - CONCURRENCY_LIMIT=50
+      - PORT=50051
+    ports:
+      - "50053:50051"
+    networks:
+      - grpc_net
+    restart: unless-stopped
+
+networks:
+  grpc_net:
+    name: grpc_net
+    driver: bridge
