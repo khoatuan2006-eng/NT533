@@ -33,7 +33,7 @@ COPY pyproject.toml ./
 RUN pip install --no-cache-dir \
     "grpcio>=1.71.2,<1.72" \
     "grpcio-health-checking>=1.71.2,<1.72" \
-    "protobuf>=5.26.1,<6"
+    "protobuf>=5.29.0,<6"
 
 # ── Copy source ───────────────────────────────────────────────────────────────
 COPY api/            ./api/
