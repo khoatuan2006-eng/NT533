@@ -1,18 +1,18 @@
 # Hướng đi đồ án: Cân bằng tải gRPC phía client với RL và Digital Twin
 
-**Kế hoạch đề xuất:** 3 thành viên, 30 ngày. Sử dụng Python và grpc.aio; một tiến trình client tạo nhiều RPC đồng thời tới ba replica. Bộ chọn replica nằm trong ứng dụng client.
+Sử dụng Python và grpc.aio; một tiến trình client tạo nhiều RPC đồng thời tới các replica. Bộ chọn replica nằm trong ứng dụng client. Nhóm gồm Khoa, Lầu và Đạt; cấu hình ban đầu có ba replica.
 
-README mô tả định hướng và kiến trúc chung. Công việc, phân công và điều kiện hoàn thành mốc 1 nằm trong [M1.md](M1.md).
+README mô tả định hướng và kiến trúc chung. Phân công và tiến độ nền tảng nằm trong [M1.md](M1.md); kế hoạch tích hợp Q-learning và Gemini nằm trong [M2.md](M2.md).
 
 ## 1. Các giai đoạn
 
 | Giai đoạn | Mục tiêu |
 |---|---|
 | M1 — Nền tảng gRPC | Client cân bằng tải tới ba replica; đo và so sánh baseline |
-| M2 — RL trên hệ thống thật | Q-learning học trọng số; cập nhật bộ chọn replica trong client theo chu kỳ |
+| M2 — RL và LLM | Q-learning cập nhật trọng số phân tải; Gemini qua API đề xuất chế độ reward khi có sự kiện kéo dài |
 | M3 — Digital Twin | Mô phỏng client, định tuyến và hàng đợi replica; hiệu chỉnh bằng dữ liệu thật |
 | M4 — Twin hỗ trợ RL | Huấn luyện trong Twin, nạp policy vào client và đánh giá trên hệ thống thật |
-| Hoàn thiện | Báo cáo, dữ liệu, hướng dẫn chạy và demo |
+| Hoàn thiện | Đo lường so sánh, đóng gói Docker, báo cáo, dữ liệu và hướng dẫn chạy |
 
 Kết quả cuối so sánh thuật toán truyền thống, RL học trực tiếp và RL học trong Twin trên cùng hệ thống. Không đặt trước yêu cầu RL phải tốt hơn.
 
@@ -39,7 +39,7 @@ Bộ chọn Round Robin và Least Request đều được viết ở tầng ứn
 | Ba server grpc.aio | Cùng cung cấp Execute; cấu hình thời gian xử lý và giới hạn đồng thời |
 | Thu dữ liệu | Ghi latency, lỗi, phân phối request, thời gian chờ và thực thi |
 
-Mỗi replica chạy trong container riêng; địa chỉ đề xuất là replica-1:50051, replica-2:50051 và replica-3:50051.
+Trong giai đoạn phát triển, client và các replica chạy trực tiếp bằng Python trên một máy, mỗi replica có cổng riêng. Docker được hoàn thiện ở bước đóng gói cuối.
 
 ## 3. Phạm vi M1
 
@@ -53,11 +53,13 @@ Mỗi replica chạy trong container riêng; địa chỉ đề xuất là repli
 
 M1 tập trung vào hệ thống chạy lại được bằng cấu hình và script. Kubernetes, autoscaling và dashboard nằm ngoài phạm vi hiện tại.
 
-**Chỉ chuyển sang M2 khi đạt các điều kiện nghiệm thu trong [M1.md](M1.md).**
+Nền tảng M1 đã chạy được bằng Python, gồm hai policy, health checking và log client/server. Các mục đã kiểm tra được đánh dấu trong [M1.md](M1.md). Nhóm tiếp tục tích hợp M2; nghiệm thu đo lường đầy đủ thực hiện sau khi tích hợp.
 
 ## 4. Hướng phát triển sau M1
 
-Ở M2, RL cập nhật trọng số theo chu kỳ; bộ chọn replica chỉ đọc trọng số hiện hành khi định tuyến. Việc huấn luyện nằm ngoài đường xử lý từng RPC.
+Ở M2, Q-learning cập nhật trọng số theo chu kỳ; bộ chọn replica đọc trọng số hiện hành khi định tuyến. Gemini chạy qua API ở tác vụ nền khi có sự kiện kéo dài, đề xuất một chế độ reward trong tập đã định nghĩa. Khi API lỗi, hệ thống giữ cấu hình reward hiện tại. Chi tiết nằm trong [M2.md](M2.md).
+
+Phân công M2: **Đạt** phụ trách Q-learning và client phân tải; **Lầu** phụ trách reward và Gemini; **Khoa** phụ trách controller, dữ liệu, phát hiện sự kiện và tích hợp demo web. M2 hiện là kế hoạch, chưa triển khai RL/LLM.
 
 Ở M3, Twin mô phỏng tải đến, lựa chọn replica, hàng đợi và thời gian xử lý. Dữ liệu M1 được dùng để hiệu chỉnh và kiểm tra mức độ khớp với hệ thống thật.
 
