@@ -5,7 +5,7 @@ import json
 import logging
 from pathlib import Path
 import time
-from typing import Any, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 import grpc
 from grpc.health.v1 import health_pb2, health_pb2_grpc
@@ -89,6 +89,8 @@ class WorkloadClient:
         self._health_task: asyncio.Task | None = None
         # Cờ đánh dấu client đã đóng hay chưa
         self._is_closed = False
+        # Danh sách callback đăng ký nhận CallResult khi hoàn tất mỗi RPC
+        self._result_callbacks: list[Callable[[CallResult], None]] = []
 
     @classmethod
     def from_config_file(
@@ -123,7 +125,57 @@ class WorkloadClient:
     @property
     def policy(self) -> str:
         """Trả về tên chính sách cân bằng tải hiện hành."""
-        return self._balancer.policy_name
+        return self._policy_name or self._balancer.policy_name
+
+    def add_result_callback(self, callback: Callable[[CallResult], None]) -> None:
+        """Đăng ký hàm lắng nghe nhận kết quả CallResult sau mỗi RPC."""
+        if callback not in self._result_callbacks:
+            self._result_callbacks.append(callback)
+
+    def remove_result_callback(self, callback: Callable[[CallResult], None]) -> None:
+        """Hủy đăng ký hàm lắng nghe kết quả CallResult."""
+        if callback in self._result_callbacks:
+            self._result_callbacks.remove(callback)
+
+    def get_in_flight(self) -> dict[str, int]:
+        """Trả về số lượng request đang bay (in-flight) tới từng backend."""
+        if hasattr(self._balancer, "get_in_flight"):
+            return self._balancer.get_in_flight()
+        if hasattr(self._balancer, "_in_flight"):
+            return dict(getattr(self._balancer, "_in_flight"))
+        return {b["id"]: 0 for b in self._backend_configs}
+
+    def get_active_backends(self) -> list[str]:
+        """Trả về danh sách các backend đang khỏe mạnh."""
+        return self._balancer.get_active_backends()
+
+    def get_weights(self) -> dict[str, float] | None:
+        """Trả về trọng số hiện tại nếu balancer hỗ trợ."""
+        if hasattr(self._balancer, "get_weights"):
+            return self._balancer.get_weights()
+        return None
+
+    def set_weights(self, weights: Mapping[str, float | int]) -> None:
+        """Cập nhật trọng số phân tải xuống balancer.
+
+        Raises:
+            NotImplementedError: Nếu balancer hiện tại không hỗ trợ phân tải theo trọng số.
+        """
+        if hasattr(self._balancer, "set_weights"):
+            self._balancer.set_weights(weights)
+        else:
+            raise NotImplementedError(
+                f"Chính sách {self.policy!r} không hỗ trợ cập nhật trọng số"
+            )
+
+    def _notify_result(self, result: CallResult) -> CallResult:
+        """Thông báo kết quả RPC tới toàn bộ callback đã đăng ký."""
+        for cb in self._result_callbacks:
+            try:
+                cb(result)
+            except Exception as cb_err:
+                logger.warning("Lỗi trong callback kết quả RPC: %s", cb_err)
+        return result
 
     def start_health_check(self) -> asyncio.Task:
         """Kích hoạt tác vụ ngầm định kỳ kiểm tra sức khỏe của các replica."""
@@ -220,15 +272,17 @@ class WorkloadClient:
         if backend_id is None:
             end_ns = time.time_ns()
             latency_ms = (end_ns - start_ns) / 1_000_000.0
-            return CallResult(
-                run_id=run_id,
-                request_id=request_id,
-                policy=self.policy,
-                backend_id=None,
-                started_at_unix_ns=start_ns,
-                latency_ms=latency_ms,
-                status=CallStatus.NO_BACKEND,
-                error_message="No healthy backend available",
+            return self._notify_result(
+                CallResult(
+                    run_id=run_id,
+                    request_id=request_id,
+                    policy=self.policy,
+                    backend_id=None,
+                    started_at_unix_ns=start_ns,
+                    latency_ms=latency_ms,
+                    status=CallStatus.NO_BACKEND,
+                    error_message="No healthy backend available",
+                )
             )
 
         # Lấy Stub của replica đã chọn và chuẩn bị dữ liệu request
@@ -277,16 +331,18 @@ class WorkloadClient:
         latency_ms = (end_ns - start_ns) / 1_000_000.0
 
         # Bước 7: Trả về đối tượng CallResult chuẩn mực
-        return CallResult(
-            run_id=run_id,
-            request_id=request_id,
-            policy=self.policy,
-            backend_id=backend_id,
-            started_at_unix_ns=start_ns,
-            latency_ms=latency_ms,
-            status=call_status,
-            grpc_code=grpc_code,
-            error_message=error_message,
+        return self._notify_result(
+            CallResult(
+                run_id=run_id,
+                request_id=request_id,
+                policy=self.policy,
+                backend_id=backend_id,
+                started_at_unix_ns=start_ns,
+                latency_ms=latency_ms,
+                status=call_status,
+                grpc_code=grpc_code,
+                error_message=error_message,
+            )
         )
 
     async def close(self) -> None:

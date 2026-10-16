@@ -274,3 +274,72 @@ def test_q_learning_agent_checkpoint_incompatibility(tmp_path):
     with pytest.raises(FileNotFoundError):
         agent.load_checkpoint(tmp_path / "non_existent.json")
 
+
+from grpc_lb.client import WorkloadClient
+from grpc_lb.contracts import CallResult, CallStatus
+
+
+@pytest.mark.asyncio
+async def test_client_q_learning_policy_binding():
+    """Kiểm tra WorkloadClient tự động khởi tạo WeightedBalancer khi chọn policy q_learning."""
+    backends = [
+        {"id": "replica-1", "address": "127.0.0.1:50051"},
+        {"id": "replica-2", "address": "127.0.0.1:50052"},
+    ]
+    client = WorkloadClient(backends=backends, policy="q_learning")
+
+    try:
+        assert client.policy == "q_learning"
+        assert client.balancer.policy_name == "weighted"
+
+        # Kiểm tra get_in_flight ban đầu
+        assert client.get_in_flight() == {"replica-1": 0, "replica-2": 0}
+        assert set(client.get_active_backends()) == {"replica-1", "replica-2"}
+
+        # Kiểm tra set_weights và get_weights
+        client.set_weights({"replica-1": 3.0, "replica-2": 1.0})
+        assert client.get_weights() == {"replica-1": 3.0, "replica-2": 1.0}
+    finally:
+        await client.close()
+
+
+@pytest.mark.asyncio
+async def test_client_set_weights_unsupported_policy():
+    """Kiểm tra gọi set_weights trên policy không hỗ trợ sẽ ném NotImplementedError."""
+    backends = [{"id": "replica-1", "address": "127.0.0.1:50051"}]
+    client = WorkloadClient(backends=backends, policy="round_robin")
+    try:
+        with pytest.raises(NotImplementedError, match="không hỗ trợ"):
+            client.set_weights({"replica-1": 2.0})
+    finally:
+        await client.close()
+
+
+@pytest.mark.asyncio
+async def test_client_result_callback_notification():
+    """Kiểm tra callback được thông báo khi RPC hoàn tất (kể cả khi không có backend)."""
+    backends = [{"id": "replica-1", "address": "127.0.0.1:50051"}]
+    client = WorkloadClient(backends=backends, policy="q_learning")
+
+    received_results: list[CallResult] = []
+    client.add_result_callback(lambda res: received_results.append(res))
+
+    try:
+        # Giả lập backend bị un-healthy -> execute trả về NO_BACKEND
+        client.balancer.set_backend_health("replica-1", False)
+
+        result = await client.execute("run-1", "req-1", timeout_s=1.0)
+        assert result.status == CallStatus.NO_BACKEND
+        assert len(received_results) == 1
+        assert received_results[0].request_id == "req-1"
+        assert received_results[0].policy == "q_learning"
+
+        # Thử gỡ callback
+        client.remove_result_callback(client._result_callbacks[0])
+        await client.execute("run-1", "req-2", timeout_s=1.0)
+        # Số kết quả trong danh sách không đổi vì đã gỡ callback
+        assert len(received_results) == 1
+    finally:
+        await client.close()
+
+

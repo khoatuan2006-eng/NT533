@@ -273,9 +273,10 @@ def create_balancer(policy: str, backends: Sequence[str] | None = None) -> BaseB
         return RoundRobinBalancer(backends)
     if normalized in ("least_request", "leastrequest", "lr"):
         return LeastRequestBalancer(backends)
-    if normalized in ("weighted", "weighted_round_robin", "wrr"):
+    if normalized in ("weighted", "weighted_round_robin", "wrr", "q_learning", "ql"):
         from grpc_lb.weighted_balancer import WeightedBalancer
 
         return WeightedBalancer(backends)
     raise ValueError(f"Unknown load balancing policy: {policy!r}")
+
 
