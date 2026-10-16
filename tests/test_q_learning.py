@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import math
 import pytest
 
@@ -341,5 +342,107 @@ async def test_client_result_callback_notification():
         assert len(received_results) == 1
     finally:
         await client.close()
+
+
+def test_q_learning_closed_loop_convergence():
+    """Kiểm chứng vòng lặp học khép kín: Agent tự động nhận diện action tối ưu và cập nhật trọng số.
+
+    Kịch bản:
+      - 3 replica: replica-1 là máy chủ tối ưu (nhanh nhất).
+      - Action 1 (boost replica-1) nhận điểm thưởng cao (+10.0).
+      - Action 0 (equal) nhận điểm trung bình (+1.0).
+      - Action 2 & 3 (boost replica 2 hoặc 3) nhận điểm phạt (-5.0).
+      - Sau 50 bước học, Agent phải hội tụ vào Action 1 khi khai thác (epsilon=0.0).
+    """
+    backends = ["replica-1", "replica-2", "replica-3"]
+    agent = QLearningAgent(backends=backends, alpha=0.3, gamma=0.8, epsilon=0.2, seed=42)
+    balancer = WeightedBalancer(backends=backends)
+
+    state = ("balanced", 0)
+
+    for _ in range(60):
+        action = agent.choose(state)
+        # Áp trọng số xuống balancer
+        weights = agent.get_action_weights(action)
+        balancer.set_weights(weights)
+
+        # Môi trường phản hồi điểm thưởng tương ứng
+        if action == 1:
+            reward = 10.0
+        elif action == 0:
+            reward = 1.0
+        else:
+            reward = -5.0
+
+        # Cập nhật Bellman
+        agent.update(state, action, reward, state)
+
+    # Sau quá trình học, kiểm tra chế độ khai thác (exploitation)
+    best_action = agent.choose(state, epsilon=0.0)
+    assert best_action == 1, f"Kỳ vọng Agent hội tụ vào Action 1 (boost replica-1), nhưng được {best_action}"
+
+    optimal_weights = agent.get_action_weights(best_action)
+    assert optimal_weights["replica-1"] == 3.0
+    assert optimal_weights["replica-2"] == 1.0
+    assert optimal_weights["replica-3"] == 1.0
+
+    # Phân phối tải thực tế qua balancer phải phản ánh tỉ lệ 3:1:1
+    balancer.set_weights(optimal_weights)
+    picks = [balancer.pick_nowait() for _ in range(5)]
+    assert picks.count("replica-1") == 3
+    assert picks.count("replica-2") == 1
+    assert picks.count("replica-3") == 1
+
+
+@pytest.mark.asyncio
+async def test_weighted_balancer_in_flight_cleanup_under_cancelled_error():
+    """Kiểm tra bộ đếm in-flight của WeightedBalancer luôn được hoàn trả về 0 khi tác vụ bị Cancel."""
+    balancer = WeightedBalancer(backends=["replica-1", "replica-2"])
+
+    # Mô phỏng coroutine lấy replica và bị cancel giữa chừng
+    picked = balancer.pick_nowait()
+    assert picked == "replica-1"
+    assert balancer.get_in_flight()["replica-1"] == 1
+
+    try:
+        # Giả lập khối try...finally như trong client.execute
+        raise asyncio.CancelledError("Tác vụ bị ngắt đột ngột")
+    except asyncio.CancelledError:
+        pass
+    finally:
+        balancer.release(picked)
+
+    # Đảm bảo in-flight trở về 0 an toàn
+    assert balancer.get_in_flight()["replica-1"] == 0
+    assert balancer.get_in_flight()["replica-2"] == 0
+
+
+def test_q_learning_with_dynamic_backend_failure_and_recovery():
+    """Kiểm tra phân phối trọng số thích ứng khi một replica bị rớt mạng và khôi phục."""
+    backends = ["A", "B", "C"]
+    balancer = WeightedBalancer(backends=backends, initial_weights={"A": 3.0, "B": 2.0, "C": 1.0})
+
+    # Ban đầu cả 3 đều sống, tổng trọng số là 6
+    picks_initial = [balancer.pick_nowait() for _ in range(6)]
+    assert picks_initial.count("A") == 3
+    assert picks_initial.count("B") == 2
+    assert picks_initial.count("C") == 1
+
+    # Backend A gặp sự cố
+    balancer.set_backend_health("A", False)
+    assert balancer.get_active_backends() == ["B", "C"]
+
+    # Chỉ còn B và C phân phối theo tỉ lệ 2:1
+    picks_fail = [balancer.pick_nowait() for _ in range(3)]
+    assert "A" not in picks_fail
+    assert picks_fail.count("B") == 2
+    assert picks_fail.count("C") == 1
+
+    # Backend A phục hồi
+    balancer.set_backend_health("A", True)
+    picks_recovered = [balancer.pick_nowait() for _ in range(6)]
+    assert picks_recovered.count("A") == 3
+    assert picks_recovered.count("B") == 2
+    assert picks_recovered.count("C") == 1
 
 
