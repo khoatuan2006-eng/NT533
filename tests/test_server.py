@@ -23,17 +23,17 @@ from pathlib import Path
 import grpc
 import grpc.aio
 import pytest
-from grpc.health.v1 import health_pb2, health_pb2_grpc
+from grpc_health.v1 import health_pb2, health_pb2_grpc
 
 from grpc_lb.client import WorkloadClient
 from grpc_lb.contracts import CallStatus
 from grpc_lb.generated import workload_pb2, workload_pb2_grpc
 from grpc_lb.server import WorkloadServicer, _JsonlLogger, build_server
 
-
 # ---------------------------------------------------------------------------
 # Helper: khoi dong server test tren cong ngau nhien
 # ---------------------------------------------------------------------------
+
 
 async def _start_test_server(
     backend_id: str = "test-replica",
@@ -70,12 +70,11 @@ def _read_jsonl(path: str | Path) -> list[dict]:
 # Test 1: RPC Execute co ban
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_execute_returns_backend_id() -> None:
     """Execute tra ve backend_id dung va status OK."""
-    server, logger, _, address = await _start_test_server(
-        backend_id="replica-test", delay_s=0.0
-    )
+    server, logger, _, address = await _start_test_server(backend_id="replica-test", delay_s=0.0)
     log_path = logger._path
     try:
         async with grpc.aio.insecure_channel(address) as ch:
@@ -105,6 +104,7 @@ async def test_execute_returns_backend_id() -> None:
 # Test 2: Nhieu request dong thoi
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_execute_concurrent_requests() -> None:
     """10 request dong thoi deu thanh cong, JSONL co 10 dong."""
@@ -115,13 +115,15 @@ async def test_execute_concurrent_requests() -> None:
     try:
         async with grpc.aio.insecure_channel(address) as ch:
             stub = workload_pb2_grpc.WorkloadServiceStub(ch)
-            results = await asyncio.gather(*[
-                stub.Execute(
-                    workload_pb2.ExecuteRequest(run_id="run-c", request_id=f"req-{i}"),
-                    timeout=5.0,
-                )
-                for i in range(10)
-            ])
+            results = await asyncio.gather(
+                *[
+                    stub.Execute(
+                        workload_pb2.ExecuteRequest(run_id="run-c", request_id=f"req-{i}"),
+                        timeout=5.0,
+                    )
+                    for i in range(10)
+                ]
+            )
         assert all(r.backend_id == "replica-1" for r in results)
         rows = _read_jsonl(log_path)
         assert len(rows) == 10
@@ -134,6 +136,7 @@ async def test_execute_concurrent_requests() -> None:
 # ---------------------------------------------------------------------------
 # Test 3: Gioi han dong thoi -- semaphore chan dung
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_concurrency_limit_blocks() -> None:
@@ -168,9 +171,7 @@ async def test_concurrency_limit_blocks() -> None:
         rows = _read_jsonl(log_path)
         assert len(rows) == 2
         # It nhat 1 dong co queue_ms > 50 ms
-        assert any(row["queue_ms"] > 50 for row in rows), (
-            f"Expected queued row, got: {rows}"
-        )
+        assert any(row["queue_ms"] > 50 for row in rows), f"Expected queued row, got: {rows}"
     finally:
         await server.stop(grace=0)
         logger.close()
@@ -179,6 +180,7 @@ async def test_concurrency_limit_blocks() -> None:
 # ---------------------------------------------------------------------------
 # Test 4: Client deadline -- DEADLINE_EXCEEDED
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_client_deadline_exceeded() -> None:
@@ -212,6 +214,7 @@ async def test_client_deadline_exceeded() -> None:
 # Test 5: Huy khi dang cho semaphore -- BAT BUOC co log cancelled, service_ms=0
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_cancel_while_queued_mandatory_log() -> None:
     """
@@ -223,12 +226,11 @@ async def test_cancel_while_queued_mandatory_log() -> None:
 
     server, logger, _, address = await _start_test_server(
         backend_id="replica-q",
-        delay_s=1.0,        # req-1 chiem semaphore 1 giay
+        delay_s=1.0,  # req-1 chiem semaphore 1 giay
         max_concurrency=1,  # chi 1 request cung luc
         on_queued_cb=queued_event,
     )
     log_path = logger._path
-    MAX_CONCURRENCY = 1
 
     try:
         async with grpc.aio.insecure_channel(address) as ch:
@@ -283,14 +285,10 @@ async def test_cancel_while_queued_mandatory_log() -> None:
 
         # Phai co it nhat 1 dong cho req-2 voi status=cancelled (BAT BUOC assertion, khong bo qua)
         cancelled_rows = [r for r in rows if r.get("request_id") == "req-2"]
-        assert len(cancelled_rows) >= 1, (
-            f"PHAI co dong log cho req-2. Tat ca rows: {rows}"
-        )
+        assert len(cancelled_rows) >= 1, f"PHAI co dong log cho req-2. Tat ca rows: {rows}"
         c = cancelled_rows[0]
         assert c["status"] == "cancelled", f"status phai la 'cancelled', got: {c}"
-        assert c["service_ms"] == 0.0, (
-            f"service_ms phai la 0.0 khi bi cancel khi cho, got: {c['service_ms']}"
-        )
+        assert c["service_ms"] == 0.0, f"service_ms phai la 0.0 khi bi cancel khi cho, got: {c['service_ms']}"
 
         # Doi req-1 hoan thanh va kiem tra khong ro ri suat
         task1.cancel()
@@ -325,6 +323,7 @@ async def test_cancel_while_queued_mandatory_log() -> None:
 # ---------------------------------------------------------------------------
 # Test 6: Health service
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_health_serving() -> None:
@@ -365,15 +364,13 @@ async def test_health_not_serving() -> None:
 # Test 7: JSONL schema day du
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_jsonl_schema_complete() -> None:
     """Moi dong JSONL phai co du tat ca cac truong theo schema M1."""
-    required = {"schema_version", "run_id", "request_id", "backend_id",
-                "queue_ms", "service_ms", "status"}
+    required = {"schema_version", "run_id", "request_id", "backend_id", "queue_ms", "service_ms", "status"}
 
-    server, logger, _, address = await _start_test_server(
-        backend_id="replica-log", delay_s=0.0
-    )
+    server, logger, _, address = await _start_test_server(backend_id="replica-log", delay_s=0.0)
     log_path = logger._path
     try:
         async with grpc.aio.insecure_channel(address) as ch:
@@ -407,24 +404,25 @@ async def test_jsonl_schema_complete() -> None:
 # Test 8: 1 dong JSONL / request
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_jsonl_one_line_per_request() -> None:
     """20 request phai tao dung 20 dong JSONL."""
     n = 20
-    server, logger, _, address = await _start_test_server(
-        delay_s=0.0, max_concurrency=n
-    )
+    server, logger, _, address = await _start_test_server(delay_s=0.0, max_concurrency=n)
     log_path = logger._path
     try:
         async with grpc.aio.insecure_channel(address) as ch:
             stub = workload_pb2_grpc.WorkloadServiceStub(ch)
-            await asyncio.gather(*[
-                stub.Execute(
-                    workload_pb2.ExecuteRequest(run_id="r", request_id=f"req-{i}"),
-                    timeout=5.0,
-                )
-                for i in range(n)
-            ])
+            await asyncio.gather(
+                *[
+                    stub.Execute(
+                        workload_pb2.ExecuteRequest(run_id="r", request_id=f"req-{i}"),
+                        timeout=5.0,
+                    )
+                    for i in range(n)
+                ]
+            )
         rows = _read_jsonl(log_path)
         assert len(rows) == n
     finally:
@@ -436,15 +434,14 @@ async def test_jsonl_one_line_per_request() -> None:
 # Integration tests -- WorkloadClient that + server that tren localhost
 # ===========================================================================
 
+
 @pytest.mark.asyncio
 async def test_integration_client_execute_round_robin() -> None:
     """
     WorkloadClient.execute() voi round_robin gui RPC thanh cong toi server.
     Ket qua phai co backend_id dung, status=ok, latency_ms > 0.
     """
-    server, logger, _, address = await _start_test_server(
-        backend_id="r1", delay_s=0.0
-    )
+    server, logger, _, address = await _start_test_server(backend_id="r1", delay_s=0.0)
     try:
         backends = [{"id": "r1", "address": address}]
         async with WorkloadClient(backends=backends, policy="round_robin") as client:
@@ -467,9 +464,7 @@ async def test_integration_client_health_check() -> None:
     WorkloadClient.check_backend_health() phai tra True khi server SERVING
     va False khi NOT_SERVING.
     """
-    server, logger, health_servicer, address = await _start_test_server(
-        backend_id="r-health"
-    )
+    server, logger, health_servicer, address = await _start_test_server(backend_id="r-health")
     try:
         backends = [{"id": "r-health", "address": address}]
         async with WorkloadClient(backends=backends, policy="round_robin") as client:
@@ -493,9 +488,7 @@ async def test_integration_client_timeout() -> None:
     """
     WorkloadClient.execute() voi timeout nho hon delay -> status=TIMEOUT.
     """
-    server, logger, _, address = await _start_test_server(
-        backend_id="r-slow", delay_s=0.5
-    )
+    server, logger, _, address = await _start_test_server(backend_id="r-slow", delay_s=0.5)
     try:
         backends = [{"id": "r-slow", "address": address}]
         async with WorkloadClient(backends=backends, policy="round_robin") as client:
@@ -515,9 +508,7 @@ async def test_integration_client_request_after_timeout() -> None:
     Request tiep theo sau timeout phai thanh cong (khong bi block boi trang thai cu).
     Kiem tra semaphore khong bi ro ri sau timeout.
     """
-    server, logger, _, address = await _start_test_server(
-        backend_id="r-seq", delay_s=0.3, max_concurrency=1
-    )
+    server, logger, _, address = await _start_test_server(backend_id="r-seq", delay_s=0.3, max_concurrency=1)
     try:
         backends = [{"id": "r-seq", "address": address}]
         async with WorkloadClient(backends=backends, policy="round_robin") as client:
@@ -530,9 +521,7 @@ async def test_integration_client_request_after_timeout() -> None:
 
             # Request 2: phai thanh cong trong thoi gian hop ly
             r2 = await client.execute("run-seq", "req-ok", timeout_s=2.0)
-            assert r2.status == CallStatus.OK, (
-                f"Request sau timeout phai thanh cong, got {r2}"
-            )
+            assert r2.status == CallStatus.OK, f"Request sau timeout phai thanh cong, got {r2}"
             assert r2.backend_id == "r-seq"
     finally:
         await server.stop(grace=0)
@@ -545,24 +534,20 @@ async def test_integration_least_request_counters_return_zero() -> None:
     Sau khi tat ca RPC ket thuc, bo dem LeastRequest phai ve 0.
     Server that phai tra ket qua dung.
     """
-    server, logger, _, address = await _start_test_server(
-        backend_id="r-lr", delay_s=0.0, max_concurrency=20
-    )
+    server, logger, _, address = await _start_test_server(backend_id="r-lr", delay_s=0.0, max_concurrency=20)
     try:
         backends = [{"id": "r-lr", "address": address}]
         async with WorkloadClient(backends=backends, policy="least_request") as client:
-            results = await asyncio.gather(*[
-                client.execute("run-lr", f"req-{i}", timeout_s=3.0)
-                for i in range(15)
-            ])
+            results = await asyncio.gather(
+                *[client.execute("run-lr", f"req-{i}", timeout_s=3.0) for i in range(15)]
+            )
             for r in results:
                 assert r.status == CallStatus.OK, f"Expected OK: {r}"
 
             from grpc_lb.balancer import LeastRequestBalancer
+
             balancer: LeastRequestBalancer = client.balancer  # type: ignore
-            assert balancer.total_in_flight() == 0, (
-                f"in_flight phai ve 0, got {balancer.total_in_flight()}"
-            )
+            assert balancer.total_in_flight() == 0, f"in_flight phai ve 0, got {balancer.total_in_flight()}"
     finally:
         await server.stop(grace=0)
         logger.close()
@@ -571,6 +556,7 @@ async def test_integration_least_request_counters_return_zero() -> None:
 # ---------------------------------------------------------------------------
 # Test 10: Cau hinh SERVICE_DELAY_S va SERVICE_DELAY_MS qua env
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_env_delay_configuration(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -603,12 +589,23 @@ async def test_env_delay_configuration(monkeypatch: pytest.MonkeyPatch) -> None:
 # Test 11: Race condition -- cancel ngay khi vua acquire semaphore
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
-async def test_race_condition_cancel_right_after_acquire() -> None:
+async def test_race_condition_cancel_right_after_acquire(monkeypatch) -> None:
     """
     Kiem tra an toan semaphore khi context bi cancelled ngay khi vua acquire.
     Chi release khi acquire thuc su thanh cong, khong ro ri suat va khong tang sai.
     """
+    acquired = asyncio.Event()
+    original_work = WorkloadServicer._do_work
+
+    async def signal_acquired(self, context):
+        # _do_work is entered only after semaphore acquisition. A tiny deadline
+        # can expire before the handler starts, which does not test this race.
+        acquired.set()
+        await original_work(self, context)
+
+    monkeypatch.setattr(WorkloadServicer, "_do_work", signal_acquired)
     server, logger, _, address = await _start_test_server(
         backend_id="replica-race", delay_s=0.5, max_concurrency=1
     )
@@ -617,17 +614,13 @@ async def test_race_condition_cancel_right_after_acquire() -> None:
         async with grpc.aio.insecure_channel(address) as ch:
             stub = workload_pb2_grpc.WorkloadServiceStub(ch)
 
-            # Request 1: timeout rat ngan (0.01s) de mo phong huy ngay khi vao handler
-            try:
-                await stub.Execute(
-                    workload_pb2.ExecuteRequest(run_id="run-rc", request_id="req-rc-1"),
-                    timeout=0.01,
-                )
-            except grpc.aio.AioRpcError:
-                pass
-
-            # Doi server giai phong semaphore
-            await asyncio.sleep(0.1)
+            first = stub.Execute(
+                workload_pb2.ExecuteRequest(run_id="run-rc", request_id="req-rc-1"), timeout=2.0
+            )
+            await asyncio.wait_for(acquired.wait(), timeout=1.0)
+            first.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await first
 
             # Request 2: phai acquire duoc semaphore binh thuong, khong bi deadlock
             resp = await stub.Execute(
@@ -651,15 +644,14 @@ async def test_race_condition_cancel_right_after_acquire() -> None:
 # Test 12: Graceful shutdown & health transition
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_graceful_shutdown_health_and_log() -> None:
     """
     Kiem tra graceful shutdown chuyen health ve NOT_SERVING cho ca '' va service_name,
     va dong file log an toan.
     """
-    server, logger, health_servicer, address = await _start_test_server(
-        backend_id="replica-shut"
-    )
+    server, logger, health_servicer, address = await _start_test_server(backend_id="replica-shut")
     try:
         # Dang SERVING
         async with grpc.aio.insecure_channel(address) as ch:
@@ -669,9 +661,7 @@ async def test_graceful_shutdown_health_and_log() -> None:
 
         # Thuc hien cac buoc shutdown nhu trong serve()
         await health_servicer.set("", health_pb2.HealthCheckResponse.NOT_SERVING)
-        await health_servicer.set(
-            "workload.v1.WorkloadService", health_pb2.HealthCheckResponse.NOT_SERVING
-        )
+        await health_servicer.set("workload.v1.WorkloadService", health_pb2.HealthCheckResponse.NOT_SERVING)
 
         # Kiem tra health da ve NOT_SERVING
         async with grpc.aio.insecure_channel(address) as ch:

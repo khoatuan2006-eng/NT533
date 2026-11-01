@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass
 import json
-from pathlib import Path
 import time
+from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from .client import WorkloadClient
@@ -62,7 +62,7 @@ class LoadGenReport:
 
 class WorkloadGenerator:
     """Bộ tạo tải bất đồng bộ theo nhịp độ thời gian thực (Real-time Pacing Load Generator).
-    
+
     Các tính năng kỹ thuật cốt lõi:
     1. Target-Time Pacing: Khử trôi thời gian tích lũy, bảo đảm tốc độ phát bám sát RPS cấu hình.
     2. Concurrency Limiting: Kiểm soát max_in_flight, ghi nhận số request bị drop khi client bão hòa.

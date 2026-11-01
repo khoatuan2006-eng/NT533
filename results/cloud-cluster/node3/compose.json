@@ -1,0 +1,87 @@
+{
+  "services": {
+    "consul": {
+      "image": "hashicorp/consul:2.1.0",
+      "network_mode": "host",
+      "restart": "unless-stopped",
+      "command": [
+        "agent",
+        "-server",
+        "-bootstrap-expect=3",
+        "-node=lb-node3",
+        "-bind=192.168.1.140",
+        "-advertise=192.168.1.140",
+        "-client=127.0.0.1",
+        "-datacenter=lb-cloud",
+        "-retry-join=192.168.1.45",
+        "-retry-join=192.168.1.158",
+        "-retry-join=192.168.1.140"
+      ],
+      "volumes": [
+        "consul-data:/consul/data",
+        "../../configs/consul-ha.json:/consul/config/ha.json:ro"
+      ]
+    },
+    "b-2": {
+      "image": "loadbalance-workload:cloud",
+      "build": {
+        "context": "../..",
+        "dockerfile": "deploy/Dockerfile"
+      },
+      "network_mode": "host",
+      "restart": "unless-stopped",
+      "command": [
+        "python",
+        "-m",
+        "grpc_lb.microservices"
+      ],
+      "volumes": [
+        "../topology.json:/app/configs/topology.json:ro",
+        "../bootstrap.json:/app/configs/bootstrap.json:ro"
+      ],
+      "environment": {
+        "SERVICE_ID": "service-b",
+        "INSTANCE_ID": "b-2",
+        "LISTEN_ADDRESS": "192.168.1.140:50202",
+        "SERVICE_ADVERTISE_ADDRESS": "192.168.1.140:50202",
+        "TOPOLOGY_PATH": "/app/configs/topology.json",
+        "DISCOVERY_MODE": "xds",
+        "GRPC_XDS_BOOTSTRAP": "/app/configs/bootstrap.json",
+        "CONSUL_HTTP_ADDR": "http://127.0.0.1:8500",
+        "DRAIN_FILE": "/tmp/drain"
+      }
+    },
+    "c-2": {
+      "image": "loadbalance-workload:cloud",
+      "build": {
+        "context": "../..",
+        "dockerfile": "deploy/Dockerfile"
+      },
+      "network_mode": "host",
+      "restart": "unless-stopped",
+      "command": [
+        "python",
+        "-m",
+        "grpc_lb.microservices"
+      ],
+      "volumes": [
+        "../topology.json:/app/configs/topology.json:ro",
+        "../bootstrap.json:/app/configs/bootstrap.json:ro"
+      ],
+      "environment": {
+        "SERVICE_ID": "service-c",
+        "INSTANCE_ID": "c-2",
+        "LISTEN_ADDRESS": "192.168.1.140:50302",
+        "SERVICE_ADVERTISE_ADDRESS": "192.168.1.140:50302",
+        "TOPOLOGY_PATH": "/app/configs/topology.json",
+        "DISCOVERY_MODE": "xds",
+        "GRPC_XDS_BOOTSTRAP": "/app/configs/bootstrap.json",
+        "CONSUL_HTTP_ADDR": "http://127.0.0.1:8500",
+        "DRAIN_FILE": "/tmp/drain"
+      }
+    }
+  },
+  "volumes": {
+    "consul-data": {}
+  }
+}

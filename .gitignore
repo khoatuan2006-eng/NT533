@@ -13,3 +13,11 @@ dist/
 build/
 *.log
 upload-artifacts/
+
+# Local cloud access files and deployment bundles; keep textual experiment evidence.
+results/*ssh*
+results/*known-hosts
+results/*credential*
+results/*.tar.gz
+results/*.zip
+results/*.png

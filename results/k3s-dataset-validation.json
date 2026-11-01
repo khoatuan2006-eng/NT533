@@ -1,0 +1,54 @@
+{
+  "total_rpcs": 24000,
+  "trials": [
+    {
+      "path": "results/k3s-controlled-final/heavy-150-1-static.jsonl",
+      "rows": 3000,
+      "all_ok": true,
+      "no_early_dispatch": true
+    },
+    {
+      "path": "results/k3s-controlled-final/heavy-150-1-xds.jsonl",
+      "rows": 3000,
+      "all_ok": true,
+      "no_early_dispatch": true
+    },
+    {
+      "path": "results/k3s-controlled-final/heavy-150-2-static.jsonl",
+      "rows": 3000,
+      "all_ok": true,
+      "no_early_dispatch": true
+    },
+    {
+      "path": "results/k3s-controlled-final/heavy-150-2-xds.jsonl",
+      "rows": 3000,
+      "all_ok": true,
+      "no_early_dispatch": true
+    },
+    {
+      "path": "results/k3s-controlled-final/light-150-1-static.jsonl",
+      "rows": 3000,
+      "all_ok": true,
+      "no_early_dispatch": true
+    },
+    {
+      "path": "results/k3s-controlled-final/light-150-1-xds.jsonl",
+      "rows": 3000,
+      "all_ok": true,
+      "no_early_dispatch": true
+    },
+    {
+      "path": "results/k3s-controlled-final/light-150-2-static.jsonl",
+      "rows": 3000,
+      "all_ok": true,
+      "no_early_dispatch": true
+    },
+    {
+      "path": "results/k3s-controlled-final/light-150-2-xds.jsonl",
+      "rows": 3000,
+      "all_ok": true,
+      "no_early_dispatch": true
+    }
+  ],
+  "verified_unix_s": 1793199043.7489824
+}

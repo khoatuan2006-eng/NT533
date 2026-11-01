@@ -3,12 +3,13 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from pathlib import Path
+import math
 import time
+from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 import grpc
-from grpc.health.v1 import health_pb2, health_pb2_grpc
+from grpc_health.v1 import health_pb2, health_pb2_grpc
 
 from .balancer import BaseBalancer, create_balancer
 from .contracts import CallResult, CallStatus
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class WorkloadClient:
     """Client gRPC điều phối với tính năng Cân bằng tải phía Client và Giám sát sức khỏe ngầm.
-    
+
     Các vai trò chính của lớp này:
     1. Channel Pool: Quản lý và tái sử dụng các kết nối HTTP/2 (Channel) tới các replica server.
     2. Health Checking: Chạy coroutine ngầm định kỳ ping các replica để phát hiện server chết/sống lại.
@@ -49,6 +50,23 @@ class WorkloadClient:
         """
         if not backends:
             raise ValueError("Danh sách backends không được để trống")
+
+        for value in (health_check_interval_s, health_check_timeout_s):
+            if type(value) not in (int, float) or not math.isfinite(value) or value <= 0:
+                raise ValueError("Health check interval and timeout must be finite and positive")
+        ids = []
+        for backend in backends:
+            if (
+                not isinstance(backend, Mapping)
+                or not isinstance(backend.get("id"), str)
+                or not backend["id"].strip()
+                or not isinstance(backend.get("address"), str)
+                or not backend["address"].strip()
+            ):
+                raise ValueError("Each backend requires a nonempty ID and address")
+            ids.append(backend["id"])
+        if len(set(ids)) != len(ids):
+            raise ValueError("Backend IDs must be unique")
 
         self._backend_configs = list(backends)
         self._policy_name = policy
@@ -102,6 +120,9 @@ class WorkloadClient:
         with path.open("r", encoding="utf-8") as f:
             data = json.load(f)
 
+        if not isinstance(data, dict) or not isinstance(data.get("health_check", {}), dict):
+            raise ValueError("Client configuration and health_check must be JSON objects")
+
         backends = data.get("backends", [])
         health_cfg = data.get("health_check", {})
         interval_s = health_cfg.get("interval_s", 1.0)
@@ -139,7 +160,7 @@ class WorkloadClient:
 
     async def check_backend_health(self, backend_id: str) -> bool:
         """Gửi 1 thông điệp kiểm tra sức khỏe tới một replica cụ thể.
-        
+
         Sử dụng giao thức chuẩn gRPC Health Checking Protocol:
         - Gửi HealthCheckRequest(service="")
         - Nếu server trả về SERVING: Replica sống khỏe mạnh (True).
@@ -152,7 +173,7 @@ class WorkloadClient:
         try:
             req = health_pb2.HealthCheckRequest(service="")
             resp = await health_stub.Check(req, timeout=self._health_timeout_s)
-            is_healthy = (resp.status == health_pb2.HealthCheckResponse.SERVING)
+            is_healthy = resp.status == health_pb2.HealthCheckResponse.SERVING
         except Exception:
             # Bất kỳ lỗi mạng, ngắt kết nối hay timeout đều coi replica là unhealthy
             is_healthy = False
@@ -163,10 +184,7 @@ class WorkloadClient:
 
     async def check_all_backends(self) -> dict[str, bool]:
         """Quét và kiểm tra sức khỏe toàn bộ các replica cùng lúc (chạy song song bằng asyncio.gather)."""
-        tasks = [
-            self.check_backend_health(b["id"])
-            for b in self._backend_configs
-        ]
+        tasks = [self.check_backend_health(b["id"]) for b in self._backend_configs]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         health_map: dict[str, bool] = {}
         for b, res in zip(self._backend_configs, results):
@@ -198,7 +216,7 @@ class WorkloadClient:
         timeout_s: float,
     ) -> CallResult:
         """Hàm thực thi một RPC WorkloadService.Execute có cân bằng tải và đo lường.
-        
+
         Đây là hàm giao diện cốt lõi kết nối với bộ phát tải (loadgen) của bạn Đạt.
 
         Quy trình xử lý:
@@ -212,14 +230,14 @@ class WorkloadClient:
         """
         # Bước 1: Ghi nhận thời điểm bắt đầu theo chuẩn Unix Nanosecond
         start_ns = time.time_ns()
+        start_elapsed_ns = time.perf_counter_ns()
 
         # Bước 2: Hỏi balancer chọn replica
         backend_id = await self._balancer.pick()
 
         # Bước 3: Kiểm tra nếu toàn bộ replica đều chết
         if backend_id is None:
-            end_ns = time.time_ns()
-            latency_ms = (end_ns - start_ns) / 1_000_000.0
+            latency_ms = (time.perf_counter_ns() - start_elapsed_ns) / 1_000_000.0
             return CallResult(
                 run_id=run_id,
                 request_id=request_id,
@@ -273,8 +291,7 @@ class WorkloadClient:
             await self._balancer.on_request_end(backend_id)
 
         # Bước 6: Tính toán tổng thời gian phản hồi (Latency) bằng mili-giây
-        end_ns = time.time_ns()
-        latency_ms = (end_ns - start_ns) / 1_000_000.0
+        latency_ms = (time.perf_counter_ns() - start_elapsed_ns) / 1_000_000.0
 
         # Bước 7: Trả về đối tượng CallResult chuẩn mực
         return CallResult(
@@ -292,7 +309,10 @@ class WorkloadClient:
     async def close(self) -> None:
         """Đóng toàn bộ client, dừng kiểm tra sức khỏe và giải phóng các Channel."""
         self._is_closed = True
+        health_task = self._health_task
         self.stop_health_check()
+        if health_task is not None:
+            await asyncio.gather(health_task, return_exceptions=True)
         # Đóng tất cả kênh kết nối TCP gRPC
         close_tasks = [ch.close() for ch in self._channels.values()]
         if close_tasks:

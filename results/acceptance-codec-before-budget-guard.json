@@ -1,0 +1,301 @@
+{
+  "scope": "single-host Docker/Envoy, synthetic asynchronous-delay workload",
+  "started_at_unix": 1792942534.929254,
+  "stages": {
+    "envoy_config_validation": "passed",
+    "initial_graph": {
+      "service-a": {
+        "a-2": 12,
+        "a-1": 12
+      },
+      "service-b": {
+        "b-1": 12,
+        "b-2": 12
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "baseline": {
+      "requests": 1000,
+      "concurrency": 32,
+      "workload": "light",
+      "elapsed_s": 2.974,
+      "codes": {
+        "OK": 1000
+      },
+      "successful_rps": 336.21,
+      "success_latency_ms": {
+        "p50": 88.105,
+        "p95": 123.46,
+        "p99": 372.879
+      },
+      "instance_visits": {
+        "a-2": 500,
+        "b-2": 500,
+        "c-1": 500,
+        "b-1": 500,
+        "c-2": 500,
+        "a-1": 500
+      }
+    },
+    "heavy": {
+      "requests": 300,
+      "concurrency": 16,
+      "workload": "heavy",
+      "elapsed_s": 2.31,
+      "codes": {
+        "OK": 300
+      },
+      "successful_rps": 129.86,
+      "success_latency_ms": {
+        "p50": 99.652,
+        "p95": 413.969,
+        "p99": 432.737
+      },
+      "instance_visits": {
+        "a-2": 150,
+        "b-2": 150,
+        "c-1": 150,
+        "b-1": 150,
+        "c-2": 150,
+        "a-1": 150
+      }
+    },
+    "bounded_stress": {
+      "requests": 5000,
+      "concurrency": 64,
+      "workload": "light",
+      "elapsed_s": 12.019,
+      "codes": {
+        "OK": 5000
+      },
+      "successful_rps": 415.99,
+      "success_latency_ms": {
+        "p50": 148.588,
+        "p95": 237.017,
+        "p99": 399.177
+      },
+      "instance_visits": {
+        "a-2": 2500,
+        "b-2": 2500,
+        "c-1": 2500,
+        "b-1": 2500,
+        "c-2": 2500,
+        "a-1": 2500
+      }
+    },
+    "overload": {
+      "requests": 1000,
+      "concurrency": 128,
+      "workload": "heavy",
+      "elapsed_s": 33.43,
+      "codes": {
+        "RESOURCE_EXHAUSTED": 394,
+        "OK": 356,
+        "DEADLINE_EXCEEDED": 250
+      },
+      "successful_rps": 10.65,
+      "success_latency_ms": {
+        "p50": 3124.177,
+        "p95": 4581.064,
+        "p99": 7363.569
+      },
+      "instance_visits": {
+        "a-1": 180,
+        "b-1": 178,
+        "c-1": 178,
+        "b-2": 178,
+        "c-2": 178,
+        "a-2": 176
+      },
+      "entry_concurrency_per_instance": 2
+    },
+    "linux_client_overload": {
+      "requests": 1000,
+      "concurrency": 128,
+      "workload": "heavy",
+      "elapsed_s": 1.119,
+      "codes": {
+        "RESOURCE_EXHAUSTED": 958,
+        "OK": 42
+      },
+      "successful_rps": 37.55,
+      "success_latency_ms": {
+        "p50": 286.845,
+        "p95": 351.578,
+        "p99": 357.723
+      },
+      "instance_visits": {
+        "a-1": 22,
+        "b-1": 21,
+        "c-1": 21,
+        "b-2": 21,
+        "c-2": 21,
+        "a-2": 20
+      }
+    },
+    "after_overload": {
+      "service-a": {
+        "a-1": 17,
+        "a-2": 7
+      },
+      "service-b": {
+        "b-1": 13,
+        "b-2": 11
+      },
+      "service-c": {
+        "c-1": 13,
+        "c-2": 11
+      }
+    },
+    "stop_b-2": {
+      "service-a": {
+        "a-2": 12,
+        "a-1": 12
+      },
+      "service-b": {
+        "b-1": 24
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "recover_b-2": {
+      "service-a": {
+        "a-2": 12,
+        "a-1": 12
+      },
+      "service-b": {
+        "b-1": 18,
+        "b-2": 6
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "stop_a-2": {
+      "service-a": {
+        "a-1": 24
+      },
+      "service-b": {
+        "b-1": 12,
+        "b-2": 12
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "recover_a-2": {
+      "service-a": {
+        "a-1": 12,
+        "a-2": 12
+      },
+      "service-b": {
+        "b-1": 12,
+        "b-2": 12
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "all_dependencies_down": {
+      "requests": 10,
+      "concurrency": 1,
+      "workload": "light",
+      "elapsed_s": 0.741,
+      "codes": {
+        "UNAVAILABLE": 10
+      },
+      "successful_rps": 0.0,
+      "success_latency_ms": {
+        "p50": null,
+        "p95": null,
+        "p99": null
+      },
+      "instance_visits": {}
+    },
+    "recover_all_dependencies_down": {
+      "service-a": {
+        "a-1": 12,
+        "a-2": 12
+      },
+      "service-b": {
+        "b-2": 18,
+        "b-1": 6
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "all_entry_instances_down": {
+      "requests": 10,
+      "concurrency": 1,
+      "workload": "light",
+      "elapsed_s": 4.847,
+      "codes": {
+        "UNAVAILABLE": 10
+      },
+      "successful_rps": 0.0,
+      "success_latency_ms": {
+        "p50": null,
+        "p95": null,
+        "p99": null
+      },
+      "instance_visits": {}
+    },
+    "recover_all_entry_instances_down": {
+      "service-a": {
+        "a-1": 12,
+        "a-2": 12
+      },
+      "service-b": {
+        "b-1": 12,
+        "b-2": 12
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "short_deadlines": {
+      "requests": 100,
+      "concurrency": 32,
+      "workload": "heavy",
+      "elapsed_s": 1.851,
+      "codes": {
+        "DEADLINE_EXCEEDED": 100
+      },
+      "successful_rps": 0.0,
+      "success_latency_ms": {
+        "p50": null,
+        "p95": null,
+        "p99": null
+      },
+      "instance_visits": {}
+    },
+    "after_deadlines": {
+      "service-a": {
+        "a-2": 12,
+        "a-1": 12
+      },
+      "service-b": {
+        "b-1": 12,
+        "b-2": 12
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    }
+  },
+  "passed": true,
+  "cleanup": "passed",
+  "finished_at_unix": 1792942697.7776709
+}

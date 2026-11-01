@@ -1,0 +1,309 @@
+{
+  "scope": "single-host Docker/Envoy, synthetic asynchronous-delay workload",
+  "started_at_unix": 1792942859.3382325,
+  "stages": {
+    "envoy_config_validation": "passed",
+    "initial_graph": {
+      "service-a": {
+        "a-1": 21,
+        "a-2": 3
+      },
+      "service-b": {
+        "b-1": 13,
+        "b-2": 11
+      },
+      "service-c": {
+        "c-1": 13,
+        "c-2": 11
+      }
+    },
+    "baseline": {
+      "requests": 1000,
+      "concurrency": 32,
+      "workload": "light",
+      "elapsed_s": 3.016,
+      "codes": {
+        "OK": 1000
+      },
+      "successful_rps": 331.57,
+      "successful_after_client_timeout": 0,
+      "success_latency_ms": {
+        "p50": 83.676,
+        "p95": 124.486,
+        "p99": 411.31
+      },
+      "instance_visits": {
+        "a-2": 500,
+        "b-2": 500,
+        "c-2": 500,
+        "b-1": 500,
+        "c-1": 500,
+        "a-1": 500
+      }
+    },
+    "heavy": {
+      "requests": 300,
+      "concurrency": 16,
+      "workload": "heavy",
+      "elapsed_s": 2.355,
+      "codes": {
+        "OK": 300
+      },
+      "successful_rps": 127.39,
+      "successful_after_client_timeout": 0,
+      "success_latency_ms": {
+        "p50": 103.006,
+        "p95": 415.349,
+        "p99": 430.779
+      },
+      "instance_visits": {
+        "a-2": 150,
+        "b-2": 150,
+        "c-2": 150,
+        "b-1": 150,
+        "c-1": 150,
+        "a-1": 150
+      }
+    },
+    "bounded_stress": {
+      "requests": 5000,
+      "concurrency": 64,
+      "workload": "light",
+      "elapsed_s": 14.737,
+      "codes": {
+        "OK": 5000
+      },
+      "successful_rps": 339.29,
+      "successful_after_client_timeout": 0,
+      "success_latency_ms": {
+        "p50": 171.119,
+        "p95": 314.457,
+        "p99": 403.185
+      },
+      "instance_visits": {
+        "a-1": 2500,
+        "b-2": 2500,
+        "c-2": 2500,
+        "a-2": 2500,
+        "b-1": 2500,
+        "c-1": 2500
+      }
+    },
+    "overload": {
+      "requests": 1000,
+      "concurrency": 128,
+      "workload": "heavy",
+      "elapsed_s": 28.729,
+      "codes": {
+        "RESOURCE_EXHAUSTED": 443,
+        "OK": 349,
+        "DEADLINE_EXCEEDED": 208
+      },
+      "successful_rps": 12.15,
+      "successful_after_client_timeout": 148,
+      "success_latency_ms": {
+        "p50": 2773.733,
+        "p95": 5060.67,
+        "p99": 5548.324
+      },
+      "instance_visits": {
+        "a-2": 173,
+        "b-2": 173,
+        "c-2": 173,
+        "b-1": 176,
+        "c-1": 176,
+        "a-1": 176
+      },
+      "entry_concurrency_per_instance": 2
+    },
+    "linux_client_overload": {
+      "requests": 1000,
+      "concurrency": 128,
+      "workload": "heavy",
+      "elapsed_s": 1.399,
+      "codes": {
+        "RESOURCE_EXHAUSTED": 946,
+        "OK": 54
+      },
+      "successful_rps": 38.6,
+      "successful_after_client_timeout": 0,
+      "success_latency_ms": {
+        "p50": 326.053,
+        "p95": 393.453,
+        "p99": 454.226
+      },
+      "instance_visits": {
+        "a-1": 28,
+        "b-2": 27,
+        "c-2": 27,
+        "b-1": 27,
+        "c-1": 27,
+        "a-2": 26
+      }
+    },
+    "after_overload": {
+      "service-a": {
+        "a-2": 12,
+        "a-1": 12
+      },
+      "service-b": {
+        "b-1": 12,
+        "b-2": 12
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "stop_b-2": {
+      "service-a": {
+        "a-2": 12,
+        "a-1": 12
+      },
+      "service-b": {
+        "b-1": 24
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "recover_b-2": {
+      "service-a": {
+        "a-2": 12,
+        "a-1": 12
+      },
+      "service-b": {
+        "b-2": 8,
+        "b-1": 16
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "stop_a-2": {
+      "service-a": {
+        "a-1": 24
+      },
+      "service-b": {
+        "b-2": 12,
+        "b-1": 12
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "recover_a-2": {
+      "service-a": {
+        "a-1": 12,
+        "a-2": 12
+      },
+      "service-b": {
+        "b-2": 12,
+        "b-1": 12
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "all_dependencies_down": {
+      "requests": 10,
+      "concurrency": 1,
+      "workload": "light",
+      "elapsed_s": 0.789,
+      "codes": {
+        "UNAVAILABLE": 10
+      },
+      "successful_rps": 0.0,
+      "successful_after_client_timeout": 0,
+      "success_latency_ms": {
+        "p50": null,
+        "p95": null,
+        "p99": null
+      },
+      "instance_visits": {}
+    },
+    "recover_all_dependencies_down": {
+      "service-a": {
+        "a-1": 12,
+        "a-2": 12
+      },
+      "service-b": {
+        "b-2": 18,
+        "b-1": 6
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "all_entry_instances_down": {
+      "requests": 10,
+      "concurrency": 1,
+      "workload": "light",
+      "elapsed_s": 4.859,
+      "codes": {
+        "UNAVAILABLE": 10
+      },
+      "successful_rps": 0.0,
+      "successful_after_client_timeout": 0,
+      "success_latency_ms": {
+        "p50": null,
+        "p95": null,
+        "p99": null
+      },
+      "instance_visits": {}
+    },
+    "recover_all_entry_instances_down": {
+      "service-a": {
+        "a-1": 12,
+        "a-2": 12
+      },
+      "service-b": {
+        "b-1": 12,
+        "b-2": 12
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "short_deadlines": {
+      "requests": 100,
+      "concurrency": 32,
+      "workload": "heavy",
+      "elapsed_s": 0.57,
+      "codes": {
+        "DEADLINE_EXCEEDED": 100
+      },
+      "successful_rps": 0.0,
+      "successful_after_client_timeout": 0,
+      "success_latency_ms": {
+        "p50": null,
+        "p95": null,
+        "p99": null
+      },
+      "instance_visits": {}
+    },
+    "after_deadlines": {
+      "service-a": {
+        "a-2": 12,
+        "a-1": 12
+      },
+      "service-b": {
+        "b-1": 12,
+        "b-2": 12
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    }
+  },
+  "passed": true,
+  "cleanup": "passed",
+  "finished_at_unix": 1792943039.833395
+}

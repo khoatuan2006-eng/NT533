@@ -1,0 +1,10 @@
+{
+  "image_source_archive_sha256": "80857261bfb6b4d962650bdf767bf140320aff6fe17248aa697732ef652dc963",
+  "final_release_sha256": "4d3e11c36b71779fb31023a959269ddcaeded0ec8648f011fd92f8edce050de5",
+  "application_and_proto_sources_equal": true,
+  "runtime_dependencies_equal": true,
+  "source_file_count": 30,
+  "release_files": 123,
+  "credentials_and_results_excluded": true,
+  "note": "Final release updates operator scripts, tests, documentation and optional cloud dependencies; deployed prebuilt application images are unchanged."
+}

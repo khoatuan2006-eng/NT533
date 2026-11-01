@@ -7,7 +7,7 @@ from typing import Sequence
 
 class BaseBalancer(abc.ABC):
     """Lớp cơ sở trừu tượng (Abstract Base Class) cho bộ cân bằng tải phía Client.
-    
+
     Định nghĩa các hàm và thuộc tính chung mà mọi thuật toán (Round Robin, Least Request,...)
     đều phải tuân theo.
     """
@@ -48,7 +48,7 @@ class BaseBalancer(abc.ABC):
 
     def set_backend_health(self, backend_id: str, is_healthy: bool) -> None:
         """Cập nhật trạng thái sức khỏe của một replica cụ thể.
-        
+
         Được gọi bởi bộ giám sát sức khỏe (Health Checker) khi phát hiện replica
         sống lại (True) hoặc bị ngắt kết nối/quá tải (False).
         """
@@ -71,7 +71,7 @@ class BaseBalancer(abc.ABC):
 
     def get_active_backends(self) -> list[str]:
         """Trả về danh sách các backend vừa có tên trong hệ thống, vừa đang khỏe mạnh.
-        
+
         Giữ nguyên thứ tự ban đầu để đảm bảo tính tất định (deterministic order).
         """
         return [b for b in self._all_backends if b in self._healthy_backends]
@@ -79,7 +79,7 @@ class BaseBalancer(abc.ABC):
     @abc.abstractmethod
     async def pick(self) -> str | None:
         """Chọn một replica phù hợp theo thuật toán và cập nhật bộ đếm (nếu có).
-        
+
         Trả về:
             backend_id (str): ID của replica được chọn.
             None: Nếu hiện tại không có bất kỳ replica nào khỏe mạnh.
@@ -98,7 +98,7 @@ class BaseBalancer(abc.ABC):
 
 class RoundRobinBalancer(BaseBalancer):
     """Thuật toán Cân bằng tải Round Robin (Luân phiên xoay vòng).
-    
+
     Phân phối các request lần lượt đều qua từng replica đang hoạt động bình thường.
     Ví dụ có 3 replica: 1 -> 2 -> 3 -> 1 -> 2 -> 3...
     Nếu replica-2 bị lỗi, danh sách active chỉ còn [1, 3] -> phân phối 1 -> 3 -> 1 -> 3...
@@ -156,10 +156,10 @@ class RoundRobinBalancer(BaseBalancer):
 
 class LeastRequestBalancer(BaseBalancer):
     """Thuật toán Cân bằng tải Least Request (Ưu tiên máy ít việc nhất).
-    
+
     Khái niệm 'in-flight request': Là số lượng RPC mà client đã gửi đi nhưng
     chưa nhận được phản hồi (đang chạy dở hoặc đang đợi trong hàng đợi của replica).
-    
+
     Quy tắc hoạt động:
     1. Kiểm tra số RPC đang chạy dở (in_flight) của từng replica khỏe mạnh.
     2. Chọn replica có số in_flight nhỏ nhất để giao việc.
@@ -234,9 +234,7 @@ class LeastRequestBalancer(BaseBalancer):
             if self._last_picked_id in self._all_backends:
                 # Quét theo thứ tự vòng tròn bắt đầu từ vị trí kế tiếp sau _last_picked_id
                 start_pos = (self._all_backends.index(self._last_picked_id) + 1) % len(self._all_backends)
-                ordered = (
-                    self._all_backends[start_pos:] + self._all_backends[:start_pos]
-                )
+                ordered = self._all_backends[start_pos:] + self._all_backends[:start_pos]
                 chosen = next((b for b in ordered if b in tied_candidates), tied_candidates[0])
             else:
                 chosen = tied_candidates[0]
@@ -263,7 +261,7 @@ class LeastRequestBalancer(BaseBalancer):
 
 def create_balancer(policy: str, backends: Sequence[str] | None = None) -> BaseBalancer:
     """Hàm Factory giúp tạo đối tượng balancer dựa vào chuỗi tên cấu hình.
-    
+
     Hỗ trợ:
       - 'round_robin', 'roundrobin', 'rr' -> RoundRobinBalancer
       - 'least_request', 'leastrequest', 'lr' -> LeastRequestBalancer

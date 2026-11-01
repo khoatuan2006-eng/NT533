@@ -1,0 +1,45 @@
+{
+  "scope": "Single-host code structure/lifecycle review; Python and Go runtime plus deployment interfaces",
+  "python": {
+    "lint": "passed",
+    "format": "passed",
+    "tests": 105,
+    "result_file": "results/code-quality-python.txt"
+  },
+  "go": {
+    "vet": "passed in Docker build",
+    "tests": "ok  \tloadbalance/controlplane\t0.504s",
+    "format": "gofmt applied"
+  },
+  "local_graph": "6 processes passed, both entry instances exercised",
+  "m1_smoke": {
+    "round_robin_ok": 30,
+    "least_request_ok": 30
+  },
+  "ha": {
+    "passed": true,
+    "cleanup": "passed",
+    "leader_health_convergence_s": 3.109,
+    "load": {
+      "baseline": {
+        "codes": {
+          "OK": 1000
+        },
+        "late_ok": 0
+      },
+      "heavy": {
+        "codes": {
+          "OK": 300
+        },
+        "late_ok": 0
+      },
+      "stress": {
+        "codes": {
+          "OK": 5000
+        },
+        "late_ok": 0
+      }
+    },
+    "source_report": "results/lookaside-ha-acceptance.json"
+  }
+}

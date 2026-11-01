@@ -1,0 +1,101 @@
+{
+  "started_at_unix": 1792982219.4953027,
+  "purpose": "diagnostic matrix, not acceptance",
+  "cases": [
+    {
+      "platform": "Windows-11-10.0.26200-SP0",
+      "python": "3.12.10",
+      "grpc": "1.84.0",
+      "api": "aio",
+      "profile": "burst",
+      "address": "127.0.0.1:50261",
+      "requests": 1000,
+      "concurrency": 128,
+      "timeout_s": 3.0,
+      "codes": {
+        "RESOURCE_EXHAUSTED": 782,
+        "OK": 218
+      },
+      "late_ok": 0,
+      "elapsed_s": 6.299204599999939,
+      "p99_all_ms": 1071.48,
+      "max_loop_lag_ms": 67.99999999975626,
+      "max_clock_disagreement_ms": 3.3500999999999976,
+      "max_creation_ms": 17.757,
+      "case": "windows-native-direct-aio-burst-0",
+      "raw_file": "results\\deadline-final-fixed184\\windows-native-direct-aio-burst-0.json"
+    },
+    {
+      "platform": "Windows-11-10.0.26200-SP0",
+      "python": "3.12.10",
+      "grpc": "1.84.0",
+      "api": "aio",
+      "profile": "burst",
+      "address": "127.0.0.1:50261",
+      "requests": 1000,
+      "concurrency": 128,
+      "timeout_s": 3.0,
+      "codes": {
+        "RESOURCE_EXHAUSTED": 730,
+        "OK": 270
+      },
+      "late_ok": 0,
+      "elapsed_s": 9.382375199999842,
+      "p99_all_ms": 1255.3433,
+      "max_loop_lag_ms": 145.9999999997308,
+      "max_clock_disagreement_ms": 2.064899999999966,
+      "max_creation_ms": 36.5027,
+      "case": "windows-native-direct-aio-burst-1",
+      "raw_file": "results\\deadline-final-fixed184\\windows-native-direct-aio-burst-1.json"
+    },
+    {
+      "platform": "Windows-11-10.0.26200-SP0",
+      "python": "3.12.10",
+      "grpc": "1.84.0",
+      "api": "sync",
+      "profile": "burst",
+      "address": "127.0.0.1:50261",
+      "requests": 1000,
+      "concurrency": 128,
+      "timeout_s": 3.0,
+      "codes": {
+        "OK": 304,
+        "RESOURCE_EXHAUSTED": 696
+      },
+      "late_ok": 0,
+      "elapsed_s": 10.846819500000038,
+      "p99_all_ms": 1564.437,
+      "max_loop_lag_ms": null,
+      "max_clock_disagreement_ms": 1.9465000000000146,
+      "max_creation_ms": 70.0258,
+      "case": "windows-native-direct-sync-burst-0",
+      "raw_file": "results\\deadline-final-fixed184\\windows-native-direct-sync-burst-0.json"
+    },
+    {
+      "platform": "Windows-11-10.0.26200-SP0",
+      "python": "3.12.10",
+      "grpc": "1.84.0",
+      "api": "sync",
+      "profile": "burst",
+      "address": "127.0.0.1:50261",
+      "requests": 1000,
+      "concurrency": 128,
+      "timeout_s": 3.0,
+      "codes": {
+        "OK": 358,
+        "RESOURCE_EXHAUSTED": 642
+      },
+      "late_ok": 0,
+      "elapsed_s": 14.307385499999782,
+      "p99_all_ms": 1360.9374,
+      "max_loop_lag_ms": null,
+      "max_clock_disagreement_ms": 1.3548999999999296,
+      "max_creation_ms": 133.5444,
+      "case": "windows-native-direct-sync-burst-1",
+      "raw_file": "results\\deadline-final-fixed184\\windows-native-direct-sync-burst-1.json"
+    }
+  ],
+  "completed": true,
+  "cleanup": "passed",
+  "finished_at_unix": 1792982382.5672033
+}

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "run_id": "d47cf5c04f9e45ca9c2d8e303e1dc57b",
+  "started_unix_s": 1793196752.7420788,
+  "python": "3.12.10",
+  "grpc": "1.84.0",
+  "parameters": {
+    "address": "127.0.0.1:17080",
+    "output": "results\\k3s-controlled-initial\\heavy-150-2-xds.json",
+    "mode": "xds",
+    "entry": "service-a",
+    "workload": "heavy",
+    "rate": 150.0,
+    "duration": 20.0,
+    "timeout": 3,
+    "ready_timeout": 20,
+    "max_inflight": 256,
+    "warmup": 100,
+    "fault_at": null,
+    "stable_window": 5
+  },
+  "completion_elapsed_s": 20.18109700000059,
+  "raw": "results\\k3s-controlled-initial\\heavy-150-2-xds.jsonl",
+  "summary": {
+    "scheduled": 3000,
+    "attempted": 3000,
+    "successful": 3000,
+    "codes": {
+      "OK": 3000
+    },
+    "successful_rps_offered_window": 150.0,
+    "successful_rps_elapsed": 148.66570743587607,
+    "failure_fraction_including_generator_drops": 0.0,
+    "rpc_error_fraction": 0.0,
+    "valid_load": true,
+    "success_latency_ms": {
+      "p50": 147.73830000012822,
+      "p95": 217.29919999961567,
+      "p99": 299.72389999966254
+    },
+    "all_rpc_latency_ms": {
+      "p50": 147.73830000012822,
+      "p95": 217.29919999961567,
+      "p99": 299.72389999966254
+    },
+    "schedule_lag_ms_p99": 19.744000000208928,
+    "observed_recovery_s": null,
+    "recovery_stable_window_s": 5
+  }
+}

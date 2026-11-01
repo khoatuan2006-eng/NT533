@@ -1,0 +1,14 @@
+{
+  "lint": "passed",
+  "format": "65 files formatted",
+  "pytest": {
+    "passed": 169,
+    "execution_elapsed_s": 34.05
+  },
+  "commands": [
+    "python scripts/check_quality.py",
+    "python -m ruff check src scripts tests",
+    "python -m ruff format --check src scripts tests"
+  ],
+  "note": "Recorded from completed quality-gate output; final operator audit additions also passed lint/format and were exercised on the deployed cloud."
+}

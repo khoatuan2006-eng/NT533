@@ -1,0 +1,744 @@
+{
+  "scope": "three Ubuntu VMs, same availability zone; physical-host separation unverified",
+  "started_unix": 1793106491.1038823,
+  "passed": true,
+  "stages": {
+    "vm_identity": {
+      "node1": {
+        "hostname": "lb-test-node-1",
+        "boot_id": "45ab7551-144d-406e-86f8-6f73c14ed194",
+        "release": "bb4f80137d962cbe2dc31178b46a76c71c28596d6c08d0c81b6fe71f5e0fb9e8"
+      },
+      "node2": {
+        "hostname": "lb-test-node-2",
+        "boot_id": "8191e92b-0b9a-4ce4-9394-c9d4c8289e51",
+        "release": "bb4f80137d962cbe2dc31178b46a76c71c28596d6c08d0c81b6fe71f5e0fb9e8"
+      },
+      "node3": {
+        "hostname": "lb-test-node-3",
+        "boot_id": "bb3dc136-deb0-4625-87d5-0a9850d21768",
+        "release": "bb4f80137d962cbe2dc31178b46a76c71c28596d6c08d0c81b6fe71f5e0fb9e8"
+      }
+    },
+    "running_container_images": {
+      "node1": {
+        "/lb-cloud-a-1-1": "sha256:9c1b0eb46f44b6420d95801f05ca614c5a26c24ed1f6bc1c0f78368849cd74ad",
+        "/lb-cloud-b-1-1": "sha256:9c1b0eb46f44b6420d95801f05ca614c5a26c24ed1f6bc1c0f78368849cd74ad",
+        "/lb-cloud-consul-1": "sha256:259fd02f2544fe1aa03fa49efd3b105c8dd67106d710a72f5e898110266356f7",
+        "/lb-cloud-controlplane-1": "sha256:df61d495d66e02db57a9d0e71990481a7de3ffb8b326d45e5e19ebf49bca9e24",
+        "/lb-cloud-ingress-1": "sha256:e086b54633073ff6bc40082baaed87d4b9e93e34e1619bda41e957fd2aaa03af"
+      },
+      "node2": {
+        "/lb-cloud-a-2-1": "sha256:9c1b0eb46f44b6420d95801f05ca614c5a26c24ed1f6bc1c0f78368849cd74ad",
+        "/lb-cloud-c-1-1": "sha256:9c1b0eb46f44b6420d95801f05ca614c5a26c24ed1f6bc1c0f78368849cd74ad",
+        "/lb-cloud-consul-1": "sha256:259fd02f2544fe1aa03fa49efd3b105c8dd67106d710a72f5e898110266356f7",
+        "/lb-cloud-controlplane-1": "sha256:df61d495d66e02db57a9d0e71990481a7de3ffb8b326d45e5e19ebf49bca9e24",
+        "/lb-cloud-ingress-1": "sha256:e086b54633073ff6bc40082baaed87d4b9e93e34e1619bda41e957fd2aaa03af"
+      },
+      "node3": {
+        "/lb-cloud-b-2-1": "sha256:9c1b0eb46f44b6420d95801f05ca614c5a26c24ed1f6bc1c0f78368849cd74ad",
+        "/lb-cloud-c-2-1": "sha256:9c1b0eb46f44b6420d95801f05ca614c5a26c24ed1f6bc1c0f78368849cd74ad",
+        "/lb-cloud-consul-1": "sha256:259fd02f2544fe1aa03fa49efd3b105c8dd67106d710a72f5e898110266356f7"
+      }
+    },
+    "initial_graph": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 12,
+          "b-2": 12
+        },
+        "service-c": {
+          "c-1": 13,
+          "c-2": 11
+        }
+      },
+      "converged_in_s": 2.844
+    },
+    "initial_raft": {
+      "Servers": [
+        {
+          "ID": "3a06085c-f56b-2ac0-b836-5b4794649fad",
+          "Node": "lb-node2",
+          "Address": "192.168.1.158:8300",
+          "Leader": true,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 81
+        },
+        {
+          "ID": "e2303c01-205c-2e29-7068-ea2fb247e359",
+          "Node": "lb-node1",
+          "Address": "192.168.1.45:8300",
+          "Leader": false,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 81
+        },
+        {
+          "ID": "e745493b-8187-cd0f-334b-c9e2676d62fb",
+          "Node": "lb-node3",
+          "Address": "192.168.1.140:8300",
+          "Leader": false,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 81
+        }
+      ],
+      "Index": 0
+    },
+    "baseline": {
+      "requests": 1000,
+      "concurrency": 32,
+      "workload": "light",
+      "warmup_requests": 4,
+      "warmup_elapsed_s": 0.4,
+      "elapsed_s": 4.203,
+      "codes": {
+        "OK": 1000
+      },
+      "successful_rps": 237.95,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 27.0,
+      "max_successful_server_duration_ms": 161.641,
+      "timing_samples": [
+        {
+          "request_id": "acceptance-0",
+          "client_elapsed_ms": 107.216,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "53.841",
+            "x-server-budget-ms": "2988.009",
+            "x-server-queue-ms": "0.182"
+          }
+        },
+        {
+          "request_id": "acceptance-2",
+          "client_elapsed_ms": 108.395,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "59.563",
+            "x-server-budget-ms": "2987.303",
+            "x-server-queue-ms": "0.084"
+          }
+        },
+        {
+          "request_id": "acceptance-4",
+          "client_elapsed_ms": 108.451,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "60.480",
+            "x-server-budget-ms": "2986.823",
+            "x-server-queue-ms": "0.049"
+          }
+        },
+        {
+          "request_id": "acceptance-6",
+          "client_elapsed_ms": 109.493,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "62.609",
+            "x-server-budget-ms": "2978.514",
+            "x-server-queue-ms": "0.139"
+          }
+        },
+        {
+          "request_id": "acceptance-1",
+          "client_elapsed_ms": 116.726,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "65.006",
+            "x-server-budget-ms": "2986.179",
+            "x-server-queue-ms": "0.130"
+          }
+        },
+        {
+          "request_id": "acceptance-5",
+          "client_elapsed_ms": 120.95,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "66.025",
+            "x-server-budget-ms": "2985.160",
+            "x-server-queue-ms": "0.027"
+          }
+        },
+        {
+          "request_id": "acceptance-3",
+          "client_elapsed_ms": 125.481,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "67.551",
+            "x-server-budget-ms": "2985.328",
+            "x-server-queue-ms": "0.088"
+          }
+        },
+        {
+          "request_id": "acceptance-7",
+          "client_elapsed_ms": 125.999,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "67.609",
+            "x-server-budget-ms": "2984.826",
+            "x-server-queue-ms": "0.074"
+          }
+        }
+      ],
+      "failure_samples": [],
+      "success_latency_ms": {
+        "p50": 114.334,
+        "p95": 201.597,
+        "p99": 217.554
+      },
+      "instance_visits": {
+        "a-1": 500,
+        "b-1": 500,
+        "c-2": 500,
+        "b-2": 500,
+        "c-1": 500,
+        "a-2": 500
+      }
+    },
+    "heavy": {
+      "requests": 300,
+      "concurrency": 16,
+      "workload": "heavy",
+      "warmup_requests": 4,
+      "warmup_elapsed_s": 0.4,
+      "elapsed_s": 3.59,
+      "codes": {
+        "OK": 300
+      },
+      "successful_rps": 83.57,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 27.0,
+      "max_successful_server_duration_ms": 259.388,
+      "timing_samples": [
+        {
+          "request_id": "acceptance-1",
+          "client_elapsed_ms": 145.699,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "97.518",
+            "x-server-budget-ms": "2987.604",
+            "x-server-queue-ms": "0.145"
+          }
+        },
+        {
+          "request_id": "acceptance-5",
+          "client_elapsed_ms": 203.266,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "113.383",
+            "x-server-budget-ms": "2986.564",
+            "x-server-queue-ms": "0.042"
+          }
+        },
+        {
+          "request_id": "acceptance-3",
+          "client_elapsed_ms": 207.139,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "164.865",
+            "x-server-budget-ms": "2986.951",
+            "x-server-queue-ms": "0.049"
+          }
+        },
+        {
+          "request_id": "acceptance-7",
+          "client_elapsed_ms": 207.679,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "175.827",
+            "x-server-budget-ms": "2986.264",
+            "x-server-queue-ms": "0.031"
+          }
+        },
+        {
+          "request_id": "acceptance-0",
+          "client_elapsed_ms": 306.177,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "237.597",
+            "x-server-budget-ms": "2985.029",
+            "x-server-queue-ms": "0.253"
+          }
+        },
+        {
+          "request_id": "acceptance-4",
+          "client_elapsed_ms": 306.184,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "241.414",
+            "x-server-budget-ms": "2982.107",
+            "x-server-queue-ms": "0.120"
+          }
+        },
+        {
+          "request_id": "acceptance-6",
+          "client_elapsed_ms": 306.962,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "246.301",
+            "x-server-budget-ms": "2982.381",
+            "x-server-queue-ms": "0.076"
+          }
+        },
+        {
+          "request_id": "acceptance-2",
+          "client_elapsed_ms": 308.518,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "252.006",
+            "x-server-budget-ms": "2984.153",
+            "x-server-queue-ms": "1.260"
+          }
+        }
+      ],
+      "failure_samples": [],
+      "success_latency_ms": {
+        "p50": 186.523,
+        "p95": 278.941,
+        "p99": 310.593
+      },
+      "instance_visits": {
+        "a-2": 150,
+        "b-2": 150,
+        "c-2": 150,
+        "c-1": 150,
+        "b-1": 150,
+        "a-1": 150
+      }
+    },
+    "stress": {
+      "requests": 5000,
+      "concurrency": 64,
+      "workload": "light",
+      "warmup_requests": 4,
+      "warmup_elapsed_s": 0.438,
+      "elapsed_s": 12.781,
+      "codes": {
+        "OK": 5000
+      },
+      "successful_rps": 391.2,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 27.0,
+      "max_successful_server_duration_ms": 145.352,
+      "timing_samples": [
+        {
+          "request_id": "acceptance-4",
+          "client_elapsed_ms": 161.058,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "33.152",
+            "x-server-budget-ms": "2986.094",
+            "x-server-queue-ms": "0.049"
+          }
+        },
+        {
+          "request_id": "acceptance-0",
+          "client_elapsed_ms": 163.409,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "37.371",
+            "x-server-budget-ms": "2987.033",
+            "x-server-queue-ms": "0.097"
+          }
+        },
+        {
+          "request_id": "acceptance-1",
+          "client_elapsed_ms": 164.417,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "34.033",
+            "x-server-budget-ms": "2983.724",
+            "x-server-queue-ms": "0.116"
+          }
+        },
+        {
+          "request_id": "acceptance-2",
+          "client_elapsed_ms": 165.468,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "38.584",
+            "x-server-budget-ms": "2986.496",
+            "x-server-queue-ms": "0.058"
+          }
+        },
+        {
+          "request_id": "acceptance-5",
+          "client_elapsed_ms": 167.412,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "37.477",
+            "x-server-budget-ms": "2982.648",
+            "x-server-queue-ms": "0.056"
+          }
+        },
+        {
+          "request_id": "acceptance-6",
+          "client_elapsed_ms": 169.756,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "47.350",
+            "x-server-budget-ms": "2985.663",
+            "x-server-queue-ms": "0.047"
+          }
+        },
+        {
+          "request_id": "acceptance-3",
+          "client_elapsed_ms": 171.756,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "44.819",
+            "x-server-budget-ms": "2983.105",
+            "x-server-queue-ms": "0.074"
+          }
+        },
+        {
+          "request_id": "acceptance-7",
+          "client_elapsed_ms": 177.3,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "53.075",
+            "x-server-budget-ms": "2982.314",
+            "x-server-queue-ms": "0.045"
+          }
+        }
+      ],
+      "failure_samples": [],
+      "success_latency_ms": {
+        "p50": 167.563,
+        "p95": 221.862,
+        "p99": 287.012
+      },
+      "instance_visits": {
+        "a-1": 2500,
+        "b-1": 2500,
+        "c-2": 2500,
+        "c-1": 2500,
+        "a-2": 2500,
+        "b-2": 2500
+      }
+    },
+    "not_serving_cross_vm": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-1": 24
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 4.485
+    },
+    "serving_recovery": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-1": 19,
+          "b-2": 5
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 2.282
+    },
+    "node1_controlplane_down_new_update": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 24
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 4.391
+    },
+    "node1_controlplane_down_recovery": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-2": 12,
+          "b-1": 12
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 5.0
+    },
+    "cold_caller_without_node1_controlplane": {
+      "instances": {
+        "b-2": 20,
+        "b-1": 20
+      },
+      "requests": 40
+    },
+    "node2_controlplane_down_new_update": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-1": 24
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 3.687
+    },
+    "node2_controlplane_down_recovery": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 22,
+          "b-2": 2
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 2.297
+    },
+    "cold_caller_without_node2_controlplane": {
+      "instances": {
+        "b-2": 20,
+        "b-1": 20
+      },
+      "requests": 40
+    },
+    "consul_leader_loss_new_health": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-1": 24
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 3.719
+    },
+    "consul_leader_recovery": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 21,
+          "b-2": 3
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 2.375
+    },
+    "restored_raft": {
+      "Servers": [
+        {
+          "ID": "e2303c01-205c-2e29-7068-ea2fb247e359",
+          "Node": "lb-node1",
+          "Address": "192.168.1.45:8300",
+          "Leader": true,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 113
+        },
+        {
+          "ID": "3a06085c-f56b-2ac0-b836-5b4794649fad",
+          "Node": "lb-node2",
+          "Address": "192.168.1.158:8300",
+          "Leader": false,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 113
+        },
+        {
+          "ID": "e745493b-8187-cd0f-334b-c9e2676d62fb",
+          "Node": "lb-node3",
+          "Address": "192.168.1.140:8300",
+          "Leader": false,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 113
+        }
+      ],
+      "Index": 0
+    },
+    "quorum_loss_expires_membership": {
+      "requests": 40,
+      "concurrency": 4,
+      "workload": "light",
+      "warmup_requests": 0,
+      "warmup_elapsed_s": 0.083,
+      "elapsed_s": 0.523,
+      "codes": {
+        "UNAVAILABLE": 40
+      },
+      "successful_rps": 0.0,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 12.0,
+      "max_successful_server_duration_ms": null,
+      "timing_samples": [],
+      "failure_samples": [
+        {
+          "code": "UNAVAILABLE",
+          "details": "Dependency: no children in weighted_target policy (EDS resource service-b: contains empty localities: [{region=\"local\", zone=\"\", sub_zone=\"\"}])",
+          "metadata": {
+            "x-envoy-upstream-service-time": "12",
+            "date": "Tue, 27 Oct 2026 13:10:31 GMT",
+            "server": "envoy"
+          }
+        }
+      ],
+      "success_latency_ms": {
+        "p50": null,
+        "p95": null,
+        "p99": null
+      },
+      "instance_visits": {}
+    },
+    "quorum_recovery": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 12,
+          "b-2": 12
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 2.547
+    },
+    "short_deadlines": {
+      "requests": 100,
+      "concurrency": 8,
+      "workload": "light",
+      "warmup_requests": 0,
+      "warmup_elapsed_s": 0.095,
+      "elapsed_s": 0.2,
+      "codes": {
+        "DEADLINE_EXCEEDED": 100
+      },
+      "successful_rps": 0.0,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 12.0,
+      "max_successful_server_duration_ms": null,
+      "timing_samples": [],
+      "failure_samples": [
+        {
+          "code": "DEADLINE_EXCEEDED",
+          "details": "Deadline Exceeded",
+          "metadata": {}
+        }
+      ],
+      "success_latency_ms": {
+        "p50": null,
+        "p95": null,
+        "p99": null
+      },
+      "instance_visits": {}
+    },
+    "after_deadline_recovery": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-2": 12,
+          "b-1": 12
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 2.563
+    },
+    "node3_vm_loss": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-1": 24
+        },
+        "service-c": {
+          "c-1": 24
+        }
+      },
+      "converged_in_s": 5.125
+    },
+    "node3_rebooted_boot_id": "3c927189-93ef-4e34-870a-fbdd13699c85",
+    "node3_vm_recovery": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-1": 21,
+          "b-2": 3
+        },
+        "service-c": {
+          "c-1": 22,
+          "c-2": 2
+        }
+      },
+      "converged_in_s": 4.438
+    }
+  },
+  "release_sha256": "bb4f80137d962cbe2dc31178b46a76c71c28596d6c08d0c81b6fe71f5e0fb9e8",
+  "operator_state": "completed",
+  "vm3_may_be_powered_off": false,
+  "finished_unix": 1793106845.5096338,
+  "resource_policy": "retain the named three-VM lab; restore faults; do not delete cloud VMs/volumes"
+}

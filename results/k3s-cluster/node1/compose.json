@@ -1,0 +1,121 @@
+{
+  "services": {
+    "consul": {
+      "image": "hashicorp/consul:2.1.0",
+      "network_mode": "host",
+      "restart": "unless-stopped",
+      "command": [
+        "agent",
+        "-server",
+        "-bootstrap-expect=3",
+        "-node=lb-node1",
+        "-bind=192.168.1.238",
+        "-advertise=192.168.1.238",
+        "-client=127.0.0.1",
+        "-datacenter=lb-cloud",
+        "-retry-join=192.168.1.238",
+        "-retry-join=192.168.1.172",
+        "-retry-join=192.168.1.217"
+      ],
+      "volumes": [
+        "consul-data:/consul/data",
+        "../../configs/consul-ha.json:/consul/config/ha.json:ro"
+      ]
+    },
+    "a-1": {
+      "image": "loadbalance-workload:cloud",
+      "build": {
+        "context": "../..",
+        "dockerfile": "deploy/Dockerfile"
+      },
+      "network_mode": "host",
+      "restart": "unless-stopped",
+      "command": [
+        "python",
+        "-m",
+        "grpc_lb.microservices"
+      ],
+      "volumes": [
+        "../topology.json:/app/configs/topology.json:ro",
+        "../bootstrap.json:/app/configs/bootstrap.json:ro"
+      ],
+      "environment": {
+        "SERVICE_ID": "service-a",
+        "INSTANCE_ID": "a-1",
+        "LISTEN_ADDRESS": "192.168.1.238:50101",
+        "SERVICE_ADVERTISE_ADDRESS": "192.168.1.238:50101",
+        "TOPOLOGY_PATH": "/app/configs/topology.json",
+        "DISCOVERY_MODE": "xds",
+        "GRPC_XDS_BOOTSTRAP": "/app/configs/bootstrap.json",
+        "CONSUL_HTTP_ADDR": "http://127.0.0.1:8500",
+        "DRAIN_FILE": "/tmp/drain"
+      }
+    },
+    "b-1": {
+      "image": "loadbalance-workload:cloud",
+      "build": {
+        "context": "../..",
+        "dockerfile": "deploy/Dockerfile"
+      },
+      "network_mode": "host",
+      "restart": "unless-stopped",
+      "command": [
+        "python",
+        "-m",
+        "grpc_lb.microservices"
+      ],
+      "volumes": [
+        "../topology.json:/app/configs/topology.json:ro",
+        "../bootstrap.json:/app/configs/bootstrap.json:ro"
+      ],
+      "environment": {
+        "SERVICE_ID": "service-b",
+        "INSTANCE_ID": "b-1",
+        "LISTEN_ADDRESS": "192.168.1.238:50201",
+        "SERVICE_ADVERTISE_ADDRESS": "192.168.1.238:50201",
+        "TOPOLOGY_PATH": "/app/configs/topology.json",
+        "DISCOVERY_MODE": "xds",
+        "GRPC_XDS_BOOTSTRAP": "/app/configs/bootstrap.json",
+        "CONSUL_HTTP_ADDR": "http://127.0.0.1:8500",
+        "DRAIN_FILE": "/tmp/drain"
+      }
+    },
+    "controlplane": {
+      "image": "loadbalance-controlplane:cloud",
+      "build": {
+        "context": "../..",
+        "dockerfile": "deploy/Dockerfile.controlplane"
+      },
+      "network_mode": "host",
+      "restart": "unless-stopped",
+      "volumes": [
+        "../discovery.json:/config/discovery.json:ro"
+      ],
+      "environment": {
+        "CONSUL_HTTP_ADDR": "http://127.0.0.1:8500",
+        "CONSUL_ACTIVE_HEALTH": "1",
+        "XDS_LISTEN_ADDRESS": "192.168.1.238:18000"
+      }
+    },
+    "ingress": {
+      "image": "envoyproxy/envoy:v1.35.5",
+      "ports": [
+        "18080:50050",
+        "127.0.0.1:9901:9901"
+      ],
+      "restart": "unless-stopped",
+      "command": [
+        "-c",
+        "/etc/envoy/envoy.yaml",
+        "--concurrency",
+        "2"
+      ],
+      "volumes": [
+        "./envoy.yaml:/etc/envoy/envoy.yaml:ro"
+      ]
+    }
+  },
+  "volumes": {
+    "consul-data": {}
+  }
+}

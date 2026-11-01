@@ -1,0 +1,167 @@
+{
+  "date_client": "2026-10-27",
+  "status": "completed",
+  "deployed": true,
+  "cloud_acceptance_passed": true,
+  "vpn_route_observed": {
+    "interface": "Local Area Connection",
+    "source": "172.31.65.218",
+    "gateway": "172.31.65.129",
+    "prefix": "128.0.0.0/1"
+  },
+  "tenant_network": "192.168.1.0/24",
+  "external_network": "192.168.120.0/23",
+  "nodes": {
+    "node1": {
+      "id": "25966de1-6b0a-4dce-acae-8ee2cf51bb70",
+      "name": "lb-test-node-1",
+      "ip": "192.168.1.45",
+      "cloud_status": "Active/Running",
+      "ssh_tcp_22": "timeout"
+    },
+    "node2": {
+      "id": "ae6bdc57-96f5-4af9-b890-0936800b6f99",
+      "name": "lb-test-node-2",
+      "ip": "192.168.1.158",
+      "cloud_status": "Active/Running",
+      "ssh_tcp_22": "timeout"
+    },
+    "node3": {
+      "id": "d7945b1c-139f-4bc3-9e53-536eaa18a54b",
+      "name": "lb-test-node-3",
+      "ip": "192.168.1.140",
+      "cloud_status": "Active/Running",
+      "ssh_tcp_22": "timeout"
+    }
+  },
+  "floating_ips_added": 1,
+  "code_uploaded": true,
+  "local_tests_passed": 162,
+  "new_deployment_tests_passed": 7,
+  "local_report": "results/multihost-quality.txt",
+  "bundle": "results/loadbalance-release.tar.gz",
+  "bundle_sha256": "6a86601f5807cae3719337a330b2a84ecf72c76c7814f08c61edd96bac84a05f",
+  "next_requirement": null,
+  "floating_ip": "192.168.120.109",
+  "floating_ip_node": "node1",
+  "ssh_verified_all_nodes": true,
+  "ssh_via": "VPN + node1 ProxyJump",
+  "deployment_fixes": [
+    "Linux SSH stdin sent as UTF-8 bytes with LF",
+    "Envoy maps host 80 to unprivileged container 50050",
+    "Use Compose v2 and Buildx from official Ubuntu packages"
+  ],
+  "target_release": "results/loadbalance-release-v5.tar.gz",
+  "target_sha256": "bb4f80137d962cbe2dc31178b46a76c71c28596d6c08d0c81b6fe71f5e0fb9e8",
+  "images_built_from_release": "results/loadbalance-release-v4.tar.gz",
+  "application_source_tree_identical_v4_v5": true,
+  "image_archive_sha256": "86852a4833a6b5a7a90a3d11d5771651e008bb6e61da9e36583990730a0b53c0",
+  "final_services": {
+    "node1": [
+      {
+        "service": "a-1",
+        "state": "running",
+        "image": "loadbalance-workload:cloud"
+      },
+      {
+        "service": "b-1",
+        "state": "running",
+        "image": "loadbalance-workload:cloud"
+      },
+      {
+        "service": "consul",
+        "state": "running",
+        "image": "hashicorp/consul:2.1.0"
+      },
+      {
+        "service": "controlplane",
+        "state": "running",
+        "image": "loadbalance-controlplane:cloud"
+      },
+      {
+        "service": "ingress",
+        "state": "running",
+        "image": "envoyproxy/envoy:v1.35.5"
+      }
+    ],
+    "node2": [
+      {
+        "service": "a-2",
+        "state": "running",
+        "image": "loadbalance-workload:cloud"
+      },
+      {
+        "service": "c-1",
+        "state": "running",
+        "image": "loadbalance-workload:cloud"
+      },
+      {
+        "service": "consul",
+        "state": "running",
+        "image": "hashicorp/consul:2.1.0"
+      },
+      {
+        "service": "controlplane",
+        "state": "running",
+        "image": "loadbalance-controlplane:cloud"
+      },
+      {
+        "service": "ingress",
+        "state": "running",
+        "image": "envoyproxy/envoy:v1.35.5"
+      }
+    ],
+    "node3": [
+      {
+        "service": "b-2",
+        "state": "running",
+        "image": "loadbalance-workload:cloud"
+      },
+      {
+        "service": "c-2",
+        "state": "running",
+        "image": "loadbalance-workload:cloud"
+      },
+      {
+        "service": "consul",
+        "state": "running",
+        "image": "hashicorp/consul:2.1.0"
+      }
+    ]
+  },
+  "final_raft": {
+    "Servers": [
+      {
+        "ID": "e2303c01-205c-2e29-7068-ea2fb247e359",
+        "Node": "lb-node1",
+        "Address": "192.168.1.45:8300",
+        "Leader": true,
+        "ProtocolVersion": "3",
+        "Voter": true,
+        "LastIndex": 185
+      },
+      {
+        "ID": "3a06085c-f56b-2ac0-b836-5b4794649fad",
+        "Node": "lb-node2",
+        "Address": "192.168.1.158:8300",
+        "Leader": false,
+        "ProtocolVersion": "3",
+        "Voter": true,
+        "LastIndex": 185
+      },
+      {
+        "ID": "e745493b-8187-cd0f-334b-c9e2676d62fb",
+        "Node": "lb-node3",
+        "Address": "192.168.1.140:8300",
+        "Leader": false,
+        "ProtocolVersion": "3",
+        "Voter": true,
+        "LastIndex": 185
+      }
+    ],
+    "Index": 0
+  },
+  "acceptance_report": "results/cloud-acceptance.json",
+  "http_image_export_server_stopped": true,
+  "resources_retained": "Three lab VMs running; original VM unchanged and shut off; one new Floating IP on node1 only"
+}

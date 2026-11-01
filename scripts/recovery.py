@@ -16,42 +16,23 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-import sys
-import time
 from typing import Any
 
-# Tự động nạp thư mục src vào sys.path
-_repo_root = Path(__file__).resolve().parent.parent
-_src_dir = str(_repo_root / "src")
-if _src_dir not in sys.path:
-    sys.path.insert(0, _src_dir)
-
-# Đảm bảo console Windows in tiếng Việt UTF-8 không bị lỗi charmap
-if sys.stdout and hasattr(sys.stdout, "reconfigure"):
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
-if sys.stderr and hasattr(sys.stderr, "reconfigure"):
-    try:
-        sys.stderr.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
-
 import grpc
-from grpc.health.v1 import health, health_pb2, health_pb2_grpc
+from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 
 from grpc_lb.client import WorkloadClient
 from grpc_lb.generated import workload_pb2, workload_pb2_grpc
 from grpc_lb.loadgen import WorkloadConfig, WorkloadGenerator
 from grpc_lb.telemetry import TelemetryWriter, read_telemetry
 
-
 # ---------------------------------------------------------------------------
 # Cụm Mock Server Điều khiển Sức khỏe Động (Dynamic Health Control)
 # ---------------------------------------------------------------------------
+
 
 class _MockWorkloadServicer(workload_pb2_grpc.WorkloadServiceServicer):
     def __init__(self, backend_id: str) -> None:
@@ -115,6 +96,7 @@ class ControllableMockCluster:
 # Phân tích Dữ liệu Dòng Thời Gian (Timeline Analysis)
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class PhaseStats:
     phase_name: str
@@ -139,7 +121,9 @@ def analyze_recovery_timeline(
 
     phases = [
         PhaseStats("Pha 1: Bình thường (Normal)", f"0.0s - {phase_duration_s:.1f}s"),
-        PhaseStats("Pha 2: Gây lỗi (Fault Injected)", f"{phase_duration_s:.1f}s - {2 * phase_duration_s:.1f}s"),
+        PhaseStats(
+            "Pha 2: Gây lỗi (Fault Injected)", f"{phase_duration_s:.1f}s - {2 * phase_duration_s:.1f}s"
+        ),
         PhaseStats("Pha 3: Đã phục hồi (Recovered)", f"> {2 * phase_duration_s:.1f}s"),
     ]
 
@@ -176,12 +160,12 @@ def format_recovery_report(
 ) -> str:
     """Tạo báo cáo Markdown kiểm chứng tiêu chí phục hồi M1.md#L224."""
     lines = [
-        f"# BÁO CÁO KIỂM THỬ KHẢ NĂNG TỰ PHỤC HỒI (RECOVERY TEST)",
+        "# BÁO CÁO KIỂM THỬ KHẢ NĂNG TỰ PHỤC HỒI (RECOVERY TEST)",
         f"**Chính sách cân bằng tải:** `{policy}` | **Replica giả lập sự cố:** `{target_replica}`",
         f"**Tổng thời lượng:** `{total_duration_s:.1f}s` (Chia đều làm 3 pha)",
-        f"",
-        f"| Giai đoạn | Khung thời gian | Tổng Request | Thành công (OK) | Lỗi / Timeout | Phân bố theo Replica |",
-        f"| :--- | :---: | :---: | :---: | :---: | :--- |",
+        "",
+        "| Giai đoạn | Khung thời gian | Tổng Request | Thành công (OK) | Lỗi / Timeout | Phân bố theo Replica |",
+        "| :--- | :---: | :---: | :---: | :---: | :--- |",
     ]
 
     for p in phases:
@@ -195,22 +179,25 @@ def format_recovery_report(
     p2_target = phases[1].backend_counts.get(target_replica, 0) if len(phases) > 1 else 0
     p3_target = phases[2].backend_counts.get(target_replica, 0) if len(phases) > 2 else 0
 
-    lines.extend([
-        f"",
-        f"### ĐÁNH GIÁ ĐIỀU KIỆN NGHIỆM THU (M1.md mục 224):",
-        f"- [x] **Pha 1:** `{target_replica}` hoạt động bình thường, nhận `{p1_target}` requests.",
-        f"- [x] **Pha 2 (Khi bị dừng):** Client phát hiện và loại `{target_replica}` khỏi vòng quay (Số request lọt vào: `{p2_target}`).",
-        f"- [x] **Pha 3 (Sau khi sống lại):** Client tự động nhận lại `{target_replica}` (Nhận `{p3_target}` requests).",
-        f"",
-        f"**KẾT LUẬN: ĐẠT TIÊU CHÍ NGHIỆM THU TỰ ĐỘNG GẠT BỎ VÀ NHẬN LẠI REPLICA.**",
-        f"",
-    ])
+    lines.extend(
+        [
+            "",
+            "### ĐÁNH GIÁ ĐIỀU KIỆN NGHIỆM THU (M1.md mục 224):",
+            f"- [x] **Pha 1:** `{target_replica}` hoạt động bình thường, nhận `{p1_target}` requests.",
+            f"- [x] **Pha 2 (Khi bị dừng):** Client phát hiện và loại `{target_replica}` khỏi vòng quay (Số request lọt vào: `{p2_target}`).",
+            f"- [x] **Pha 3 (Sau khi sống lại):** Client tự động nhận lại `{target_replica}` (Nhận `{p3_target}` requests).",
+            "",
+            "**KẾT LUẬN: ĐẠT TIÊU CHÍ NGHIỆM THU TỰ ĐỘNG GẠT BỎ VÀ NHẬN LẠI REPLICA.**",
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 
 # ---------------------------------------------------------------------------
 # Logic Điều khiển Sự cố và Phát tải Đồng thời
 # ---------------------------------------------------------------------------
+
 
 async def _schedule_fault_injection(
     cluster: ControllableMockCluster,
@@ -244,10 +231,10 @@ async def run_recovery_experiment(
     run_id = f"recovery_{policy}"
     jsonl_path = results_dir / f"{run_id}.jsonl"
 
-    print(f"\n============================================================")
+    print("\n============================================================")
     print(f" BẮT ĐẦU KIỂM THỬ PHỤC HỒI (RECOVERY TEST): {policy.upper()}")
     print(f" Replica mục tiêu: {target_replica} | Mỗi pha: {phase_duration_s}s | Tổng: {total_duration_s}s")
-    print(f"============================================================")
+    print("============================================================")
 
     with TelemetryWriter(jsonl_path) as telemetry:
         async with WorkloadClient(
@@ -304,6 +291,7 @@ async def run_recovery_experiment(
 # Hàm Main CLI
 # ---------------------------------------------------------------------------
 
+
 async def async_main(args: argparse.Namespace) -> None:
     results_dir = Path(args.results_dir)
     results_dir.mkdir(parents=True, exist_ok=True)
@@ -341,6 +329,10 @@ async def async_main(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        if stream is not None and hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
+
     parser = argparse.ArgumentParser(
         description="Script Kiểm thử Phục hồi và Chịu lỗi gRPC Client-Side Load Balancing (M1)"
     )

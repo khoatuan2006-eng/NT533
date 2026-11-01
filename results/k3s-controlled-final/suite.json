@@ -1,0 +1,274 @@
+{
+  "failure": null,
+  "restored_xds": true,
+  "groups": {
+    "light/150.0/static": {
+      "repetitions": 2,
+      "trials": [
+        {
+          "scheduled": 3000,
+          "attempted": 3000,
+          "successful": 3000,
+          "codes": {
+            "OK": 3000
+          },
+          "successful_rps_offered_window": 150.0,
+          "successful_rps_elapsed": 149.44748517492985,
+          "failure_fraction_including_generator_drops": 0.0,
+          "rpc_error_fraction": 0.0,
+          "valid_load": true,
+          "success_latency_ms": {
+            "p50": 95.92659999907482,
+            "p95": 164.53720000026806,
+            "p99": 219.7133000008762
+          },
+          "all_rpc_latency_ms": {
+            "p50": 95.92659999907482,
+            "p95": 164.53720000026806,
+            "p99": 219.7133000008762
+          },
+          "schedule_lag_ms_p99": 15.898933332621823,
+          "observed_recovery_s": null,
+          "recovery_stable_window_s": 5
+        },
+        {
+          "scheduled": 3000,
+          "attempted": 3000,
+          "successful": 3000,
+          "codes": {
+            "OK": 3000
+          },
+          "successful_rps_offered_window": 150.0,
+          "successful_rps_elapsed": 149.47152697451108,
+          "failure_fraction_including_generator_drops": 0.0,
+          "rpc_error_fraction": 0.0,
+          "valid_load": true,
+          "success_latency_ms": {
+            "p50": 90.04500000082771,
+            "p95": 152.16599999985192,
+            "p99": 172.07779999989725
+          },
+          "all_rpc_latency_ms": {
+            "p50": 90.04500000082771,
+            "p95": 152.16599999985192,
+            "p99": 172.07779999989725
+          },
+          "schedule_lag_ms_p99": 41.75333333402875,
+          "observed_recovery_s": null,
+          "recovery_stable_window_s": 5
+        }
+      ],
+      "successful_rps_offered_window": {
+        "median": 150.0,
+        "min": 150.0,
+        "max": 150.0
+      },
+      "rpc_error_fraction": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "light/150.0/xds": {
+      "repetitions": 2,
+      "trials": [
+        {
+          "scheduled": 3000,
+          "attempted": 3000,
+          "successful": 3000,
+          "codes": {
+            "OK": 3000
+          },
+          "successful_rps_offered_window": 150.0,
+          "successful_rps_elapsed": 149.44331766395962,
+          "failure_fraction_including_generator_drops": 0.0,
+          "rpc_error_fraction": 0.0,
+          "valid_load": true,
+          "success_latency_ms": {
+            "p50": 102.62599999987287,
+            "p95": 264.1535999991902,
+            "p99": 426.68810000031954
+          },
+          "all_rpc_latency_ms": {
+            "p50": 102.62599999987287,
+            "p95": 264.1535999991902,
+            "p99": 426.68810000031954
+          },
+          "schedule_lag_ms_p99": 15.173499999873385,
+          "observed_recovery_s": null,
+          "recovery_stable_window_s": 5
+        },
+        {
+          "scheduled": 3000,
+          "attempted": 3000,
+          "successful": 3000,
+          "codes": {
+            "OK": 3000
+          },
+          "successful_rps_offered_window": 150.0,
+          "successful_rps_elapsed": 149.43727153842246,
+          "failure_fraction_including_generator_drops": 0.0,
+          "rpc_error_fraction": 0.0,
+          "valid_load": true,
+          "success_latency_ms": {
+            "p50": 99.9327000008634,
+            "p95": 156.6290000009758,
+            "p99": 168.20949999964796
+          },
+          "all_rpc_latency_ms": {
+            "p50": 99.9327000008634,
+            "p95": 156.6290000009758,
+            "p99": 168.20949999964796
+          },
+          "schedule_lag_ms_p99": 15.342099999905656,
+          "observed_recovery_s": null,
+          "recovery_stable_window_s": 5
+        }
+      ],
+      "successful_rps_offered_window": {
+        "median": 150.0,
+        "min": 150.0,
+        "max": 150.0
+      },
+      "rpc_error_fraction": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "heavy/150.0/static": {
+      "repetitions": 2,
+      "trials": [
+        {
+          "scheduled": 3000,
+          "attempted": 3000,
+          "successful": 3000,
+          "codes": {
+            "OK": 3000
+          },
+          "successful_rps_offered_window": 150.0,
+          "successful_rps_elapsed": 148.76652762649837,
+          "failure_fraction_including_generator_drops": 0.0,
+          "rpc_error_fraction": 0.0,
+          "valid_load": true,
+          "success_latency_ms": {
+            "p50": 124.41539999963425,
+            "p95": 183.8102000001527,
+            "p99": 537.4355999992986
+          },
+          "all_rpc_latency_ms": {
+            "p50": 124.41539999963425,
+            "p95": 183.8102000001527,
+            "p99": 537.4355999992986
+          },
+          "schedule_lag_ms_p99": 26.49533333334375,
+          "observed_recovery_s": null,
+          "recovery_stable_window_s": 5
+        },
+        {
+          "scheduled": 3000,
+          "attempted": 3000,
+          "successful": 3000,
+          "codes": {
+            "OK": 3000
+          },
+          "successful_rps_offered_window": 150.0,
+          "successful_rps_elapsed": 149.2262403062081,
+          "failure_fraction_including_generator_drops": 0.0,
+          "rpc_error_fraction": 0.0,
+          "valid_load": true,
+          "success_latency_ms": {
+            "p50": 132.82970000000205,
+            "p95": 184.18929999825195,
+            "p99": 225.20989999975427
+          },
+          "all_rpc_latency_ms": {
+            "p50": 132.82970000000205,
+            "p95": 184.18929999825195,
+            "p99": 225.20989999975427
+          },
+          "schedule_lag_ms_p99": 15.206466667102347,
+          "observed_recovery_s": null,
+          "recovery_stable_window_s": 5
+        }
+      ],
+      "successful_rps_offered_window": {
+        "median": 150.0,
+        "min": 150.0,
+        "max": 150.0
+      },
+      "rpc_error_fraction": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "heavy/150.0/xds": {
+      "repetitions": 2,
+      "trials": [
+        {
+          "scheduled": 3000,
+          "attempted": 3000,
+          "successful": 3000,
+          "codes": {
+            "OK": 3000
+          },
+          "successful_rps_offered_window": 150.0,
+          "successful_rps_elapsed": 148.6711026060053,
+          "failure_fraction_including_generator_drops": 0.0,
+          "rpc_error_fraction": 0.0,
+          "valid_load": true,
+          "success_latency_ms": {
+            "p50": 130.05290000000969,
+            "p95": 187.92909999865515,
+            "p99": 248.45210000057705
+          },
+          "all_rpc_latency_ms": {
+            "p50": 130.05290000000969,
+            "p95": 187.92909999865515,
+            "p99": 248.45210000057705
+          },
+          "schedule_lag_ms_p99": 15.164533331965657,
+          "observed_recovery_s": null,
+          "recovery_stable_window_s": 5
+        },
+        {
+          "scheduled": 3000,
+          "attempted": 3000,
+          "successful": 3000,
+          "codes": {
+            "OK": 3000
+          },
+          "successful_rps_offered_window": 150.0,
+          "successful_rps_elapsed": 149.2736203822211,
+          "failure_fraction_including_generator_drops": 0.0,
+          "rpc_error_fraction": 0.0,
+          "valid_load": true,
+          "success_latency_ms": {
+            "p50": 125.96640000083426,
+            "p95": 173.3479000013176,
+            "p99": 202.51509999980044
+          },
+          "all_rpc_latency_ms": {
+            "p50": 125.96640000083426,
+            "p95": 173.3479000013176,
+            "p99": 202.51509999980044
+          },
+          "schedule_lag_ms_p99": 35.63579999907063,
+          "observed_recovery_s": null,
+          "recovery_stable_window_s": 5
+        }
+      ],
+      "successful_rps_offered_window": {
+        "median": 150.0,
+        "min": 150.0,
+        "max": 150.0
+      },
+      "rpc_error_fraction": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    }
+  }
+}

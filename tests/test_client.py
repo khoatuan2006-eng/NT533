@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-import pytest
 
 import grpc
-from grpc.health.v1 import health, health_pb2, health_pb2_grpc
+import pytest
+from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 
 from grpc_lb.balancer import (
     LeastRequestBalancer,
@@ -16,10 +16,10 @@ from grpc_lb.client import WorkloadClient
 from grpc_lb.contracts import CallResult, CallStatus
 from grpc_lb.generated import workload_pb2, workload_pb2_grpc
 
-
 # ---------------------------------------------------------------------------
 # Unit tests for Balancers
 # ---------------------------------------------------------------------------
+
 
 class TestRoundRobinBalancer:
     @pytest.mark.asyncio
@@ -151,6 +151,7 @@ class TestLeastRequestBalancer:
 # Integration tests for WorkloadClient with live local gRPC servers
 # ---------------------------------------------------------------------------
 
+
 class MockWorkloadServicer(workload_pb2_grpc.WorkloadServiceServicer):
     def __init__(self, backend_id: str, delay_s: float = 0.0) -> None:
         self.backend_id = backend_id
@@ -265,10 +266,7 @@ async def test_client_execution_least_request() -> None:
             policy="least_request",
         ) as client:
             # Send concurrent calls
-            tasks = [
-                client.execute("run-test", f"req-{i}", timeout_s=2.0)
-                for i in range(10)
-            ]
+            tasks = [client.execute("run-test", f"req-{i}", timeout_s=2.0) for i in range(10)]
             results: list[CallResult] = await asyncio.gather(*tasks)
 
             for r in results:
@@ -359,4 +357,3 @@ async def test_client_from_config_file() -> None:
     assert client.policy == "round_robin"
     assert len(client._backend_configs) == 3
     await client.close()
-

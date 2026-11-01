@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import math
-from pathlib import Path
 import statistics
+from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from .telemetry import read_telemetry
@@ -14,11 +14,11 @@ def compute_percentiles(
     percentiles: list[float] | None = None,
 ) -> dict[float, float]:
     """Tính toán các phân vị độ trễ (percentiles) dùng phương pháp nội suy tuyến tính.
-    
+
     Tham số:
         values: Danh sách các giá trị độ trễ (mili-giây).
         percentiles: Danh sách các phân vị cần tính (mặc định [50.0, 95.0, 99.0]).
-        
+
     Trả về:
         Dictionary ánh xạ từ phân vị sang giá trị (ví dụ: {50.0: 12.4, 95.0: 45.2, 99.0: 98.1}).
     """
@@ -50,9 +50,7 @@ def compute_percentiles(
         fraction = rank - lower_idx
 
         # Nội suy tuyến tính giữa 2 giá trị lân cận
-        interpolated = sorted_vals[lower_idx] + fraction * (
-            sorted_vals[upper_idx] - sorted_vals[lower_idx]
-        )
+        interpolated = sorted_vals[lower_idx] + fraction * (sorted_vals[upper_idx] - sorted_vals[lower_idx])
         results[p] = round(interpolated, 3)
 
     return results
@@ -263,27 +261,27 @@ def aggregate_runs(summaries: list[RunSummary]) -> AggregatedSummary:
 def format_summary_table(summary: RunSummary) -> str:
     """Tạo bảng ASCII tóm tắt kết quả thí nghiệm để in ra console hoặc báo cáo."""
     lines = [
-        f"============================================================",
+        "============================================================",
         f" RUN SUMMARY: {summary.run_id} (Policy: {summary.policy})",
-        f"============================================================",
+        "============================================================",
         f"  Total Requests   : {summary.total_requests}",
         f"  Success (OK)     : {summary.ok_count} ({summary.ok_rate_pct}%)",
         f"  Timeouts         : {summary.timeout_count} ({summary.timeout_rate_pct}%)",
         f"  Errors / No-back : {summary.error_count + summary.no_backend_count} ({summary.error_rate_pct}%)",
         f"  Duration (s)     : {summary.duration_s}s",
         f"  Throughput       : {summary.throughput_rps} req/s",
-        f"------------------------------------------------------------",
-        f" LATENCY (OK requests):",
+        "------------------------------------------------------------",
+        " LATENCY (OK requests):",
         f"  p50 (Median)     : {summary.p50_latency_ms} ms",
         f"  p95              : {summary.p95_latency_ms} ms",
         f"  p99              : {summary.p99_latency_ms} ms",
         f"  Mean (Avg)       : {summary.mean_latency_ms} ms",
         f"  Min / Max        : {summary.min_latency_ms} ms / {summary.max_latency_ms} ms",
-        f"------------------------------------------------------------",
-        f" BACKEND DISTRIBUTION:",
+        "------------------------------------------------------------",
+        " BACKEND DISTRIBUTION:",
     ]
     for b_id, count in sorted(summary.backend_distribution.items()):
         pct = summary.backend_distribution_pct.get(b_id, 0.0)
         lines.append(f"  - {b_id:<14}: {count:>5} requests ({pct:>6.2f}%)")
-    lines.append(f"============================================================")
+    lines.append("============================================================")
     return "\n".join(lines)

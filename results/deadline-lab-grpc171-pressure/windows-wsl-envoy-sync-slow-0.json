@@ -1,0 +1,1320 @@
+{
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10",
+  "grpc": "1.71.2",
+  "api": "sync",
+  "profile": "slow",
+  "address": "127.0.0.1:50250",
+  "requests": 128,
+  "concurrency": 32,
+  "timeout_s": 0.05,
+  "codes": {
+    "DEADLINE_EXCEEDED": 128
+  },
+  "late_ok": 0,
+  "elapsed_s": 0.7721599000001333,
+  "p99_all_ms": 212.9065,
+  "max_loop_lag_ms": null,
+  "max_clock_disagreement_ms": 2.3659999999999997,
+  "max_creation_ms": 11.1299,
+  "rows": [
+    {
+      "index": 0,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 111.8601,
+      "monotonic_ms": 109.0,
+      "wall_ms": 111.9654,
+      "call_creation_ms": 2.2216,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 1,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 214.2642,
+      "monotonic_ms": 219.0,
+      "wall_ms": 213.4287,
+      "call_creation_ms": 1.4026,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:11:52 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 2,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 212.9065,
+      "monotonic_ms": 219.0,
+      "wall_ms": 212.4285,
+      "call_creation_ms": 1.2296,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:11:52 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 3,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 210.6667,
+      "monotonic_ms": 219.0,
+      "wall_ms": 211.4278,
+      "call_creation_ms": 1.3175,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:11:52 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 4,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 208.1134,
+      "monotonic_ms": 219.0,
+      "wall_ms": 207.8655,
+      "call_creation_ms": 1.493,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:11:52 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 5,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 105.5541,
+      "monotonic_ms": 109.0,
+      "wall_ms": 105.9652,
+      "call_creation_ms": 1.3938,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 6,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 105.0925,
+      "monotonic_ms": 109.0,
+      "wall_ms": 104.9619,
+      "call_creation_ms": 1.2934,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 7,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 104.5419,
+      "monotonic_ms": 93.0,
+      "wall_ms": 103.9682,
+      "call_creation_ms": 1.3191,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 8,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 116.8326,
+      "monotonic_ms": 109.0,
+      "wall_ms": 117.3578,
+      "call_creation_ms": 1.4383,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 9,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 115.0543,
+      "monotonic_ms": 109.0,
+      "wall_ms": 115.3524,
+      "call_creation_ms": 1.5865,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 10,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 206.8636,
+      "monotonic_ms": 203.0,
+      "wall_ms": 207.4299,
+      "call_creation_ms": 1.399,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:11:52 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 11,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 200.4856,
+      "monotonic_ms": 203.0,
+      "wall_ms": 200.8649,
+      "call_creation_ms": 1.351,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:11:52 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 12,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 130.0401,
+      "monotonic_ms": 125.0,
+      "wall_ms": 129.9644,
+      "call_creation_ms": 1.5724,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 13,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 128.0693,
+      "monotonic_ms": 125.0,
+      "wall_ms": 127.9671,
+      "call_creation_ms": 1.7758,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 14,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 126.3519,
+      "monotonic_ms": 125.0,
+      "wall_ms": 125.9626,
+      "call_creation_ms": 1.9638,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 15,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 124.3096,
+      "monotonic_ms": 125.0,
+      "wall_ms": 124.799,
+      "call_creation_ms": 1.652,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 16,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 122.405,
+      "monotonic_ms": 125.0,
+      "wall_ms": 122.5317,
+      "call_creation_ms": 1.5802,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 17,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 119.3685,
+      "monotonic_ms": 125.0,
+      "wall_ms": 119.5264,
+      "call_creation_ms": 1.6256,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 18,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 116.719,
+      "monotonic_ms": 125.0,
+      "wall_ms": 116.526,
+      "call_creation_ms": 1.395,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 19,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 118.1284,
+      "monotonic_ms": 125.0,
+      "wall_ms": 118.5255,
+      "call_creation_ms": 1.444,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 20,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 113.7471,
+      "monotonic_ms": 125.0,
+      "wall_ms": 113.5294,
+      "call_creation_ms": 1.5598,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 21,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 112.4137,
+      "monotonic_ms": 125.0,
+      "wall_ms": 112.528,
+      "call_creation_ms": 1.4477,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 22,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 114.0963,
+      "monotonic_ms": 125.0,
+      "wall_ms": 113.5153,
+      "call_creation_ms": 1.0154,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 23,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 107.7099,
+      "monotonic_ms": 94.0,
+      "wall_ms": 107.4043,
+      "call_creation_ms": 1.1977,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 24,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 105.6184,
+      "monotonic_ms": 94.0,
+      "wall_ms": 105.9182,
+      "call_creation_ms": 0.9898,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 25,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 118.2576,
+      "monotonic_ms": 110.0,
+      "wall_ms": 118.526,
+      "call_creation_ms": 1.067,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 26,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 102.6681,
+      "monotonic_ms": 94.0,
+      "wall_ms": 102.9145,
+      "call_creation_ms": 1.4408,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 27,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 106.9307,
+      "monotonic_ms": 110.0,
+      "wall_ms": 106.5399,
+      "call_creation_ms": 1.392,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 28,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 99.5069,
+      "monotonic_ms": 94.0,
+      "wall_ms": 98.9062,
+      "call_creation_ms": 1.3891,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 29,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 110.0272,
+      "monotonic_ms": 110.0,
+      "wall_ms": 109.5224,
+      "call_creation_ms": 1.6546,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 30,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 96.8853,
+      "monotonic_ms": 94.0,
+      "wall_ms": 96.9134,
+      "call_creation_ms": 1.8324,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 31,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 103.6018,
+      "monotonic_ms": 110.0,
+      "wall_ms": 103.1346,
+      "call_creation_ms": 1.318,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 32,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 114.8864,
+      "monotonic_ms": 125.0,
+      "wall_ms": 114.4593,
+      "call_creation_ms": 1.3473,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 33,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 93.1966,
+      "monotonic_ms": 94.0,
+      "wall_ms": 93.6279,
+      "call_creation_ms": 1.4826,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 34,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 93.1509,
+      "monotonic_ms": 94.0,
+      "wall_ms": 93.6279,
+      "call_creation_ms": 11.1299,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 35,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 90.466,
+      "monotonic_ms": 94.0,
+      "wall_ms": 90.6216,
+      "call_creation_ms": 10.9118,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 36,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 103.8927,
+      "monotonic_ms": 109.0,
+      "wall_ms": 104.0802,
+      "call_creation_ms": 1.2277,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 37,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 78.2604,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.2348,
+      "call_creation_ms": 1.1085,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 38,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 101.4149,
+      "monotonic_ms": 109.0,
+      "wall_ms": 101.0797,
+      "call_creation_ms": 1.1708,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 39,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 99.097,
+      "monotonic_ms": 94.0,
+      "wall_ms": 99.0834,
+      "call_creation_ms": 0.8681,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 40,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 95.4834,
+      "monotonic_ms": 94.0,
+      "wall_ms": 95.0749,
+      "call_creation_ms": 2.0894,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 41,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 91.5353,
+      "monotonic_ms": 94.0,
+      "wall_ms": 92.0636,
+      "call_creation_ms": 1.8604,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 42,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 90.9446,
+      "monotonic_ms": 94.0,
+      "wall_ms": 90.5775,
+      "call_creation_ms": 1.2766,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 43,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 89.0518,
+      "monotonic_ms": 78.0,
+      "wall_ms": 89.4472,
+      "call_creation_ms": 1.1478,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 44,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 76.3276,
+      "monotonic_ms": 62.0,
+      "wall_ms": 75.887,
+      "call_creation_ms": 1.1944,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 45,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 90.4009,
+      "monotonic_ms": 78.0,
+      "wall_ms": 90.4566,
+      "call_creation_ms": 1.5761,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 46,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 84.566,
+      "monotonic_ms": 78.0,
+      "wall_ms": 85.4561,
+      "call_creation_ms": 1.6108,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 47,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 85.221,
+      "monotonic_ms": 78.0,
+      "wall_ms": 85.4484,
+      "call_creation_ms": 1.2902,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 48,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 81.5071,
+      "monotonic_ms": 78.0,
+      "wall_ms": 81.4647,
+      "call_creation_ms": 0.919,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 49,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 69.0255,
+      "monotonic_ms": 62.0,
+      "wall_ms": 68.6273,
+      "call_creation_ms": 1.0312,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 50,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 87.4256,
+      "monotonic_ms": 78.0,
+      "wall_ms": 87.4688,
+      "call_creation_ms": 1.0014,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 51,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 81.944,
+      "monotonic_ms": 78.0,
+      "wall_ms": 82.4539,
+      "call_creation_ms": 1.1049,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 52,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 70.1276,
+      "monotonic_ms": 62.0,
+      "wall_ms": 69.8848,
+      "call_creation_ms": 1.2944,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 53,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 83.3082,
+      "monotonic_ms": 78.0,
+      "wall_ms": 83.4632,
+      "call_creation_ms": 1.2404,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 54,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 69.1014,
+      "monotonic_ms": 62.0,
+      "wall_ms": 68.8906,
+      "call_creation_ms": 1.3609,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 55,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 69.1924,
+      "monotonic_ms": 78.0,
+      "wall_ms": 69.892,
+      "call_creation_ms": 1.2845,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 56,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 67.105,
+      "monotonic_ms": 62.0,
+      "wall_ms": 66.891,
+      "call_creation_ms": 1.1611,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 57,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 64.3721,
+      "monotonic_ms": 62.0,
+      "wall_ms": 64.8662,
+      "call_creation_ms": 0.6681,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 58,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 59.2401,
+      "monotonic_ms": 63.0,
+      "wall_ms": 58.1167,
+      "call_creation_ms": 1.7781,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 59,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 66.0003,
+      "monotonic_ms": 63.0,
+      "wall_ms": 66.536,
+      "call_creation_ms": 2.6281,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 60,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 57.7069,
+      "monotonic_ms": 63.0,
+      "wall_ms": 56.1132,
+      "call_creation_ms": 1.3715,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 61,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 57.7114,
+      "monotonic_ms": 63.0,
+      "wall_ms": 56.1132,
+      "call_creation_ms": 1.4587,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 62,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 57.5521,
+      "monotonic_ms": 63.0,
+      "wall_ms": 56.1132,
+      "call_creation_ms": 1.8835,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 63,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 61.4474,
+      "monotonic_ms": 63.0,
+      "wall_ms": 61.3013,
+      "call_creation_ms": 0.8726,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 64,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 122.737,
+      "monotonic_ms": 125.0,
+      "wall_ms": 122.492,
+      "call_creation_ms": 1.615,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 65,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 117.0526,
+      "monotonic_ms": 125.0,
+      "wall_ms": 116.4883,
+      "call_creation_ms": 1.7131,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 66,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 121.6163,
+      "monotonic_ms": 125.0,
+      "wall_ms": 121.4928,
+      "call_creation_ms": 1.71,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 67,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 123.6801,
+      "monotonic_ms": 125.0,
+      "wall_ms": 124.0437,
+      "call_creation_ms": 2.1739,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 68,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 113.0482,
+      "monotonic_ms": 109.0,
+      "wall_ms": 112.4932,
+      "call_creation_ms": 2.0707,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 69,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 109.8768,
+      "monotonic_ms": 109.0,
+      "wall_ms": 109.4818,
+      "call_creation_ms": 1.9767,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 70,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 111.233,
+      "monotonic_ms": 109.0,
+      "wall_ms": 111.4764,
+      "call_creation_ms": 1.0576,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 71,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 104.0442,
+      "monotonic_ms": 94.0,
+      "wall_ms": 103.9298,
+      "call_creation_ms": 0.5805,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 72,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 95.149,
+      "monotonic_ms": 94.0,
+      "wall_ms": 95.1019,
+      "call_creation_ms": 0.9706,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 73,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 101.2981,
+      "monotonic_ms": 94.0,
+      "wall_ms": 100.9172,
+      "call_creation_ms": 1.3247,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 74,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 105.889,
+      "monotonic_ms": 109.0,
+      "wall_ms": 105.9202,
+      "call_creation_ms": 1.2853,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 75,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 109.549,
+      "monotonic_ms": 109.0,
+      "wall_ms": 109.9144,
+      "call_creation_ms": 1.512,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 76,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 92.0191,
+      "monotonic_ms": 94.0,
+      "wall_ms": 91.1063,
+      "call_creation_ms": 0.8144,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 77,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 105.2507,
+      "monotonic_ms": 109.0,
+      "wall_ms": 104.9269,
+      "call_creation_ms": 0.5461,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 78,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 104.6508,
+      "monotonic_ms": 109.0,
+      "wall_ms": 104.9269,
+      "call_creation_ms": 0.7865,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 79,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 88.3491,
+      "monotonic_ms": 94.0,
+      "wall_ms": 88.1076,
+      "call_creation_ms": 1.0459,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 80,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 98.7712,
+      "monotonic_ms": 109.0,
+      "wall_ms": 98.9366,
+      "call_creation_ms": 0.9726,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 81,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 89.6907,
+      "monotonic_ms": 94.0,
+      "wall_ms": 90.0944,
+      "call_creation_ms": 0.9552,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 82,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 94.1046,
+      "monotonic_ms": 94.0,
+      "wall_ms": 93.9154,
+      "call_creation_ms": 1.0507,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 83,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 92.439,
+      "monotonic_ms": 94.0,
+      "wall_ms": 92.9147,
+      "call_creation_ms": 0.9984,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 84,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 92.2045,
+      "monotonic_ms": 94.0,
+      "wall_ms": 91.9185,
+      "call_creation_ms": 1.1014,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 85,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 87.3603,
+      "monotonic_ms": 94.0,
+      "wall_ms": 87.0911,
+      "call_creation_ms": 1.1942,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 86,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 86.8381,
+      "monotonic_ms": 79.0,
+      "wall_ms": 86.1022,
+      "call_creation_ms": 1.3076,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 87,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 84.0391,
+      "monotonic_ms": 79.0,
+      "wall_ms": 84.1069,
+      "call_creation_ms": 1.3883,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 88,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 84.2902,
+      "monotonic_ms": 79.0,
+      "wall_ms": 84.0967,
+      "call_creation_ms": 1.0346,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 89,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 82.7358,
+      "monotonic_ms": 79.0,
+      "wall_ms": 83.0948,
+      "call_creation_ms": 0.5211,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 90,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 72.0535,
+      "monotonic_ms": 62.0,
+      "wall_ms": 73.3473,
+      "call_creation_ms": 1.0642,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 91,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 65.9625,
+      "monotonic_ms": 62.0,
+      "wall_ms": 67.6389,
+      "call_creation_ms": 1.0092,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 92,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 64.8779,
+      "monotonic_ms": 62.0,
+      "wall_ms": 66.6356,
+      "call_creation_ms": 1.3507,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 93,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 68.4932,
+      "monotonic_ms": 62.0,
+      "wall_ms": 70.8592,
+      "call_creation_ms": 1.6297,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 94,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 97.1076,
+      "monotonic_ms": 93.0,
+      "wall_ms": 96.9035,
+      "call_creation_ms": 0.4556,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 95,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 98.4839,
+      "monotonic_ms": 109.0,
+      "wall_ms": 97.9374,
+      "call_creation_ms": 0.6519,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 96,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 58.1779,
+      "monotonic_ms": 62.0,
+      "wall_ms": 58.5319,
+      "call_creation_ms": 0.3897,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 97,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 57.3735,
+      "monotonic_ms": 62.0,
+      "wall_ms": 57.5316,
+      "call_creation_ms": 0.8218,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 98,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 57.4918,
+      "monotonic_ms": 62.0,
+      "wall_ms": 57.534,
+      "call_creation_ms": 2.2405,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 99,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 59.0986,
+      "monotonic_ms": 62.0,
+      "wall_ms": 58.5424,
+      "call_creation_ms": 2.308,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 100,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 57.2961,
+      "monotonic_ms": 62.0,
+      "wall_ms": 57.534,
+      "call_creation_ms": 2.4335,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 101,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 105.1039,
+      "monotonic_ms": 109.0,
+      "wall_ms": 105.8208,
+      "call_creation_ms": 2.6143,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 102,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 103.1961,
+      "monotonic_ms": 109.0,
+      "wall_ms": 102.822,
+      "call_creation_ms": 2.7798,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 103,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 104.3133,
+      "monotonic_ms": 109.0,
+      "wall_ms": 103.8219,
+      "call_creation_ms": 2.8707,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 104,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 103.2338,
+      "monotonic_ms": 109.0,
+      "wall_ms": 103.8219,
+      "call_creation_ms": 2.8619,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 105,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 100.1196,
+      "monotonic_ms": 109.0,
+      "wall_ms": 100.0045,
+      "call_creation_ms": 0.6492,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 106,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 98.1197,
+      "monotonic_ms": 109.0,
+      "wall_ms": 99.0046,
+      "call_creation_ms": 1.1398,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 107,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 98.6466,
+      "monotonic_ms": 109.0,
+      "wall_ms": 99.0038,
+      "call_creation_ms": 1.5002,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 108,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 94.8303,
+      "monotonic_ms": 93.0,
+      "wall_ms": 94.4853,
+      "call_creation_ms": 1.3279,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 109,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 98.0207,
+      "monotonic_ms": 109.0,
+      "wall_ms": 97.9936,
+      "call_creation_ms": 1.0144,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 110,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 93.3049,
+      "monotonic_ms": 94.0,
+      "wall_ms": 93.4709,
+      "call_creation_ms": 0.4865,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 111,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 82.5922,
+      "monotonic_ms": 78.0,
+      "wall_ms": 82.4914,
+      "call_creation_ms": 0.4618,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 112,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 80.8464,
+      "monotonic_ms": 78.0,
+      "wall_ms": 80.4891,
+      "call_creation_ms": 0.7399,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 113,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 88.6626,
+      "monotonic_ms": 78.0,
+      "wall_ms": 88.4875,
+      "call_creation_ms": 0.9867,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 114,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 85.3425,
+      "monotonic_ms": 78.0,
+      "wall_ms": 85.4893,
+      "call_creation_ms": 1.3267,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 115,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 78.9705,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.4921,
+      "call_creation_ms": 1.3867,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 116,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 78.4156,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.4921,
+      "call_creation_ms": 1.5396,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 117,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 88.5461,
+      "monotonic_ms": 94.0,
+      "wall_ms": 89.0044,
+      "call_creation_ms": 1.3872,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 118,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 84.4149,
+      "monotonic_ms": 78.0,
+      "wall_ms": 84.489,
+      "call_creation_ms": 1.1862,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 119,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 85.114,
+      "monotonic_ms": 94.0,
+      "wall_ms": 85.4891,
+      "call_creation_ms": 1.8745,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 120,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 83.5276,
+      "monotonic_ms": 78.0,
+      "wall_ms": 83.4877,
+      "call_creation_ms": 1.6115,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 121,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 79.5436,
+      "monotonic_ms": 78.0,
+      "wall_ms": 79.487,
+      "call_creation_ms": 1.6504,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 122,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 82.3856,
+      "monotonic_ms": 94.0,
+      "wall_ms": 82.4822,
+      "call_creation_ms": 2.1645,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 123,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 79.1213,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.2703,
+      "call_creation_ms": 2.2971,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 124,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 76.713,
+      "monotonic_ms": 78.0,
+      "wall_ms": 76.9361,
+      "call_creation_ms": 1.3926,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 125,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 76.8969,
+      "monotonic_ms": 78.0,
+      "wall_ms": 76.7802,
+      "call_creation_ms": 0.8014,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 126,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 94.2168,
+      "monotonic_ms": 110.0,
+      "wall_ms": 94.558,
+      "call_creation_ms": 0.535,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 127,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 87.8613,
+      "monotonic_ms": 78.0,
+      "wall_ms": 87.5339,
+      "call_creation_ms": 0.9987,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "services": {
+    "service-b": ["b-1:50051", "b-2:50051"],
+    "service-c": ["c-1:50051", "c-2:50051"]
+  }
+}

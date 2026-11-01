@@ -26,15 +26,16 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import math
 import os
 import signal
 import time
+from contextlib import AsyncExitStack
 from pathlib import Path
-from typing import Callable
 
 import grpc
 import grpc.aio
-from grpc.health.v1 import health, health_pb2, health_pb2_grpc
+from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 
 from .generated import workload_pb2, workload_pb2_grpc
 
@@ -51,6 +52,7 @@ _SCHEMA_VERSION = 1
 # ---------------------------------------------------------------------------
 # JSONL logger
 # ---------------------------------------------------------------------------
+
 
 class _JsonlLogger:
     """Ghi log -- line-buffered, an toan voi GIL cho IO ngan."""
@@ -95,6 +97,7 @@ class _JsonlLogger:
 # WorkloadServicer
 # ---------------------------------------------------------------------------
 
+
 class WorkloadServicer(workload_pb2_grpc.WorkloadServiceServicer):
     """
     Cung cap RPC Execute voi:
@@ -134,9 +137,7 @@ class WorkloadServicer(workload_pb2_grpc.WorkloadServiceServicer):
 
         # -- Pha 1: Cho semaphore -------------------------------------------
         # Tao task acquire rieng de co the shield khoi cancel cua Execute handler.
-        acquire_task: asyncio.Task[bool] = asyncio.create_task(
-            self._semaphore.acquire()
-        )
+        acquire_task: asyncio.Task[bool] = asyncio.create_task(self._semaphore.acquire())
 
         # Bao cho test biet handler da vao giai doan cho semaphore
         if self._on_queued_cb is not None:
@@ -225,9 +226,7 @@ class WorkloadServicer(workload_pb2_grpc.WorkloadServiceServicer):
             is_cancelled = context.cancelled() or "CANCELLED" in str(exc)
             status = "cancelled" if is_cancelled else "error"
             if status == "error":
-                logger.error(
-                    "Execute error [%s/%s]: %s", run_id, request_id, exc, exc_info=True
-                )
+                logger.error("Execute error [%s/%s]: %s", run_id, request_id, exc, exc_info=True)
             self._logger.write(
                 run_id=run_id,
                 request_id=request_id,
@@ -274,6 +273,7 @@ class WorkloadServicer(workload_pb2_grpc.WorkloadServiceServicer):
 # Server factory
 # ---------------------------------------------------------------------------
 
+
 async def build_server(
     backend_id: str,
     delay_s: float,
@@ -288,30 +288,47 @@ async def build_server(
     Khi port=0, OS tu chon cong trong; bound_port la cong thuc duoc gan.
     Ham nay huu ich cho kiem thu -- khong start server ngay.
     """
+    if not backend_id or type(max_concurrency) is not int or max_concurrency <= 0:
+        raise ValueError("Backend ID and positive integer concurrency required")
+    if not math.isfinite(delay_s) or delay_s < 0:
+        raise ValueError("Delay must be finite and nonnegative")
+    if type(port) is not int or not 0 <= port <= 65535:
+        raise ValueError("Port must be in 0..65535")
     jsonl_logger = _JsonlLogger(log_path)
+    server = None
+    try:
+        servicer = WorkloadServicer(
+            backend_id=backend_id,
+            delay_s=delay_s,
+            max_concurrency=max_concurrency,
+            jsonl_logger=jsonl_logger,
+            on_queued_cb=on_queued_cb,
+        )
 
-    servicer = WorkloadServicer(
-        backend_id=backend_id,
-        delay_s=delay_s,
-        max_concurrency=max_concurrency,
-        jsonl_logger=jsonl_logger,
-        on_queued_cb=on_queued_cb,
-    )
+        health_servicer = health.aio.HealthServicer()
 
-    health_servicer = health.aio.HealthServicer()
+        server = grpc.aio.server(options=(("grpc.so_reuseport", 0),))
+        workload_pb2_grpc.add_WorkloadServiceServicer_to_server(servicer, server)
+        health_pb2_grpc.add_HealthServicer_to_server(health_servicer, server)
 
-    server = grpc.aio.server()
-    workload_pb2_grpc.add_WorkloadServiceServicer_to_server(servicer, server)
-    health_pb2_grpc.add_HealthServicer_to_server(health_servicer, server)
+        addr = listen_addr if listen_addr is not None else f"[::]:{port}"
+        bound_port = server.add_insecure_port(addr)
+        if not bound_port:
+            raise RuntimeError("Cannot bind workload service address")
 
-    addr = listen_addr if listen_addr is not None else f"[::]:{port}"
-    bound_port = server.add_insecure_port(addr)
+        # Dat SERVING cho ca "" va ten service cu the
+        await health_servicer.set("", health_pb2.HealthCheckResponse.SERVING)
+        await health_servicer.set(_SERVICE_NAME, health_pb2.HealthCheckResponse.SERVING)
 
-    # Dat SERVING cho ca "" va ten service cu the
-    await health_servicer.set("", health_pb2.HealthCheckResponse.SERVING)
-    await health_servicer.set(_SERVICE_NAME, health_pb2.HealthCheckResponse.SERVING)
+        return server, jsonl_logger, health_servicer, bound_port
 
-    return server, jsonl_logger, health_servicer, bound_port
+    except BaseException:
+        try:
+            if server is not None:
+                await server.stop(0)
+        finally:
+            jsonl_logger.close()
+        raise
 
 
 async def serve(
@@ -330,49 +347,47 @@ async def serve(
         log_path=log_path,
     )
 
-    await server.start()
-    logger.info(
-        "Server %s started on port %d | delay=%.3fs | max_concurrency=%d | log=%s",
-        backend_id,
-        port,
-        delay_s,
-        max_concurrency,
-        log_path,
-    )
+    async with AsyncExitStack() as cleanup:
+        cleanup.callback(jsonl_logger.close)
+        cleanup.push_async_callback(server.stop, grace=5.0)
+        await server.start()
+        logger.info(
+            "Server %s started on port %d | delay=%.3fs | max_concurrency=%d | log=%s",
+            backend_id,
+            port,
+            delay_s,
+            max_concurrency,
+            log_path,
+        )
 
-    # Dung co kiem soat (graceful shutdown)
-    stop_event = asyncio.Event()
+        # Dung co kiem soat (graceful shutdown)
+        stop_event = asyncio.Event()
 
-    def _on_signal() -> None:
-        logger.info("Shutdown signal received for %s", backend_id)
-        stop_event.set()
+        def _on_signal() -> None:
+            logger.info("Shutdown signal received for %s", backend_id)
+            stop_event.set()
 
-    loop = asyncio.get_running_loop()
-    for sig in (signal.SIGINT, signal.SIGTERM):
+        loop = asyncio.get_running_loop()
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            try:
+                loop.add_signal_handler(sig, _on_signal)
+                cleanup.callback(loop.remove_signal_handler, sig)
+            except (NotImplementedError, OSError):
+                # Windows khong ho tro add_signal_handler cho tat ca signal
+                pass
+
+        cleanup.push_async_callback(health_servicer.enter_graceful_shutdown)
         try:
-            loop.add_signal_handler(sig, _on_signal)
-        except (NotImplementedError, OSError):
-            # Windows khong ho tro add_signal_handler cho tat ca signal
-            pass
-
-    try:
-        await stop_event.wait()
-    except (asyncio.CancelledError, KeyboardInterrupt):
-        logger.info("Shutdown interrupt received for %s", backend_id)
-    finally:
-        logger.info("Stopping server %s (grace=5s)...", backend_id)
-        # Bao NOT_SERVING de client khong gui them request moi
-        await health_servicer.set("", health_pb2.HealthCheckResponse.NOT_SERVING)
-        await health_servicer.set(_SERVICE_NAME, health_pb2.HealthCheckResponse.NOT_SERVING)
-
-        await server.stop(grace=5.0)
-        jsonl_logger.close()
-        logger.info("Server %s stopped.", backend_id)
+            await stop_event.wait()
+        except (asyncio.CancelledError, KeyboardInterrupt):
+            logger.info("Shutdown interrupt received for %s", backend_id)
+    logger.info("Server %s stopped.", backend_id)
 
 
 # ---------------------------------------------------------------------------
 # __main__ entry point
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     logging.basicConfig(

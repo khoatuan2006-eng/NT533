@@ -1,0 +1,44 @@
+{
+  "fault": "backend",
+  "mode": "xds",
+  "endpoint": "192.168.120.109:80",
+  "fault_dispatch_s": 10.110974999999598,
+  "fault_confirmed_s": 13.329386200000954,
+  "restore_dispatch_s": 33.3094228000009,
+  "restore_confirmed_s": 36.669586199999685,
+  "before_restore_summary": {
+    "scheduled": 667,
+    "attempted": 667,
+    "successful": 667,
+    "codes": {
+      "OK": 667
+    },
+    "successful_rps_offered_window": 20.024363796540538,
+    "successful_rps_elapsed": 19.985025612817967,
+    "failure_fraction_including_generator_drops": 0.0,
+    "rpc_error_fraction": 0.0,
+    "valid_load": true,
+    "success_latency_ms": {
+      "p50": 69.28120000156923,
+      "p95": 119.29149999923538,
+      "p99": 162.2066999989329
+    },
+    "all_rpc_latency_ms": {
+      "p50": 69.28120000156923,
+      "p95": 119.29149999923538,
+      "p99": 162.2066999989329
+    },
+    "schedule_lag_ms_p99": 21.61599999999453,
+    "observed_recovery_s": 3.2390250000004013,
+    "recovery_stable_window_s": 5
+  },
+  "recovery_after_confirmation_s": 0.020613799999045668,
+  "successes_while_fault_confirmed": 399,
+  "instances_while_fault_confirmed": [
+    "a-1",
+    "a-2",
+    "b-1",
+    "c-1",
+    "c-2"
+  ]
+}

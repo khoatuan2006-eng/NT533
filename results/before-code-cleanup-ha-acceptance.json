@@ -1,0 +1,803 @@
+{
+  "scope": "single-host Linux containers, Consul 2.1.0 quorum=3, xDS replicas=2",
+  "started_at_unix": 1792992252.90538,
+  "passed": true,
+  "stages": {
+    "initial_registration_and_health": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-2": 12,
+          "b-1": 12
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 6.125
+    },
+    "initial_raft_peers": {
+      "Servers": [
+        {
+          "ID": "75990757-4558-b247-1211-3fd2fb1d46f3",
+          "Node": "consul-1",
+          "Address": "172.18.0.2:8300",
+          "Leader": true,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 42
+        },
+        {
+          "ID": "c7d09fbf-41b5-4dd3-c5ed-4169b8b3786f",
+          "Node": "consul-2",
+          "Address": "172.18.0.3:8300",
+          "Leader": false,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 42
+        },
+        {
+          "ID": "1d29034f-d79b-fec3-e019-288678336f3d",
+          "Node": "consul-3",
+          "Address": "172.18.0.4:8300",
+          "Leader": false,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 42
+        }
+      ],
+      "Index": 0
+    },
+    "baseline": {
+      "requests": 1000,
+      "concurrency": 32,
+      "workload": "light",
+      "warmup_requests": 4,
+      "warmup_elapsed_s": 0.46,
+      "elapsed_s": 5.202,
+      "codes": {
+        "OK": 1000
+      },
+      "successful_rps": 192.22,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 12.0,
+      "max_successful_server_duration_ms": 180.898,
+      "timing_samples": [
+        {
+          "request_id": "acceptance-0",
+          "client_elapsed_ms": 35.803,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "25.614",
+            "x-server-budget-ms": "2988.016",
+            "x-server-queue-ms": "0.075"
+          }
+        },
+        {
+          "request_id": "acceptance-2",
+          "client_elapsed_ms": 79.833,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "30.127",
+            "x-server-budget-ms": "2987.273",
+            "x-server-queue-ms": "0.116"
+          }
+        },
+        {
+          "request_id": "acceptance-6",
+          "client_elapsed_ms": 84.024,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "33.168",
+            "x-server-budget-ms": "2985.061",
+            "x-server-queue-ms": "0.088"
+          }
+        },
+        {
+          "request_id": "acceptance-3",
+          "client_elapsed_ms": 87.809,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "37.318",
+            "x-server-budget-ms": "2986.222",
+            "x-server-queue-ms": "0.066"
+          }
+        },
+        {
+          "request_id": "acceptance-1",
+          "client_elapsed_ms": 89.305,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "40.028",
+            "x-server-budget-ms": "2987.114",
+            "x-server-queue-ms": "0.072"
+          }
+        },
+        {
+          "request_id": "acceptance-4",
+          "client_elapsed_ms": 101.408,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "41.608",
+            "x-server-budget-ms": "2985.996",
+            "x-server-queue-ms": "0.096"
+          }
+        },
+        {
+          "request_id": "acceptance-5",
+          "client_elapsed_ms": 107.597,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "53.787",
+            "x-server-budget-ms": "2985.532",
+            "x-server-queue-ms": "0.066"
+          }
+        },
+        {
+          "request_id": "acceptance-7",
+          "client_elapsed_ms": 114.535,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "58.021",
+            "x-server-budget-ms": "2984.896",
+            "x-server-queue-ms": "0.051"
+          }
+        }
+      ],
+      "failure_samples": [],
+      "success_latency_ms": {
+        "p50": 156.186,
+        "p95": 241.863,
+        "p99": 283.902
+      },
+      "instance_visits": {
+        "a-1": 500,
+        "b-2": 500,
+        "c-1": 500,
+        "b-1": 500,
+        "c-2": 500,
+        "a-2": 500
+      }
+    },
+    "heavy": {
+      "requests": 300,
+      "concurrency": 16,
+      "workload": "heavy",
+      "warmup_requests": 4,
+      "warmup_elapsed_s": 0.472,
+      "elapsed_s": 2.893,
+      "codes": {
+        "OK": 300
+      },
+      "successful_rps": 103.72,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 26.0,
+      "max_successful_server_duration_ms": 177.558,
+      "timing_samples": [
+        {
+          "request_id": "acceptance-0",
+          "client_elapsed_ms": 107.983,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "90.791",
+            "x-server-budget-ms": "2988.145",
+            "x-server-queue-ms": "0.099"
+          }
+        },
+        {
+          "request_id": "acceptance-2",
+          "client_elapsed_ms": 159.489,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "87.963",
+            "x-server-budget-ms": "2988.075",
+            "x-server-queue-ms": "0.094"
+          }
+        },
+        {
+          "request_id": "acceptance-4",
+          "client_elapsed_ms": 163.635,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "90.873",
+            "x-server-budget-ms": "2987.143",
+            "x-server-queue-ms": "0.229"
+          }
+        },
+        {
+          "request_id": "acceptance-6",
+          "client_elapsed_ms": 166.052,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "91.393",
+            "x-server-budget-ms": "2986.076",
+            "x-server-queue-ms": "0.071"
+          }
+        },
+        {
+          "request_id": "acceptance-7",
+          "client_elapsed_ms": 174.771,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "91.438",
+            "x-server-budget-ms": "2985.108",
+            "x-server-queue-ms": "0.078"
+          }
+        },
+        {
+          "request_id": "acceptance-3",
+          "client_elapsed_ms": 176.272,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "100.899",
+            "x-server-budget-ms": "2987.070",
+            "x-server-queue-ms": "0.158"
+          }
+        },
+        {
+          "request_id": "acceptance-1",
+          "client_elapsed_ms": 194.962,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "113.798",
+            "x-server-budget-ms": "2987.867",
+            "x-server-queue-ms": "0.084"
+          }
+        },
+        {
+          "request_id": "acceptance-5",
+          "client_elapsed_ms": 199.671,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "114.893",
+            "x-server-budget-ms": "2986.140",
+            "x-server-queue-ms": "0.076"
+          }
+        }
+      ],
+      "failure_samples": [],
+      "success_latency_ms": {
+        "p50": 148.895,
+        "p95": 194.092,
+        "p99": 205.195
+      },
+      "instance_visits": {
+        "a-1": 150,
+        "b-2": 150,
+        "c-1": 150,
+        "b-1": 150,
+        "c-2": 150,
+        "a-2": 150
+      }
+    },
+    "stress": {
+      "requests": 5000,
+      "concurrency": 64,
+      "workload": "light",
+      "warmup_requests": 4,
+      "warmup_elapsed_s": 0.485,
+      "elapsed_s": 26.437,
+      "codes": {
+        "OK": 5000
+      },
+      "successful_rps": 189.13,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 105.0,
+      "max_successful_server_duration_ms": 229.57,
+      "timing_samples": [
+        {
+          "request_id": "acceptance-0",
+          "client_elapsed_ms": 47.223,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "26.250",
+            "x-server-budget-ms": "2987.495",
+            "x-server-queue-ms": "0.107"
+          }
+        },
+        {
+          "request_id": "acceptance-3",
+          "client_elapsed_ms": 121.718,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "36.522",
+            "x-server-budget-ms": "2984.338",
+            "x-server-queue-ms": "0.083"
+          }
+        },
+        {
+          "request_id": "acceptance-1",
+          "client_elapsed_ms": 139.552,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "51.312",
+            "x-server-budget-ms": "2985.726",
+            "x-server-queue-ms": "0.104"
+          }
+        },
+        {
+          "request_id": "acceptance-7",
+          "client_elapsed_ms": 140.509,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "51.117",
+            "x-server-budget-ms": "2983.033",
+            "x-server-queue-ms": "0.074"
+          }
+        },
+        {
+          "request_id": "acceptance-5",
+          "client_elapsed_ms": 142.797,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "52.692",
+            "x-server-budget-ms": "2983.895",
+            "x-server-queue-ms": "0.076"
+          }
+        },
+        {
+          "request_id": "acceptance-4",
+          "client_elapsed_ms": 144.287,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "53.472",
+            "x-server-budget-ms": "2985.808",
+            "x-server-queue-ms": "0.084"
+          }
+        },
+        {
+          "request_id": "acceptance-2",
+          "client_elapsed_ms": 146.029,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "55.420",
+            "x-server-budget-ms": "2986.973",
+            "x-server-queue-ms": "0.097"
+          }
+        },
+        {
+          "request_id": "acceptance-6",
+          "client_elapsed_ms": 147.183,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "57.964",
+            "x-server-budget-ms": "2985.043",
+            "x-server-queue-ms": "0.054"
+          }
+        }
+      ],
+      "failure_samples": [],
+      "success_latency_ms": {
+        "p50": 310.057,
+        "p95": 601.106,
+        "p99": 707.765
+      },
+      "instance_visits": {
+        "a-1": 2500,
+        "b-2": 2500,
+        "c-1": 2500,
+        "a-2": 2500,
+        "c-2": 2500,
+        "b-1": 2500
+      }
+    },
+    "not_serving_withdraws_from_eds": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 24
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 3.031
+    },
+    "drained_backend_transport_alive": {
+      "health": 2,
+      "business_instance": "b-2"
+    },
+    "serving_readds_to_eds": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 13,
+          "b-2": 11
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 2.969
+    },
+    "new_instance_self_registers": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-2": 8,
+          "b-1": 8,
+          "b-3": 8
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 6.156
+    },
+    "graceful_deregister": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-2": 12,
+          "b-1": 12
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 1.14
+    },
+    "cp2_delivers_new_health_update": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-1": 24
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 2.891
+    },
+    "cp2_delivers_recovery": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-2": 12,
+          "b-1": 12
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 2.953
+    },
+    "cold_caller_with_only_cp2": {
+      "instances": {
+        "b-2": 20,
+        "b-1": 20
+      },
+      "requests": 40
+    },
+    "cp1_delivers_new_health_update": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-1": 24
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 2.891
+    },
+    "cp1_delivers_recovery": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-2": 12,
+          "b-1": 12
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 2.719
+    },
+    "cold_caller_with_only_cp1": {
+      "instances": {
+        "b-2": 20,
+        "b-1": 20
+      },
+      "requests": 40
+    },
+    "registry_leader_loss_health_update": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 24
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 2.015
+    },
+    "replacement_raft_peers": {
+      "Servers": [
+        {
+          "ID": "c7d09fbf-41b5-4dd3-c5ed-4169b8b3786f",
+          "Node": "consul-2",
+          "Address": "172.18.0.3:8300",
+          "Leader": true,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 74
+        },
+        {
+          "ID": "75990757-4558-b247-1211-3fd2fb1d46f3",
+          "Node": "consul-1",
+          "Address": "172.18.0.2:8300",
+          "Leader": false,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 71
+        },
+        {
+          "ID": "1d29034f-d79b-fec3-e019-288678336f3d",
+          "Node": "consul-3",
+          "Address": "172.18.0.4:8300",
+          "Leader": false,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 74
+        }
+      ],
+      "Index": 0
+    },
+    "registry_leader_recovery": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-2": 12,
+          "b-1": 12
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 2.797
+    },
+    "registry_voters_restored": {
+      "Servers": [
+        {
+          "ID": "c7d09fbf-41b5-4dd3-c5ed-4169b8b3786f",
+          "Node": "consul-2",
+          "Address": "172.18.0.3:8300",
+          "Leader": true,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 78
+        },
+        {
+          "ID": "75990757-4558-b247-1211-3fd2fb1d46f3",
+          "Node": "consul-1",
+          "Address": "172.18.0.2:8300",
+          "Leader": false,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 78
+        },
+        {
+          "ID": "1d29034f-d79b-fec3-e019-288678336f3d",
+          "Node": "consul-3",
+          "Address": "172.18.0.4:8300",
+          "Leader": false,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 78
+        }
+      ],
+      "Index": 0
+    },
+    "registry_quorum_loss_expires_membership": {
+      "requests": 40,
+      "concurrency": 4,
+      "workload": "light",
+      "warmup_requests": 0,
+      "warmup_elapsed_s": 0.269,
+      "elapsed_s": 0.26,
+      "codes": {
+        "UNAVAILABLE": 40
+      },
+      "successful_rps": 0.0,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 11.0,
+      "max_successful_server_duration_ms": null,
+      "timing_samples": [],
+      "failure_samples": [
+        {
+          "code": "UNAVAILABLE",
+          "details": "Dependency: no children in weighted_target policy (EDS resource service-b: contains empty localities: [{region=\"local\", zone=\"\", sub_zone=\"\"}])",
+          "metadata": {
+            "x-envoy-upstream-service-time": "14",
+            "date": "Mon, 26 Oct 2026 05:30:04 GMT",
+            "server": "envoy"
+          }
+        }
+      ],
+      "success_latency_ms": {
+        "p50": null,
+        "p95": null,
+        "p99": null
+      },
+      "instance_visits": {}
+    },
+    "registry_quorum_recovery": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-2": 12,
+          "b-1": 12
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 3.36
+    },
+    "agent_restart_registration_recovery": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 12,
+          "b-2": 12
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 3.469
+    },
+    "backend_stop": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 24
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 0.906
+    },
+    "backend_reregistration": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 20,
+          "b-2": 4
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 4.938
+    },
+    "caller_start_ticks_unchanged": {
+      "a-1": "17987",
+      "a-2": "18058"
+    },
+    "short_deadlines": {
+      "requests": 100,
+      "concurrency": 8,
+      "workload": "light",
+      "warmup_requests": 0,
+      "warmup_elapsed_s": 0.004,
+      "elapsed_s": 0.182,
+      "codes": {
+        "DEADLINE_EXCEEDED": 100
+      },
+      "successful_rps": 0.0,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 0,
+      "max_successful_server_duration_ms": null,
+      "timing_samples": [],
+      "failure_samples": [
+        {
+          "code": "DEADLINE_EXCEEDED",
+          "details": "Deadline Exceeded",
+          "metadata": {}
+        },
+        {
+          "code": "DEADLINE_EXCEEDED",
+          "details": "downstream duration timeout",
+          "metadata": {
+            "date": "Mon, 26 Oct 2026 05:30:39 GMT",
+            "server": "envoy"
+          }
+        }
+      ],
+      "success_latency_ms": {
+        "p50": null,
+        "p95": null,
+        "p99": null
+      },
+      "instance_visits": {}
+    },
+    "final_recovery": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-2": 12,
+          "b-1": 12
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 0.828
+    }
+  },
+  "cleanup": "passed",
+  "finished_at_unix": 1792992659.8453882
+}

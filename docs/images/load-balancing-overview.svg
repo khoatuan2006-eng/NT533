@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1080" viewBox="0 0 1200 1080">
+<title>Kế hoạch triển khai lookaside trên k3s</title>
+<desc>Client gọi Envoy. Service điều phối có hai pod, mỗi pod có gRPC client nhận cấu hình Lookaside và gọi trực tiếp các pod của hai service xử lý.</desc>
+<rect width="1200" height="1080" fill="#101923"/>
+<rect x="25" y="140" width="1150" height="875" rx="20" fill="#101923" stroke="#50677d" stroke-width="2"/>
+<text x="63" y="175" fill="#afc1d3" font-family="Segoe UI,Arial,sans-serif" font-size="24" font-weight="600" text-anchor="start" dominant-baseline="central">CỤM k3s</text>
+<rect x="90" y="470" width="1020" height="235" rx="16" fill="#112624" stroke="#2b6d60" stroke-width="2"/>
+<text x="600" y="501" fill="#58cfb8" font-family="Segoe UI,Arial,sans-serif" font-size="27" font-weight="600" text-anchor="middle" dominant-baseline="central">Service điều phối</text>
+<rect x="60" y="805" width="510" height="185" rx="16" fill="#142431" stroke="#31576d" stroke-width="2"/>
+<rect x="630" y="805" width="510" height="185" rx="16" fill="#142431" stroke="#31576d" stroke-width="2"/>
+<line x1="600" y1="104" x2="600" y2="185" stroke="#68bfea" stroke-width="3"/>
+<polygon points="600,185 595.3269798922962,173.94726807196537 604.6730201077038,173.94726807196537" fill="#68bfea"/>
+<line x1="565" y1="265" x2="300" y2="540" stroke="#68bfea" stroke-width="3"/>
+<polygon points="300,540 304.30447751312465,528.7985950283456 311.03435444667645,535.2837491643137" fill="#68bfea"/>
+<line x1="635" y1="265" x2="900" y2="540" stroke="#68bfea" stroke-width="3"/>
+<polygon points="900,540 888.9656455533236,535.2837491643137 895.6955224868753,528.7985950283456" fill="#68bfea"/>
+<line x1="240" y1="680" x2="168" y2="835" stroke="#68bfea" stroke-width="3"/>
+<polygon points="168,835 168.4182323139453,823.007290475811 176.89442848275715,826.9446203090656" fill="#68bfea"/>
+<line x1="280" y1="680" x2="408" y2="835" stroke="#68bfea" stroke-width="3"/>
+<polygon points="408,835 397.3589251180084,829.4531517637628 404.5653571026109,823.5020337377684" fill="#68bfea"/>
+<line x1="320" y1="680" x2="748" y2="835" stroke="#68bfea" stroke-width="3"/>
+<polygon points="748,835 736.0165606704537,835.6302236389427 739.198962652026,826.8426878446656" fill="#68bfea"/>
+<line x1="360" y1="680" x2="988" y2="835" stroke="#68bfea" stroke-width="3"/>
+<polygon points="988,835 976.1495122227903,836.8883695195074 978.3890522798938,827.8146201268557" fill="#68bfea"/>
+<line x1="840" y1="680" x2="212" y2="835" stroke="#68bfea" stroke-width="3"/>
+<polygon points="212,835 221.61094772010617,827.8146201268557 223.85048777720965,836.8883695195074" fill="#68bfea"/>
+<line x1="880" y1="680" x2="452" y2="835" stroke="#68bfea" stroke-width="3"/>
+<polygon points="452,835 460.80103734797405,826.8426878446656 463.98343932954634,835.6302236389427" fill="#68bfea"/>
+<line x1="920" y1="680" x2="792" y2="835" stroke="#68bfea" stroke-width="3"/>
+<polygon points="792,835 795.434642897389,823.5020337377684 802.6410748819916,829.4531517637628" fill="#68bfea"/>
+<line x1="960" y1="680" x2="1032" y2="835" stroke="#68bfea" stroke-width="3"/>
+<polygon points="1032,835 1023.1055715172429,826.9446203090656 1031.5817676860547,823.007290475811" fill="#68bfea"/>
+<rect x="490" y="35" width="220" height="69" rx="14" fill="#19364b" stroke="#68bfea" stroke-width="2"/>
+<text x="600" y="70" fill="#edf3fa" font-family="Segoe UI,Arial,sans-serif" font-size="29" font-weight="600" text-anchor="middle" dominant-baseline="central">Client</text>
+<rect x="450" y="185" width="300" height="80" rx="14" fill="#19364b" stroke="#68bfea" stroke-width="2"/>
+<text x="600" y="225" fill="#edf3fa" font-family="Segoe UI,Arial,sans-serif" font-size="29" font-weight="600" text-anchor="middle" dominant-baseline="central">Envoy ingress</text>
+<rect x="500" y="345" width="200" height="80" rx="14" fill="#292744" stroke="#b39aef" stroke-width="2"/>
+<text x="600" y="385" fill="#edf3fa" font-family="Segoe UI,Arial,sans-serif" font-size="29" font-weight="600" text-anchor="middle" dominant-baseline="central">Lookaside</text>
+<rect x="140" y="540" width="320" height="140" rx="14" fill="#123b33" stroke="#58cfb8" stroke-width="2"/>
+<text x="300" y="570" fill="#edf3fa" font-family="Segoe UI,Arial,sans-serif" font-size="26" font-weight="600" text-anchor="middle" dominant-baseline="central">Pod điều phối 1</text>
+<rect x="165" y="600" width="270" height="60" rx="14" fill="#16463d" stroke="#58cfb8" stroke-width="2"/>
+<text x="300" y="630" fill="#edf3fa" font-family="Segoe UI,Arial,sans-serif" font-size="25" font-weight="600" text-anchor="middle" dominant-baseline="central">gRPC client</text>
+<rect x="740" y="540" width="320" height="140" rx="14" fill="#123b33" stroke="#58cfb8" stroke-width="2"/>
+<text x="900" y="570" fill="#edf3fa" font-family="Segoe UI,Arial,sans-serif" font-size="26" font-weight="600" text-anchor="middle" dominant-baseline="central">Pod điều phối 2</text>
+<rect x="765" y="600" width="270" height="60" rx="14" fill="#16463d" stroke="#58cfb8" stroke-width="2"/>
+<text x="900" y="630" fill="#edf3fa" font-family="Segoe UI,Arial,sans-serif" font-size="25" font-weight="600" text-anchor="middle" dominant-baseline="central">gRPC client</text>
+<line x1="510" y1="425" x2="435" y2="630" stroke="#b39aef" stroke-width="3" stroke-dasharray="10 8"/>
+<polygon points="435,630 434.40897458891703,618.0145634637927 443.18605453204185,621.2256902722529" fill="#b39aef"/>
+<line x1="690" y1="425" x2="765" y2="630" stroke="#b39aef" stroke-width="3" stroke-dasharray="10 8"/>
+<polygon points="765,630 756.8139454679581,621.2256902722529 765.5910254110829,618.0145634637927" fill="#b39aef"/>
+<rect x="90" y="835" width="200" height="75" rx="14" fill="#19364b" stroke="#68bfea" stroke-width="2"/>
+<text x="190" y="873" fill="#edf3fa" font-family="Segoe UI,Arial,sans-serif" font-size="28" font-weight="600" text-anchor="middle" dominant-baseline="central">Pod 1</text>
+<rect x="330" y="835" width="200" height="75" rx="14" fill="#19364b" stroke="#68bfea" stroke-width="2"/>
+<text x="430" y="873" fill="#edf3fa" font-family="Segoe UI,Arial,sans-serif" font-size="28" font-weight="600" text-anchor="middle" dominant-baseline="central">Pod 2</text>
+<rect x="670" y="835" width="200" height="75" rx="14" fill="#19364b" stroke="#68bfea" stroke-width="2"/>
+<text x="770" y="873" fill="#edf3fa" font-family="Segoe UI,Arial,sans-serif" font-size="28" font-weight="600" text-anchor="middle" dominant-baseline="central">Pod 1</text>
+<rect x="910" y="835" width="200" height="75" rx="14" fill="#19364b" stroke="#68bfea" stroke-width="2"/>
+<text x="1010" y="873" fill="#edf3fa" font-family="Segoe UI,Arial,sans-serif" font-size="28" font-weight="600" text-anchor="middle" dominant-baseline="central">Pod 2</text>
+<text x="315" y="952" fill="#68bfea" font-family="Segoe UI,Arial,sans-serif" font-size="26" font-weight="600" text-anchor="middle" dominant-baseline="central">Service xử lý 1</text>
+<text x="885" y="952" fill="#68bfea" font-family="Segoe UI,Arial,sans-serif" font-size="26" font-weight="600" text-anchor="middle" dominant-baseline="central">Service xử lý 2</text>
+<line x1="230" y1="1050" x2="300" y2="1050" stroke="#68bfea" stroke-width="3"/>
+<polygon points="300,1050 288.94726807196537,1054.673020107704 288.94726807196537,1045.326979892296" fill="#68bfea"/>
+<text x="320" y="1050" fill="#afc1d3" font-family="Segoe UI,Arial,sans-serif" font-size="21" font-weight="400" text-anchor="start" dominant-baseline="central">Request</text>
+<line x1="690" y1="1050" x2="760" y2="1050" stroke="#b39aef" stroke-width="3" stroke-dasharray="10 8"/>
+<polygon points="760,1050 748.9472680719654,1054.673020107704 748.9472680719654,1045.326979892296" fill="#b39aef"/>
+<text x="780" y="1050" fill="#afc1d3" font-family="Segoe UI,Arial,sans-serif" font-size="21" font-weight="400" text-anchor="start" dominant-baseline="central">Cấu hình LB</text>
+</svg>

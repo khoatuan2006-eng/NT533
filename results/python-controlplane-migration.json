@@ -1,0 +1,148 @@
+{
+  "completed_at_utc": "2026-10-26T09:54:18.034296+00:00",
+  "passed": true,
+  "scope": "Single Windows host; Linux containers in WSL. No multi-host/production certification.",
+  "implementation": "Python grpc.aio SotW ADS v3; LDS/CDS/EDS; native gRPC caller unchanged",
+  "source": "src/grpc_lb/controlplane",
+  "go_source_removed": true,
+  "python_tests_passed": 155,
+  "linux_controlplane_tests_passed": 50,
+  "lint": "passed",
+  "format": "passed",
+  "python_quality_log": "results/python-controlplane-quality.txt",
+  "linux_build_log": "results/python-controlplane-build.log",
+  "packages": {
+    "grpcio": "1.84.0",
+    "xds-protos": "1.84.0",
+    "protobuf": "7.36.2",
+    "httpx": "0.28.1"
+  },
+  "runtime_image": {
+    "python": "3.12.15",
+    "xds_protos": "1.84.0",
+    "module": "/usr/local/lib/python3.12/site-packages/grpc_lb/controlplane/__init__.py",
+    "has_pytest": false
+  },
+  "total_load_requests_ok": 12600,
+  "successful_after_client_timeout": 0,
+  "leader_loss_health_convergence_s": 3.641,
+  "acceptance": {
+    "file": {
+      "report": "results/lookaside-acceptance.json",
+      "passed": true,
+      "cleanup": "passed",
+      "load": {
+        "baseline": {
+          "requests": 1000,
+          "codes": {
+            "OK": 1000
+          },
+          "successful_after_client_timeout": 0
+        },
+        "heavy": {
+          "requests": 300,
+          "codes": {
+            "OK": 300
+          },
+          "successful_after_client_timeout": 0
+        },
+        "stress": {
+          "requests": 5000,
+          "codes": {
+            "OK": 5000
+          },
+          "successful_after_client_timeout": 0
+        }
+      },
+      "stages": [
+        "initial_graph",
+        "baseline",
+        "heavy",
+        "stress",
+        "dynamic_remove_b2",
+        "dynamic_add_b2",
+        "callers_unchanged",
+        "invalid_config_keeps_last_good",
+        "empty_membership",
+        "empty_membership_recovery",
+        "dead_backend_transport_failover",
+        "backend_transport_recovery",
+        "controlplane_down_cached_config",
+        "cold_caller_without_controlplane",
+        "controlplane_reconnect_new_snapshot",
+        "final_recovery",
+        "short_deadlines",
+        "after_deadline_recovery",
+        "xds_protocol"
+      ]
+    },
+    "ha": {
+      "report": "results/lookaside-ha-acceptance.json",
+      "passed": true,
+      "cleanup": "passed",
+      "load": {
+        "baseline": {
+          "requests": 1000,
+          "codes": {
+            "OK": 1000
+          },
+          "successful_after_client_timeout": 0
+        },
+        "heavy": {
+          "requests": 300,
+          "codes": {
+            "OK": 300
+          },
+          "successful_after_client_timeout": 0
+        },
+        "stress": {
+          "requests": 5000,
+          "codes": {
+            "OK": 5000
+          },
+          "successful_after_client_timeout": 0
+        }
+      },
+      "stages": [
+        "initial_registration_and_health",
+        "controlplane_image_runtime",
+        "initial_raft_peers",
+        "baseline",
+        "heavy",
+        "stress",
+        "not_serving_withdraws_from_eds",
+        "drained_backend_transport_alive",
+        "serving_readds_to_eds",
+        "new_instance_self_registers",
+        "graceful_deregister",
+        "cp2_delivers_new_health_update",
+        "cp2_delivers_recovery",
+        "cold_caller_with_only_cp2",
+        "cp1_delivers_new_health_update",
+        "cp1_delivers_recovery",
+        "cold_caller_with_only_cp1",
+        "registry_leader_loss_health_update",
+        "replacement_raft_peers",
+        "registry_leader_recovery",
+        "registry_voters_restored",
+        "registry_quorum_loss_expires_membership",
+        "registry_quorum_recovery",
+        "agent_restart_registration_recovery",
+        "backend_stop",
+        "backend_reregistration",
+        "caller_start_ticks_unchanged",
+        "short_deadlines",
+        "final_recovery"
+      ]
+    }
+  },
+  "previous_reports": [
+    "results/before-python-controlplane-lookaside.json",
+    "results/before-python-controlplane-ha.json"
+  ],
+  "provisional_image_failed_evidence_check": "results/python-controlplane-initial-ha.json",
+  "limitations": [
+    "Delta ADS unsupported; only current LDS/CDS/EDS API scope",
+    "Both control planes unreachable: native gRPC retains in-memory cached configuration as before"
+  ]
+}

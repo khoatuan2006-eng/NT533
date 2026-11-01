@@ -1,0 +1,27 @@
+{
+  "profile": {
+    "performance": {
+      "raft_multiplier": 1
+    },
+    "limits": {
+      "rpc_client_timeout": "2s"
+    }
+  },
+  "passed": false,
+  "trials": [
+    {
+      "leader": "consul-1",
+      "fault_started_unix_s": 1792991484.414632,
+      "health_convergence_s": 28.235,
+      "codes": {
+        "OK": 2489
+      },
+      "late_ok": 2
+    }
+  ],
+  "agent_effective_config": {
+    "RPCClientTimeout": "2s"
+  },
+  "error": "Graph did not converge: Unexpected instance: b-2",
+  "cleanup": "passed"
+}
