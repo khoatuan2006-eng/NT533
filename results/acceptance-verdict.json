@@ -1,0 +1,24 @@
+{
+  "functional_checks_passed": true,
+  "late_successes_by_stage": {
+    "initial_graph": 0,
+    "baseline": 0,
+    "heavy": 0,
+    "bounded_stress": 0,
+    "overload": 0,
+    "linux_client_overload": 0,
+    "after_overload": 0,
+    "stop_b-2": 0,
+    "recover_b-2": 0,
+    "stop_a-2": 0,
+    "recover_a-2": 0,
+    "all_dependencies_down": 0,
+    "recover_all_dependencies_down": 0,
+    "all_entry_instances_down": 0,
+    "recover_all_entry_instances_down": 0,
+    "short_deadlines": 0,
+    "after_deadlines": 0
+  },
+  "client_wall_deadline_accepted": true,
+  "overall_accepted": true
+}

@@ -1,0 +1,394 @@
+{
+  "started_unix_s": 1793198691.579206,
+  "release_sha256": "4d3e11c36b71779fb31023a959269ddcaeded0ec8648f011fd92f8edce050de5",
+  "nodes": {
+    "node1": {
+      "hostname": "k3s-server",
+      "boot_id": "6d7b3f56-e07c-4235-9d59-11991987309b",
+      "ssh": "192.168.121.214",
+      "containers": [
+        {
+          "Command": "\"python -m grpc_lb.m\u2026\"",
+          "CreatedAt": "2026-10-28 14:39:42 +0000 UTC",
+          "ID": "b0fda1e39e16",
+          "Image": "loadbalance-workload:cloud",
+          "Labels": "com.docker.compose.project=lb-cloud,com.docker.compose.project.config_files=/opt/loadbalance/cluster/node1/compose.json,/opt/loadbalance/cluster/node1/mode.json,com.docker.compose.container-number=1,com.docker.compose.depends_on=,com.docker.compose.oneoff=False,com.docker.compose.project.working_dir=/opt/loadbalance/cluster/node1,com.docker.compose.replace=0451b08cb8f6c44f4fa78f78d9c791bfc8baefcca30df94fff2bf84bcf209ea3,com.docker.compose.service=a-1,com.docker.compose.version=2.27.1,com.docker.compose.config-hash=151cdf35d6c5791f8ea6b5aef904fccea67c7fd29fc6698e5ee91628f2048066,com.docker.compose.image=sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462",
+          "LocalVolumes": "1",
+          "Mounts": "/opt/loadbalan\u2026,f6428c4118582f\u2026,/opt/loadbalan\u2026",
+          "Names": "lb-cloud-a-1-1",
+          "Networks": "host",
+          "Ports": "",
+          "RunningFor": "5 minutes ago",
+          "Size": "0B (virtual 153MB)",
+          "State": "running",
+          "Status": "Up 5 minutes"
+        },
+        {
+          "Command": "\"python -m grpc_lb.m\u2026\"",
+          "CreatedAt": "2026-10-28 13:52:56 +0000 UTC",
+          "ID": "5266bd2cc5e9",
+          "Image": "loadbalance-workload:cloud",
+          "Labels": "com.docker.compose.container-number=1,com.docker.compose.depends_on=,com.docker.compose.image=sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462,com.docker.compose.oneoff=False,com.docker.compose.project=lb-cloud,com.docker.compose.replace=8f45b052dd0ec01f8687f246b8d387691b0e909f5d745c4585ddf3372cd77e7a,com.docker.compose.service=b-1,com.docker.compose.config-hash=353fe762fae9fed4d1153987b10cdc17bb722186f032790b2b112c7324d8521b,com.docker.compose.version=2.27.1,com.docker.compose.project.working_dir=/opt/loadbalance/cluster/node1,com.docker.compose.project.config_files=/opt/loadbalance/cluster/node1/compose.json",
+          "LocalVolumes": "1",
+          "Mounts": "1ec4970eec3436\u2026,/opt/loadbalan\u2026,/opt/loadbalan\u2026",
+          "Names": "lb-cloud-b-1-1",
+          "Networks": "host",
+          "Ports": "",
+          "RunningFor": "51 minutes ago",
+          "Size": "0B (virtual 153MB)",
+          "State": "running",
+          "Status": "Up 17 minutes"
+        },
+        {
+          "Command": "\"/docker-entrypoint.\u2026\"",
+          "CreatedAt": "2026-10-28 13:48:55 +0000 UTC",
+          "ID": "b1f5bd619a81",
+          "Image": "envoyproxy/envoy:v1.35.5",
+          "Labels": "com.docker.compose.config-hash=d417c18fdff69ff75ff3c834c6911204a5845ea22c419e751c1d8a784255d3d9,com.docker.compose.container-number=1,com.docker.compose.depends_on=,com.docker.compose.project=lb-cloud,com.docker.compose.service=ingress,org.opencontainers.image.version=22.04,com.docker.compose.image=sha256:2bff5f4732a53adca9345dd06d972662789e37f309351cc2158d2dc08c6c3d13,com.docker.compose.oneoff=False,com.docker.compose.project.config_files=/opt/loadbalance/cluster/node1/compose.json,com.docker.compose.project.working_dir=/opt/loadbalance/cluster/node1,com.docker.compose.version=2.27.1,org.opencontainers.image.ref.name=ubuntu",
+          "LocalVolumes": "0",
+          "Mounts": "/opt/loadbalan\u2026",
+          "Names": "lb-cloud-ingress-1",
+          "Networks": "lb-cloud_default",
+          "Ports": "127.0.0.1:9901->9901/tcp, 10000/tcp, 0.0.0.0:18080->50050/tcp, :::18080->50050/tcp",
+          "RunningFor": "55 minutes ago",
+          "Size": "0B (virtual 167MB)",
+          "State": "running",
+          "Status": "Up 17 minutes"
+        },
+        {
+          "Command": "\"grpc-lb-controlplane\"",
+          "CreatedAt": "2026-10-28 13:48:55 +0000 UTC",
+          "ID": "7391cbb68460",
+          "Image": "loadbalance-controlplane:cloud",
+          "Labels": "com.docker.compose.oneoff=False,com.docker.compose.project=lb-cloud,com.docker.compose.project.working_dir=/opt/loadbalance/cluster/node1,com.docker.compose.service=controlplane,com.docker.compose.depends_on=,com.docker.compose.container-number=1,com.docker.compose.image=sha256:5a51cdd0fd22696c2ee47bbe0946dadab471a2e6b6063177d4b8a0ba69ae61b0,com.docker.compose.project.config_files=/opt/loadbalance/cluster/node1/compose.json,com.docker.compose.version=2.27.1,com.docker.compose.config-hash=6a418729310916aa80189ddb25f586e832926e567777ee9422cc3337a75381d1",
+          "LocalVolumes": "0",
+          "Mounts": "/opt/loadbalan\u2026",
+          "Names": "lb-cloud-controlplane-1",
+          "Networks": "host",
+          "Ports": "",
+          "RunningFor": "55 minutes ago",
+          "Size": "0B (virtual 153MB)",
+          "State": "running",
+          "Status": "Up 12 minutes"
+        },
+        {
+          "Command": "\"docker-entrypoint.s\u2026\"",
+          "CreatedAt": "2026-10-28 13:48:55 +0000 UTC",
+          "ID": "29a0749f00b1",
+          "Image": "hashicorp/consul:2.1.0",
+          "Labels": "com.docker.compose.config-hash=bd6be32f0eed945c71434633839810d9abfbd58467654d2aa07ba3214e3100e5,name=Consul,org.opencontainers.image.url=https://www.consul.io/,revision=881572b49b5d4d67713fa7f8ff09ed0ff2befc0f,com.docker.compose.depends_on=,com.docker.compose.project.working_dir=/opt/loadbalance/cluster/node1,com.docker.compose.version=2.27.1,org.opencontainers.image.vendor=HashiCorp,org.opencontainers.image.description=Consul is a datacenter runtime that provides service discovery, configuration, and orchestration.,org.opencontainers.image.version=2.1.0,release=881572b49b5d4d67713fa7f8ff09ed0ff2befc0f,version=2.1.0,org.opencontainers.image.source=https://github.com/hashicorp/consul,org.opencontainers.image.title=consul,summary=Consul is a datacenter runtime that provides service discovery, configuration, and orchestration.,com.docker.compose.service=consul,org.opencontainers.image.documentation=https://developer.hashicorp.com/docs,com.docker.compose.container-number=1,com.docker.compose.project.config_files=/opt/loadbalance/cluster/node1/compose.json,maintainer=Consul Team <consul@hashicorp.com>,com.docker.compose.oneoff=False,description=Consul is a datacenter runtime that provides service discovery, configuration, and orchestration.,org.opencontainers.image.licenses=BSL-1.1,com.docker.compose.image=sha256:f54e8396b116a05d06f5315346bedb0369fd706c66d3bda7a53f703ab3977589,com.docker.compose.project=lb-cloud,org.opencontainers.image.authors=Consul Team <consul@hashicorp.com>,vendor=HashiCorp",
+          "LocalVolumes": "1",
+          "Mounts": "/opt/loadbalan\u2026,lb-cloud_consu\u2026",
+          "Names": "lb-cloud-consul-1",
+          "Networks": "host",
+          "Ports": "",
+          "RunningFor": "55 minutes ago",
+          "Size": "0B (virtual 236MB)",
+          "State": "running",
+          "Status": "Up 17 minutes"
+        }
+      ],
+      "image_ids": [
+        "sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462",
+        "sha256:5a51cdd0fd22696c2ee47bbe0946dadab471a2e6b6063177d4b8a0ba69ae61b0"
+      ]
+    },
+    "node2": {
+      "hostname": "k3s-agent1",
+      "boot_id": "4fc3c153-115c-483d-8fc1-5e2f591536fb",
+      "ssh": "192.168.1.172",
+      "containers": [
+        {
+          "Command": "\"python -m grpc_lb.m\u2026\"",
+          "CreatedAt": "2026-10-28 14:39:47 +0000 UTC",
+          "ID": "0cd8b2f97476",
+          "Image": "loadbalance-workload:cloud",
+          "Labels": "com.docker.compose.config-hash=f818362408a9f8b919f2355eed33b524a11782a48bc3cc1f016b63d2d4e244f1,com.docker.compose.oneoff=False,com.docker.compose.project.config_files=/opt/loadbalance/cluster/node2/compose.json,/opt/loadbalance/cluster/node2/mode.json,com.docker.compose.service=a-2,com.docker.compose.version=2.27.1,com.docker.compose.replace=315820e6b21d15266a9bd95bdf912d97d5f505435a58735e41d5b58325244804,com.docker.compose.container-number=1,com.docker.compose.depends_on=,com.docker.compose.image=sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462,com.docker.compose.project=lb-cloud,com.docker.compose.project.working_dir=/opt/loadbalance/cluster/node2",
+          "LocalVolumes": "1",
+          "Mounts": "/opt/loadbalan\u2026,/opt/loadbalan\u2026,71753a57612660\u2026",
+          "Names": "lb-cloud-a-2-1",
+          "Networks": "host",
+          "Ports": "",
+          "RunningFor": "5 minutes ago",
+          "Size": "0B (virtual 153MB)",
+          "State": "running",
+          "Status": "Up 5 minutes"
+        },
+        {
+          "Command": "\"docker-entrypoint.s\u2026\"",
+          "CreatedAt": "2026-10-28 13:53:11 +0000 UTC",
+          "ID": "4aae7ade41c7",
+          "Image": "hashicorp/consul:2.1.0",
+          "Labels": "com.docker.compose.project=lb-cloud,com.docker.compose.project.working_dir=/opt/loadbalance/cluster/node2,org.opencontainers.image.source=https://github.com/hashicorp/consul,com.docker.compose.container-number=1,com.docker.compose.oneoff=False,com.docker.compose.service=consul,maintainer=Consul Team <consul@hashicorp.com>,org.opencontainers.image.title=consul,org.opencontainers.image.vendor=HashiCorp,name=Consul,org.opencontainers.image.licenses=BSL-1.1,vendor=HashiCorp,description=Consul is a datacenter runtime that provides service discovery, configuration, and orchestration.,com.docker.compose.depends_on=,org.opencontainers.image.url=https://www.consul.io/,release=881572b49b5d4d67713fa7f8ff09ed0ff2befc0f,com.docker.compose.project.config_files=/opt/loadbalance/cluster/node2/compose.json,org.opencontainers.image.description=Consul is a datacenter runtime that provides service discovery, configuration, and orchestration.,revision=881572b49b5d4d67713fa7f8ff09ed0ff2befc0f,summary=Consul is a datacenter runtime that provides service discovery, configuration, and orchestration.,com.docker.compose.config-hash=3643d065905ff118c9874cf493e3a5291b93937e6bbaaa778a725090f1cf9cf1,com.docker.compose.image=sha256:f54e8396b116a05d06f5315346bedb0369fd706c66d3bda7a53f703ab3977589,com.docker.compose.version=2.27.1,org.opencontainers.image.authors=Consul Team <consul@hashicorp.com>,org.opencontainers.image.documentation=https://developer.hashicorp.com/docs,org.opencontainers.image.version=2.1.0,version=2.1.0",
+          "LocalVolumes": "1",
+          "Mounts": "/opt/loadbalan\u2026,lb-cloud_consu\u2026",
+          "Names": "lb-cloud-consul-1",
+          "Networks": "host",
+          "Ports": "",
+          "RunningFor": "51 minutes ago",
+          "Size": "0B (virtual 236MB)",
+          "State": "running",
+          "Status": "Up 11 minutes"
+        },
+        {
+          "Command": "\"grpc-lb-controlplane\"",
+          "CreatedAt": "2026-10-28 13:53:11 +0000 UTC",
+          "ID": "d424b39aa493",
+          "Image": "loadbalance-controlplane:cloud",
+          "Labels": "com.docker.compose.project.working_dir=/opt/loadbalance/cluster/node2,com.docker.compose.depends_on=,com.docker.compose.image=sha256:5a51cdd0fd22696c2ee47bbe0946dadab471a2e6b6063177d4b8a0ba69ae61b0,com.docker.compose.oneoff=False,com.docker.compose.project.config_files=/opt/loadbalance/cluster/node2/compose.json,com.docker.compose.version=2.27.1,com.docker.compose.config-hash=b8bdd73c8b865e1c9b1a8eb476a2ae886af3a3734ee037b872e490eaec776719,com.docker.compose.container-number=1,com.docker.compose.project=lb-cloud,com.docker.compose.service=controlplane",
+          "LocalVolumes": "0",
+          "Mounts": "/opt/loadbalan\u2026",
+          "Names": "lb-cloud-controlplane-1",
+          "Networks": "host",
+          "Ports": "",
+          "RunningFor": "51 minutes ago",
+          "Size": "0B (virtual 153MB)",
+          "State": "running",
+          "Status": "Up 11 minutes"
+        },
+        {
+          "Command": "\"/docker-entrypoint.\u2026\"",
+          "CreatedAt": "2026-10-28 13:53:11 +0000 UTC",
+          "ID": "0bd0b392bbf7",
+          "Image": "envoyproxy/envoy:v1.35.5",
+          "Labels": "com.docker.compose.project=lb-cloud,com.docker.compose.service=ingress,com.docker.compose.version=2.27.1,org.opencontainers.image.version=22.04,com.docker.compose.container-number=1,com.docker.compose.image=sha256:2bff5f4732a53adca9345dd06d972662789e37f309351cc2158d2dc08c6c3d13,com.docker.compose.oneoff=False,com.docker.compose.project.working_dir=/opt/loadbalance/cluster/node2,org.opencontainers.image.ref.name=ubuntu,com.docker.compose.config-hash=cb9573a968285be60c93197823b8f56d5f9cf4aa16d5f4f0cbf39ff926f39f04,com.docker.compose.depends_on=,com.docker.compose.project.config_files=/opt/loadbalance/cluster/node2/compose.json",
+          "LocalVolumes": "0",
+          "Mounts": "/opt/loadbalan\u2026",
+          "Names": "lb-cloud-ingress-1",
+          "Networks": "lb-cloud_default",
+          "Ports": "127.0.0.1:9901->9901/tcp, 10000/tcp, 0.0.0.0:18080->50050/tcp, :::18080->50050/tcp",
+          "RunningFor": "51 minutes ago",
+          "Size": "0B (virtual 167MB)",
+          "State": "running",
+          "Status": "Up 51 minutes"
+        },
+        {
+          "Command": "\"python -m grpc_lb.m\u2026\"",
+          "CreatedAt": "2026-10-28 13:53:11 +0000 UTC",
+          "ID": "2a2ab931b886",
+          "Image": "loadbalance-workload:cloud",
+          "Labels": "com.docker.compose.depends_on=,com.docker.compose.oneoff=False,com.docker.compose.project=lb-cloud,com.docker.compose.project.config_files=/opt/loadbalance/cluster/node2/compose.json,com.docker.compose.project.working_dir=/opt/loadbalance/cluster/node2,com.docker.compose.service=c-1,com.docker.compose.config-hash=a3de6eceb82b3d05152c2b6e96aaf766943c6d56f78c32bf2a27f1d51c3ef7c6,com.docker.compose.container-number=1,com.docker.compose.image=sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462,com.docker.compose.version=2.27.1",
+          "LocalVolumes": "1",
+          "Mounts": "/opt/loadbalan\u2026,/opt/loadbalan\u2026,ef45592b1e6413\u2026",
+          "Names": "lb-cloud-c-1-1",
+          "Networks": "host",
+          "Ports": "",
+          "RunningFor": "51 minutes ago",
+          "Size": "0B (virtual 153MB)",
+          "State": "running",
+          "Status": "Up 51 minutes"
+        }
+      ],
+      "image_ids": [
+        "sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462",
+        "sha256:5a51cdd0fd22696c2ee47bbe0946dadab471a2e6b6063177d4b8a0ba69ae61b0"
+      ]
+    },
+    "node3": {
+      "hostname": "k3s-agent2",
+      "boot_id": "9b46c8b8-ffac-4d02-8178-36158068ae9d",
+      "ssh": "192.168.1.217",
+      "containers": [
+        {
+          "Command": "\"python -m grpc_lb.m\u2026\"",
+          "CreatedAt": "2026-10-28 13:53:26 +0000 UTC",
+          "ID": "13f7e468bf08",
+          "Image": "loadbalance-workload:cloud",
+          "Labels": "com.docker.compose.oneoff=False,com.docker.compose.project=lb-cloud,com.docker.compose.project.config_files=/opt/loadbalance/cluster/node3/compose.json,com.docker.compose.version=2.27.1,com.docker.compose.project.working_dir=/opt/loadbalance/cluster/node3,com.docker.compose.service=c-2,com.docker.compose.config-hash=be94d8d84d0fb8e357d29e5012ab58d5b2eba6aa8228b4df9c5d5fb415300554,com.docker.compose.container-number=1,com.docker.compose.depends_on=,com.docker.compose.image=sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462",
+          "LocalVolumes": "1",
+          "Mounts": "/opt/loadbalan\u2026,/opt/loadbalan\u2026,31856cd3cfd864\u2026",
+          "Names": "lb-cloud-c-2-1",
+          "Networks": "host",
+          "Ports": "",
+          "RunningFor": "51 minutes ago",
+          "Size": "0B (virtual 153MB)",
+          "State": "running",
+          "Status": "Up 51 minutes"
+        },
+        {
+          "Command": "\"docker-entrypoint.s\u2026\"",
+          "CreatedAt": "2026-10-28 13:53:26 +0000 UTC",
+          "ID": "7a316a941290",
+          "Image": "hashicorp/consul:2.1.0",
+          "Labels": "com.docker.compose.container-number=1,org.opencontainers.image.source=https://github.com/hashicorp/consul,org.opencontainers.image.version=2.1.0,revision=881572b49b5d4d67713fa7f8ff09ed0ff2befc0f,com.docker.compose.project.config_files=/opt/loadbalance/cluster/node3/compose.json,name=Consul,vendor=HashiCorp,org.opencontainers.image.licenses=BSL-1.1,com.docker.compose.image=sha256:f54e8396b116a05d06f5315346bedb0369fd706c66d3bda7a53f703ab3977589,com.docker.compose.version=2.27.1,org.opencontainers.image.documentation=https://developer.hashicorp.com/docs,com.docker.compose.project.working_dir=/opt/loadbalance/cluster/node3,maintainer=Consul Team <consul@hashicorp.com>,org.opencontainers.image.description=Consul is a datacenter runtime that provides service discovery, configuration, and orchestration.,org.opencontainers.image.url=https://www.consul.io/,version=2.1.0,com.docker.compose.depends_on=,com.docker.compose.project=lb-cloud,com.docker.compose.service=consul,release=881572b49b5d4d67713fa7f8ff09ed0ff2befc0f,com.docker.compose.config-hash=c62a4940560cfb8d19c7c136fcb959eef671ad0f5da1fa0f70906796ba16b840,description=Consul is a datacenter runtime that provides service discovery, configuration, and orchestration.,org.opencontainers.image.title=consul,org.opencontainers.image.vendor=HashiCorp,com.docker.compose.oneoff=False,org.opencontainers.image.authors=Consul Team <consul@hashicorp.com>,summary=Consul is a datacenter runtime that provides service discovery, configuration, and orchestration.",
+          "LocalVolumes": "1",
+          "Mounts": "/opt/loadbalan\u2026,lb-cloud_consu\u2026",
+          "Names": "lb-cloud-consul-1",
+          "Networks": "host",
+          "Ports": "",
+          "RunningFor": "51 minutes ago",
+          "Size": "0B (virtual 236MB)",
+          "State": "running",
+          "Status": "Up 51 minutes"
+        },
+        {
+          "Command": "\"python -m grpc_lb.m\u2026\"",
+          "CreatedAt": "2026-10-28 13:53:26 +0000 UTC",
+          "ID": "54020f3e32c0",
+          "Image": "loadbalance-workload:cloud",
+          "Labels": "com.docker.compose.depends_on=,com.docker.compose.oneoff=False,com.docker.compose.project=lb-cloud,com.docker.compose.project.config_files=/opt/loadbalance/cluster/node3/compose.json,com.docker.compose.config-hash=823f6de7250b1a47384977ff5954c6b6ff42d7fb4821f17cbfac80d66462f1bf,com.docker.compose.container-number=1,com.docker.compose.image=sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462,com.docker.compose.project.working_dir=/opt/loadbalance/cluster/node3,com.docker.compose.service=b-2,com.docker.compose.version=2.27.1",
+          "LocalVolumes": "1",
+          "Mounts": "/opt/loadbalan\u2026,/opt/loadbalan\u2026,f357ee4d99155f\u2026",
+          "Names": "lb-cloud-b-2-1",
+          "Networks": "host",
+          "Ports": "",
+          "RunningFor": "51 minutes ago",
+          "Size": "0B (virtual 153MB)",
+          "State": "running",
+          "Status": "Up 25 minutes"
+        }
+      ],
+      "image_ids": [
+        "sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462",
+        "sha256:5a51cdd0fd22696c2ee47bbe0946dadab471a2e6b6063177d4b8a0ba69ae61b0"
+      ]
+    }
+  },
+  "kubernetes_nodes": "NAME         STATUS   ROLES           AGE     VERSION\nk3s-agent1   Ready    <none>          6h31m   v1.36.5+k3s1\nk3s-agent2   Ready    <none>          6h19m   v1.36.5+k3s1\nk3s-server   Ready    control-plane   6h49m   v1.36.5+k3s1\n",
+  "consul_raft": {
+    "Servers": [
+      {
+        "ID": "2821467f-5293-d220-05d5-fc4575fcb8bc",
+        "Node": "lb-node3",
+        "Address": "192.168.1.217:8300",
+        "Leader": false,
+        "ProtocolVersion": "3",
+        "Voter": true,
+        "LastIndex": 665
+      },
+      {
+        "ID": "5720e5e3-32bf-8a51-269a-45161a3a26d4",
+        "Node": "lb-node2",
+        "Address": "192.168.1.172:8300",
+        "Leader": false,
+        "ProtocolVersion": "3",
+        "Voter": true,
+        "LastIndex": 665
+      },
+      {
+        "ID": "7e39d5d2-979c-206a-92f2-3fee1a304b71",
+        "Node": "lb-node1",
+        "Address": "192.168.1.238:8300",
+        "Leader": true,
+        "ProtocolVersion": "3",
+        "Voter": true,
+        "LastIndex": 665
+      }
+    ],
+    "Index": 0
+  },
+  "ingress": {
+    "statuses": {
+      "loadbalancer": {
+        "id": "62877bb9-c24d-4f24-8f57-cb6f4491ece7",
+        "name": "lb-ha-entry",
+        "operating_status": "ONLINE",
+        "provisioning_status": "ACTIVE",
+        "listeners": [
+          {
+            "id": "56cb2b12-5c65-4c69-b99b-6c7e481ca649",
+            "name": "lb-ha-grpc-tcp",
+            "operating_status": "ONLINE",
+            "provisioning_status": "ACTIVE",
+            "pools": [
+              {
+                "id": "cbf6cf17-84d0-485c-9277-be38a047ebe1",
+                "name": "lb-ha-envoy-pool",
+                "provisioning_status": "ACTIVE",
+                "operating_status": "ONLINE",
+                "health_monitor": {
+                  "id": "37817e09-a05d-484f-85af-2458c1760365",
+                  "name": "lb-ha-tcp-health",
+                  "type": "TCP",
+                  "provisioning_status": "ACTIVE",
+                  "operating_status": "ONLINE"
+                },
+                "members": [
+                  {
+                    "id": "c35a8dbf-89ec-45bf-9a5b-29d28bc701fb",
+                    "name": "",
+                    "operating_status": "ONLINE",
+                    "provisioning_status": "ACTIVE",
+                    "address": "192.168.1.172",
+                    "protocol_port": 18080
+                  },
+                  {
+                    "id": "2ffb44f5-667d-4ad8-83e4-268c30c2a30c",
+                    "name": "",
+                    "operating_status": "ONLINE",
+                    "provisioning_status": "ACTIVE",
+                    "address": "192.168.1.238",
+                    "protocol_port": 18080
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "vms": [
+    {
+      "id": "50ffce03-5bfc-4137-90aa-a9960f8a09c7",
+      "name": "k3s-server",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "802e661e-3b47-4a20-b015-80ee7e38ddae",
+      "name": "k3s-agent1",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "2a2e7313-fa2b-4013-9f0e-c2fc5fd3496c",
+      "name": "k3s-agent2",
+      "status": "ACTIVE"
+    }
+  ],
+  "graph": {
+    "service-a": {
+      "a-1": 30,
+      "a-2": 30
+    },
+    "service-b": {
+      "b-1": 31,
+      "b-2": 29
+    },
+    "service-c": {
+      "c-2": 30,
+      "c-1": 30
+    }
+  },
+  "checks": {
+    "thirteen_running_containers": true,
+    "three_active_vms": true,
+    "three_raft_voters": true,
+    "ingress_online": true,
+    "same_workload_and_controlplane_images": true,
+    "kubernetes_nodes_ready": true
+  },
+  "finished_unix_s": 1793198713.1099033,
+  "credential_revoked": true,
+  "credential_revocation": {
+    "method": "user-confirmed dashboard deletion; UI confirmed success and empty credential list",
+    "credential_id": "6d4fb4b3b4be4667a6b9b0da8d7e6594",
+    "self_revoke_api_status": 403,
+    "authentication_after_deletion_status": 404,
+    "verified_unix_s": 1793198910.348263
+  },
+  "credential_download_removed": true,
+  "persistent_release_and_mode": {
+    "node1": {
+      "persistent_release_sha256": "4d3e11c36b71779fb31023a959269ddcaeded0ec8648f011fd92f8edce050de5",
+      "discovery_mode": "xds"
+    },
+    "node2": {
+      "persistent_release_sha256": "4d3e11c36b71779fb31023a959269ddcaeded0ec8648f011fd92f8edce050de5",
+      "discovery_mode": "xds"
+    },
+    "node3": {
+      "persistent_release_sha256": "4d3e11c36b71779fb31023a959269ddcaeded0ec8648f011fd92f8edce050de5"
+    }
+  },
+  "handoff_verified_unix_s": 1793198983.6387568
+}

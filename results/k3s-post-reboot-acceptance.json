@@ -1,0 +1,719 @@
+{
+  "scope": "three Ubuntu VMs, same availability zone; physical-host separation unverified",
+  "started_unix": 1793197880.5524242,
+  "passed": true,
+  "stages": {
+    "vm_identity": {
+      "node1": {
+        "hostname": "k3s-server",
+        "boot_id": "6d7b3f56-e07c-4235-9d59-11991987309b",
+        "release": "80857261bfb6b4d962650bdf767bf140320aff6fe17248aa697732ef652dc963"
+      },
+      "node2": {
+        "hostname": "k3s-agent1",
+        "boot_id": "4fc3c153-115c-483d-8fc1-5e2f591536fb",
+        "release": "80857261bfb6b4d962650bdf767bf140320aff6fe17248aa697732ef652dc963"
+      },
+      "node3": {
+        "hostname": "k3s-agent2",
+        "boot_id": "9b46c8b8-ffac-4d02-8178-36158068ae9d",
+        "release": "80857261bfb6b4d962650bdf767bf140320aff6fe17248aa697732ef652dc963"
+      }
+    },
+    "running_container_images": {
+      "node1": {
+        "/lb-cloud-a-1-1": "sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462",
+        "/lb-cloud-b-1-1": "sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462",
+        "/lb-cloud-consul-1": "sha256:f54e8396b116a05d06f5315346bedb0369fd706c66d3bda7a53f703ab3977589",
+        "/lb-cloud-controlplane-1": "sha256:5a51cdd0fd22696c2ee47bbe0946dadab471a2e6b6063177d4b8a0ba69ae61b0",
+        "/lb-cloud-ingress-1": "sha256:2bff5f4732a53adca9345dd06d972662789e37f309351cc2158d2dc08c6c3d13"
+      },
+      "node2": {
+        "/lb-cloud-a-2-1": "sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462",
+        "/lb-cloud-c-1-1": "sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462",
+        "/lb-cloud-consul-1": "sha256:f54e8396b116a05d06f5315346bedb0369fd706c66d3bda7a53f703ab3977589",
+        "/lb-cloud-controlplane-1": "sha256:5a51cdd0fd22696c2ee47bbe0946dadab471a2e6b6063177d4b8a0ba69ae61b0",
+        "/lb-cloud-ingress-1": "sha256:2bff5f4732a53adca9345dd06d972662789e37f309351cc2158d2dc08c6c3d13"
+      },
+      "node3": {
+        "/lb-cloud-b-2-1": "sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462",
+        "/lb-cloud-c-2-1": "sha256:ef6a11bee21658ad1e07c1bb091d72bd8997297fb4bfe187986fd605a06ee462",
+        "/lb-cloud-consul-1": "sha256:f54e8396b116a05d06f5315346bedb0369fd706c66d3bda7a53f703ab3977589"
+      }
+    },
+    "initial_graph": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-1": 12,
+          "b-2": 12
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 1.437
+    },
+    "initial_raft": {
+      "Servers": [
+        {
+          "ID": "2821467f-5293-d220-05d5-fc4575fcb8bc",
+          "Node": "lb-node3",
+          "Address": "192.168.1.217:8300",
+          "Leader": false,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 497
+        },
+        {
+          "ID": "5720e5e3-32bf-8a51-269a-45161a3a26d4",
+          "Node": "lb-node2",
+          "Address": "192.168.1.172:8300",
+          "Leader": true,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 497
+        },
+        {
+          "ID": "7e39d5d2-979c-206a-92f2-3fee1a304b71",
+          "Node": "lb-node1",
+          "Address": "192.168.1.238:8300",
+          "Leader": false,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 497
+        }
+      ],
+      "Index": 0
+    },
+    "baseline": {
+      "requests": 1000,
+      "concurrency": 32,
+      "workload": "light",
+      "warmup_requests": 4,
+      "warmup_elapsed_s": 0.295,
+      "elapsed_s": 3.286,
+      "codes": {
+        "OK": 1000
+      },
+      "successful_rps": 304.28,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 27.0,
+      "max_successful_server_duration_ms": 83.547,
+      "timing_samples": [
+        {
+          "request_id": "acceptance-0",
+          "client_elapsed_ms": 102.201,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "25.515",
+            "x-server-budget-ms": "2998.465",
+            "x-server-queue-ms": "0.079"
+          }
+        },
+        {
+          "request_id": "acceptance-5",
+          "client_elapsed_ms": 101.689,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "28.657",
+            "x-server-budget-ms": "2998.662",
+            "x-server-queue-ms": "0.100"
+          }
+        },
+        {
+          "request_id": "acceptance-1",
+          "client_elapsed_ms": 103.884,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "32.460",
+            "x-server-budget-ms": "2999.014",
+            "x-server-queue-ms": "0.077"
+          }
+        },
+        {
+          "request_id": "acceptance-3",
+          "client_elapsed_ms": 103.779,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "32.459",
+            "x-server-budget-ms": "2998.920",
+            "x-server-queue-ms": "0.040"
+          }
+        },
+        {
+          "request_id": "acceptance-7",
+          "client_elapsed_ms": 106.078,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "32.414",
+            "x-server-budget-ms": "2998.253",
+            "x-server-queue-ms": "0.044"
+          }
+        },
+        {
+          "request_id": "acceptance-2",
+          "client_elapsed_ms": 109.572,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "34.610",
+            "x-server-budget-ms": "2995.092",
+            "x-server-queue-ms": "0.062"
+          }
+        },
+        {
+          "request_id": "acceptance-6",
+          "client_elapsed_ms": 121.132,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "38.836",
+            "x-server-budget-ms": "2993.599",
+            "x-server-queue-ms": "0.030"
+          }
+        },
+        {
+          "request_id": "acceptance-4",
+          "client_elapsed_ms": 129.96,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "52.315",
+            "x-server-budget-ms": "2994.015",
+            "x-server-queue-ms": "0.109"
+          }
+        }
+      ],
+      "failure_samples": [],
+      "success_latency_ms": {
+        "p50": 100.752,
+        "p95": 133.16,
+        "p99": 230.572
+      },
+      "instance_visits": {
+        "a-2": 500,
+        "b-1": 500,
+        "c-2": 500,
+        "a-1": 500,
+        "b-2": 500,
+        "c-1": 500
+      }
+    },
+    "heavy": {
+      "requests": 300,
+      "concurrency": 16,
+      "workload": "heavy",
+      "warmup_requests": 4,
+      "warmup_elapsed_s": 0.227,
+      "elapsed_s": 2.258,
+      "codes": {
+        "OK": 300
+      },
+      "successful_rps": 132.86,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 27.0,
+      "max_successful_server_duration_ms": 132.22,
+      "timing_samples": [
+        {
+          "request_id": "acceptance-1",
+          "client_elapsed_ms": 99.443,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "83.332",
+            "x-server-budget-ms": "2988.969",
+            "x-server-queue-ms": "0.080"
+          }
+        },
+        {
+          "request_id": "acceptance-3",
+          "client_elapsed_ms": 100.681,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "83.463",
+            "x-server-budget-ms": "2988.499",
+            "x-server-queue-ms": "0.044"
+          }
+        },
+        {
+          "request_id": "acceptance-5",
+          "client_elapsed_ms": 101.495,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "84.101",
+            "x-server-budget-ms": "2988.168",
+            "x-server-queue-ms": "0.030"
+          }
+        },
+        {
+          "request_id": "acceptance-7",
+          "client_elapsed_ms": 102.858,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "85.140",
+            "x-server-budget-ms": "2987.802",
+            "x-server-queue-ms": "0.043"
+          }
+        },
+        {
+          "request_id": "acceptance-2",
+          "client_elapsed_ms": 105.254,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "86.206",
+            "x-server-budget-ms": "2986.287",
+            "x-server-queue-ms": "0.074"
+          }
+        },
+        {
+          "request_id": "acceptance-0",
+          "client_elapsed_ms": 107.568,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "89.847",
+            "x-server-budget-ms": "2987.193",
+            "x-server-queue-ms": "0.074"
+          }
+        },
+        {
+          "request_id": "acceptance-4",
+          "client_elapsed_ms": 108.446,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "89.570",
+            "x-server-budget-ms": "2985.917",
+            "x-server-queue-ms": "0.032"
+          }
+        },
+        {
+          "request_id": "acceptance-6",
+          "client_elapsed_ms": 109.083,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "91.184",
+            "x-server-budget-ms": "2985.644",
+            "x-server-queue-ms": "0.029"
+          }
+        }
+      ],
+      "failure_samples": [],
+      "success_latency_ms": {
+        "p50": 106.935,
+        "p95": 179.87,
+        "p99": 201.054
+      },
+      "instance_visits": {
+        "a-1": 150,
+        "b-2": 150,
+        "c-1": 150,
+        "b-1": 150,
+        "c-2": 150,
+        "a-2": 150
+      }
+    },
+    "stress": {
+      "requests": 5000,
+      "concurrency": 64,
+      "workload": "light",
+      "warmup_requests": 4,
+      "warmup_elapsed_s": 0.366,
+      "elapsed_s": 14.665,
+      "codes": {
+        "OK": 5000
+      },
+      "successful_rps": 340.95,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 27.0,
+      "max_successful_server_duration_ms": 491.708,
+      "timing_samples": [
+        {
+          "request_id": "acceptance-2",
+          "client_elapsed_ms": 103.788,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "33.307",
+            "x-server-budget-ms": "2997.159",
+            "x-server-queue-ms": "0.041"
+          }
+        },
+        {
+          "request_id": "acceptance-0",
+          "client_elapsed_ms": 106.098,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "36.653",
+            "x-server-budget-ms": "2997.610",
+            "x-server-queue-ms": "0.094"
+          }
+        },
+        {
+          "request_id": "acceptance-7",
+          "client_elapsed_ms": 107.849,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "35.932",
+            "x-server-budget-ms": "2997.065",
+            "x-server-queue-ms": "0.034"
+          }
+        },
+        {
+          "request_id": "acceptance-4",
+          "client_elapsed_ms": 109.538,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "41.647",
+            "x-server-budget-ms": "2996.813",
+            "x-server-queue-ms": "0.032"
+          }
+        },
+        {
+          "request_id": "acceptance-6",
+          "client_elapsed_ms": 110.964,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "42.740",
+            "x-server-budget-ms": "2996.454",
+            "x-server-queue-ms": "0.049"
+          }
+        },
+        {
+          "request_id": "acceptance-3",
+          "client_elapsed_ms": 111.671,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "41.509",
+            "x-server-budget-ms": "2997.844",
+            "x-server-queue-ms": "0.044"
+          }
+        },
+        {
+          "request_id": "acceptance-1",
+          "client_elapsed_ms": 114.154,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "42.803",
+            "x-server-budget-ms": "2998.348",
+            "x-server-queue-ms": "0.093"
+          }
+        },
+        {
+          "request_id": "acceptance-5",
+          "client_elapsed_ms": 116.822,
+          "timeout_ms": 3000,
+          "server_trailers": {
+            "x-server-duration-ms": "50.102",
+            "x-server-budget-ms": "2997.411",
+            "x-server-queue-ms": "0.041"
+          }
+        }
+      ],
+      "failure_samples": [],
+      "success_latency_ms": {
+        "p50": 168.243,
+        "p95": 329.64,
+        "p99": 422.007
+      },
+      "instance_visits": {
+        "a-2": 2500,
+        "b-2": 2500,
+        "c-2": 2500,
+        "b-1": 2500,
+        "c-1": 2500,
+        "a-1": 2500
+      }
+    },
+    "not_serving_cross_vm": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 24
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 3.813
+    },
+    "serving_recovery": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 23,
+          "b-2": 1
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 1.765
+    },
+    "node1_controlplane_down_new_update": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 24
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 2.734
+    },
+    "node1_controlplane_down_recovery": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-2": 12,
+          "b-1": 12
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 3.61
+    },
+    "cold_caller_without_node1_controlplane": {
+      "instances": {
+        "b-2": 21,
+        "b-1": 19
+      },
+      "requests": 40
+    },
+    "node2_controlplane_down_new_update": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-1": 24
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 3.468
+    },
+    "node2_controlplane_down_recovery": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 22,
+          "b-2": 2
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 1.516
+    },
+    "cold_caller_without_node2_controlplane": {
+      "instances": {
+        "b-2": 20,
+        "b-1": 20
+      },
+      "requests": 40
+    },
+    "consul_leader_loss_new_health": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-1": 24
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 3.812
+    },
+    "consul_leader_recovery": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 20,
+          "b-2": 4
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 2.344
+    },
+    "restored_raft": {
+      "Servers": [
+        {
+          "ID": "2821467f-5293-d220-05d5-fc4575fcb8bc",
+          "Node": "lb-node3",
+          "Address": "192.168.1.217:8300",
+          "Leader": false,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 530
+        },
+        {
+          "ID": "5720e5e3-32bf-8a51-269a-45161a3a26d4",
+          "Node": "lb-node2",
+          "Address": "192.168.1.172:8300",
+          "Leader": false,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 530
+        },
+        {
+          "ID": "7e39d5d2-979c-206a-92f2-3fee1a304b71",
+          "Node": "lb-node1",
+          "Address": "192.168.1.238:8300",
+          "Leader": true,
+          "ProtocolVersion": "3",
+          "Voter": true,
+          "LastIndex": 530
+        }
+      ],
+      "Index": 0
+    },
+    "quorum_loss_expires_membership": {
+      "requests": 40,
+      "concurrency": 4,
+      "workload": "light",
+      "warmup_requests": 0,
+      "warmup_elapsed_s": 0.096,
+      "elapsed_s": 0.512,
+      "codes": {
+        "UNAVAILABLE": 40
+      },
+      "successful_rps": 0.0,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 27.0,
+      "max_successful_server_duration_ms": null,
+      "timing_samples": [],
+      "failure_samples": [
+        {
+          "code": "UNAVAILABLE",
+          "details": "Dependency: no children in weighted_target policy (EDS resource service-b: contains empty localities: [{region=\"local\", zone=\"\", sub_zone=\"\"}])",
+          "metadata": {
+            "x-envoy-upstream-service-time": "10",
+            "date": "Wed, 28 Oct 2026 14:33:48 GMT",
+            "server": "envoy"
+          }
+        }
+      ],
+      "success_latency_ms": {
+        "p50": null,
+        "p95": null,
+        "p99": null
+      },
+      "instance_visits": {}
+    },
+    "quorum_recovery": {
+      "counts": {
+        "service-a": {
+          "a-1": 12,
+          "a-2": 12
+        },
+        "service-b": {
+          "b-1": 12,
+          "b-2": 12
+        },
+        "service-c": {
+          "c-1": 12,
+          "c-2": 12
+        }
+      },
+      "converged_in_s": 2.172
+    },
+    "short_deadlines": {
+      "requests": 100,
+      "concurrency": 8,
+      "workload": "light",
+      "warmup_requests": 0,
+      "warmup_elapsed_s": 0.08,
+      "elapsed_s": 0.119,
+      "codes": {
+        "DEADLINE_EXCEEDED": 100
+      },
+      "successful_rps": 0.0,
+      "successful_after_client_timeout": 0,
+      "verified_proxy_overflow_rejections": 0,
+      "max_client_event_loop_lag_ms": 11.0,
+      "max_successful_server_duration_ms": null,
+      "timing_samples": [],
+      "failure_samples": [
+        {
+          "code": "DEADLINE_EXCEEDED",
+          "details": "Deadline Exceeded",
+          "metadata": {}
+        },
+        {
+          "code": "DEADLINE_EXCEEDED",
+          "details": "downstream duration timeout",
+          "metadata": {
+            "date": "Wed, 28 Oct 2026 14:33:58 GMT",
+            "server": "envoy"
+          }
+        }
+      ],
+      "success_latency_ms": {
+        "p50": null,
+        "p95": null,
+        "p99": null
+      },
+      "instance_visits": {}
+    },
+    "after_deadline_recovery": {
+      "counts": {
+        "service-a": {
+          "a-2": 12,
+          "a-1": 12
+        },
+        "service-b": {
+          "b-2": 12,
+          "b-1": 12
+        },
+        "service-c": {
+          "c-2": 12,
+          "c-1": 12
+        }
+      },
+      "converged_in_s": 2.219
+    }
+  },
+  "release_sha256": "80857261bfb6b4d962650bdf767bf140320aff6fe17248aa697732ef652dc963",
+  "operator_state": "completed",
+  "vm3_may_be_powered_off": false,
+  "finished_unix": 1793198048.6636896,
+  "resource_policy": "retain the named three-VM lab; restore faults; do not delete cloud VMs/volumes"
+}

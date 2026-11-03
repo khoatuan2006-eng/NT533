@@ -1,0 +1,23 @@
+{
+  "profile": {
+    "performance": {
+      "raft_multiplier": 5
+    },
+    "limits": {
+      "rpc_client_timeout": "2s"
+    }
+  },
+  "passed": true,
+  "trials": [
+    {
+      "leader": "consul-3",
+      "fault_started_unix_s": 1792991277.310312,
+      "health_convergence_s": 12.797,
+      "codes": {
+        "OK": 3335
+      },
+      "late_ok": 0
+    }
+  ],
+  "cleanup": "passed"
+}

@@ -5,26 +5,38 @@ build-backend = "hatchling.build"
 [project]
 name = "grpc-lb"
 version = "0.1.0"
-description = "gRPC client-side load balancing experiment — M1 foundation"
+description = "Distributed gRPC workload services with Envoy ingress and xDS lookaside load balancing"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin runtime và tools cùng một minor version để sinh proto tái lập được.
+    # Pin runtime và tools cùng version đã kiểm chứng để sinh proto tái lập được.
     # Nếu muốn nâng cấp: đổi cả 3 grpcio* cùng lúc, rồi chạy scripts/gen_proto.py
-    "grpcio>=1.71.2,<1.72",
-    "grpcio-health-checking>=1.71.2,<1.72",
-    # protobuf: grpcio-health-checking 1.71.2 yêu cầu >=5.26.1,<6.0
-    # Mã sinh hiện dùng Protobuf 5.29.0; runtime phải bằng hoặc mới hơn.
-    "protobuf>=5.29.0,<6",
+    "grpcio==1.84.0",
+    "grpcio-health-checking==1.84.0",
+    # protobuf: grpcio-health-checking 1.84.0 yêu cầu >=7.35.1,<8.0
+    # Mã sinh hiện dùng Protobuf 7.35.1; runtime phải bằng hoặc mới hơn.
+    "protobuf==7.36.2",
+    "xds-protos==1.84.0",
+    "httpx==0.28.1",
 ]
 
+[project.scripts]
+grpc-lb-service = "grpc_lb.microservices:main"
+grpc-lb-controlplane = "grpc_lb.controlplane.__main__:main"
+
 [project.optional-dependencies]
+cloud = [
+    # Operator tooling only; credentials never enter container images/releases.
+    "requests>=2.32,<3",
+    "PyYAML>=6,<7",
+]
 dev = [
     # grpcio-tools PHẢI cùng version với grpcio runtime để sinh code tương thích
-    "grpcio-tools>=1.71.2,<1.72",
+    "grpcio-tools==1.84.0",
     # Testing
     "pytest>=7",
     "pytest-asyncio>=0.23",
+    "ruff==0.17.2",
 ]
 
 # -- Hatch build config -------------------------------------------------------
@@ -48,9 +60,17 @@ testpaths = ["tests"]
 #       --grpc_python_out=src/grpc_lb/generated \
 #       api/workload.proto
 #
-# Sau khi sinh: workload_pb2_grpc.py sẽ có GRPC_GENERATED_VERSION='1.71.2'
-# phù hợp với grpcio>=1.71.2 đã khai báo ở trên.
+# Sau khi sinh: workload_pb2_grpc.py sẽ có GRPC_GENERATED_VERSION='1.84.0'
+# phù hợp với grpcio==1.84.0 đã khai báo ở trên.
 [tool.grpc]
 proto_dir = "api"
 out_dir = "src/grpc_lb/generated"
-proto_files = ["workload.proto"]
+proto_files = ["workload.proto", "processing.proto"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 110
+extend-exclude = ["src/grpc_lb/generated", "results"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

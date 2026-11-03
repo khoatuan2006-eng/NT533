@@ -16,32 +16,11 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-from pathlib import Path
 import sys
-import time
-from typing import Any
-
-# Tự động nạp thư mục src vào sys.path để có thể chạy script trực tiếp từ bất kỳ thư mục nào
-_repo_root = Path(__file__).resolve().parent.parent
-_src_dir = str(_repo_root / "src")
-if _src_dir not in sys.path:
-    sys.path.insert(0, _src_dir)
-
-# Đảm bảo console Windows in được tiếng Việt UTF-8 không bị lỗi charmap
-if sys.stdout and hasattr(sys.stdout, "reconfigure"):
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
-if sys.stderr and hasattr(sys.stderr, "reconfigure"):
-    try:
-        sys.stderr.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
-
+from pathlib import Path
 
 import grpc
-from grpc.health.v1 import health, health_pb2, health_pb2_grpc
+from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 
 from grpc_lb.client import WorkloadClient
 from grpc_lb.generated import workload_pb2, workload_pb2_grpc
@@ -50,15 +29,14 @@ from grpc_lb.summarize import (
     AggregatedSummary,
     RunSummary,
     aggregate_runs,
-    format_summary_table,
     summarize_file,
 )
 from grpc_lb.telemetry import TelemetryWriter
 
-
 # ---------------------------------------------------------------------------
 # Cụm Mock Server Cục bộ (Hỗ trợ chạy test độc lập không cần Docker)
 # ---------------------------------------------------------------------------
+
 
 class _MockWorkloadServicer(workload_pb2_grpc.WorkloadServiceServicer):
     def __init__(self, backend_id: str, delay_s: float = 0.0) -> None:
@@ -119,6 +97,7 @@ class LocalMockCluster:
 # Logic Điều phối Benchmark
 # ---------------------------------------------------------------------------
 
+
 async def run_single_run(
     backend_configs: list[dict[str, str]],
     policy: str,
@@ -140,7 +119,7 @@ async def run_single_run(
             await asyncio.sleep(0.1)
 
             generator = WorkloadGenerator(client=client, telemetry=telemetry)
-            report = await generator.run(config=config, run_id=run_id)
+            await generator.run(config=config, run_id=run_id)
 
     # Đọc lại file JSONL và tính toán các chỉ số thống kê
     summary = summarize_file(jsonl_path)
@@ -160,9 +139,9 @@ async def run_policy_benchmark(
     results_dir: Path,
 ) -> tuple[AggregatedSummary, list[RunSummary]]:
     """Chạy lặp lại N lần cho 1 chính sách (policy) và tổng hợp kết quả."""
-    print(f"\n============================================================")
+    print("\n============================================================")
     print(f" BẮT ĐẦU CHÍNH SÁCH: {policy.upper()} ({repetitions} LẦN LẶP)")
-    print(f"============================================================")
+    print("============================================================")
 
     summaries: list[RunSummary] = []
     for rep in range(1, repetitions + 1):
@@ -187,22 +166,22 @@ def generate_comparison_table(
 ) -> str:
     """Tạo bảng so sánh Markdown trực diện giữa Round Robin và Least Request."""
     lines = [
-        f"# BẢNG SO SÁNH HIỆU NĂNG: ROUND ROBIN VS LEAST REQUEST",
+        "# BẢNG SO SÁNH HIỆU NĂNG: ROUND ROBIN VS LEAST REQUEST",
         f"**Kịch bản tải:** `{workload_name}` | **Số lần lặp lại:** `{rr_agg.runs_count}`",
-        f"",
-        f"| Tiêu chí đánh giá | Round Robin | Least Request | Chênh lệch (LR vs RR) |",
-        f"| :--- | :---: | :---: | :---: |",
+        "",
+        "| Tiêu chí đánh giá | Round Robin | Least Request | Chênh lệch (LR vs RR) |",
+        "| :--- | :---: | :---: | :---: |",
         f"| **Thông lượng (Throughput)** | `{rr_agg.mean_throughput_rps} ± {rr_agg.std_throughput_rps}` req/s | `{lr_agg.mean_throughput_rps} ± {lr_agg.std_throughput_rps}` req/s | {lr_agg.mean_throughput_rps - rr_agg.mean_throughput_rps:+.2f} req/s |",
         f"| **Độ trễ p50 (Median)** | `{rr_agg.mean_p50_latency_ms}` ms | `{lr_agg.mean_p50_latency_ms}` ms | {lr_agg.mean_p50_latency_ms - rr_agg.mean_p50_latency_ms:+.3f} ms |",
         f"| **Độ trễ p95** | `{rr_agg.mean_p95_latency_ms}` ms | `{lr_agg.mean_p95_latency_ms}` ms | {lr_agg.mean_p95_latency_ms - rr_agg.mean_p95_latency_ms:+.3f} ms |",
         f"| **Độ trễ p99 (Đuôi trễ)** | `{rr_agg.mean_p99_latency_ms}` ms | `{lr_agg.mean_p99_latency_ms}` ms | {lr_agg.mean_p99_latency_ms - rr_agg.mean_p99_latency_ms:+.3f} ms |",
         f"| **Tỷ lệ thành công (OK)** | `{rr_agg.mean_ok_rate_pct}%` | `{lr_agg.mean_ok_rate_pct}%` | {lr_agg.mean_ok_rate_pct - rr_agg.mean_ok_rate_pct:+.2f}% |",
         f"| **Tỷ lệ Timeout** | `{rr_agg.mean_timeout_rate_pct}%` | `{lr_agg.mean_timeout_rate_pct}%` | {lr_agg.mean_timeout_rate_pct - rr_agg.mean_timeout_rate_pct:+.2f}% |",
-        f"",
-        f"### Phân bố Request theo Replica (Tổng hợp qua tất cả các lần chạy):",
-        f"",
-        f"| Replica | Round Robin (Số request) | Least Request (Số request) |",
-        f"| :--- | :---: | :---: |",
+        "",
+        "### Phân bố Request theo Replica (Tổng hợp qua tất cả các lần chạy):",
+        "",
+        "| Replica | Round Robin (Số request) | Least Request (Số request) |",
+        "| :--- | :---: | :---: |",
     ]
 
     all_keys = sorted(
@@ -221,6 +200,7 @@ def generate_comparison_table(
 # ---------------------------------------------------------------------------
 # Hàm Main CLI
 # ---------------------------------------------------------------------------
+
 
 async def async_main(args: argparse.Namespace) -> None:
     workload_path = Path(args.workload)
@@ -267,11 +247,7 @@ async def async_main(args: argparse.Namespace) -> None:
         print(f">> Sử dụng backends từ {backends_path}: {backend_configs}")
 
     try:
-        policies_to_run = (
-            ["round_robin", "least_request"]
-            if args.policy == "both"
-            else [args.policy]
-        )
+        policies_to_run = ["round_robin", "least_request"] if args.policy == "both" else [args.policy]
 
         aggregated_results: dict[str, AggregatedSummary] = {}
         for pol in policies_to_run:
@@ -305,9 +281,11 @@ async def async_main(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Script Benchmark cân bằng tải gRPC phía client (M1)"
-    )
+    for stream in (sys.stdout, sys.stderr):
+        if stream is not None and hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
+
+    parser = argparse.ArgumentParser(description="Script Benchmark cân bằng tải gRPC phía client (M1)")
     parser.add_argument(
         "--workload",
         type=str,

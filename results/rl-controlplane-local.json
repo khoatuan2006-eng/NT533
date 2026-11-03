@@ -1,0 +1,123 @@
+{
+  "experiment": "real-grpc-local-q-learning",
+  "seed": 42,
+  "records": [
+    {
+      "window": 0,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "one": 18,
+        "two": 22
+      },
+      "errors": 0,
+      "p95_ms": 32.00000000651926
+    },
+    {
+      "window": 1,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "one": 24,
+        "two": 16
+      },
+      "errors": 0,
+      "p95_ms": 47.00000000593718
+    },
+    {
+      "window": 2,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "one": 12,
+        "two": 28
+      },
+      "errors": 0,
+      "p95_ms": 61.99999999080319
+    },
+    {
+      "window": 3,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "one": 22,
+        "two": 18
+      },
+      "errors": 0,
+      "p95_ms": 47.00000000593718
+    },
+    {
+      "window": 4,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "one": 19,
+        "two": 21
+      },
+      "errors": 0,
+      "p95_ms": 47.00000000593718
+    },
+    {
+      "window": 5,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "two": 21,
+        "one": 19
+      },
+      "errors": 0,
+      "p95_ms": 47.00000000593718
+    },
+    {
+      "window": 6,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "one": 17,
+        "two": 23
+      },
+      "errors": 0,
+      "p95_ms": 31.999999991967343
+    },
+    {
+      "window": 7,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "one": 15,
+        "two": 25
+      },
+      "errors": 0,
+      "p95_ms": 31.999999991967343
+    }
+  ],
+  "q": [
+    {
+      "state": [
+        0,
+        5
+      ],
+      "values": [
+        0.0,
+        1.8564304699175513,
+        0.0
+      ]
+    }
+  ]
+}

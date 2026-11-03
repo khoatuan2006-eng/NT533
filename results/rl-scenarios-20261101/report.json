@@ -1,0 +1,563 @@
+{
+  "parameters": {
+    "model": "results/rl-convergence-balanced-20261101/model-7.json",
+    "output_dir": "results/rl-scenarios-20261101",
+    "windows": 8,
+    "requests": 40,
+    "concurrency": 8
+  },
+  "rows": [
+    {
+      "scenario": "equal",
+      "mode": "baseline",
+      "windows": 6,
+      "fallback": false,
+      "offered": 240,
+      "errors": 0,
+      "mean_ms": 30.033333333324208,
+      "p95_ms": 47.000000000025466,
+      "p99_ms": 47.000000000025466,
+      "weights": [
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ]
+      ],
+      "raw": "equal-baseline.json"
+    },
+    {
+      "scenario": "equal",
+      "mode": "rl",
+      "windows": 6,
+      "fallback": false,
+      "offered": 240,
+      "errors": 0,
+      "mean_ms": 30.945833333337685,
+      "p95_ms": 47.000000000025466,
+      "p99_ms": 61.99999999989814,
+      "weights": [
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          5,
+          5
+        ]
+      ],
+      "raw": "equal-rl.json"
+    },
+    {
+      "scenario": "equal",
+      "mode": "rule",
+      "windows": 6,
+      "fallback": false,
+      "offered": 240,
+      "errors": 0,
+      "mean_ms": 30.062499999996817,
+      "p95_ms": 47.000000000025466,
+      "p99_ms": 61.99999999989814,
+      "weights": [
+        [
+          5,
+          5
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          5,
+          5
+        ]
+      ],
+      "raw": "equal-rule.json"
+    },
+    {
+      "scenario": "unequal",
+      "mode": "baseline",
+      "windows": 6,
+      "fallback": false,
+      "offered": 240,
+      "errors": 0,
+      "mean_ms": 33.87500000000424,
+      "p95_ms": 61.99999999989814,
+      "p99_ms": 77.99999999997453,
+      "weights": [
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ]
+      ],
+      "raw": "unequal-baseline.json"
+    },
+    {
+      "scenario": "unequal",
+      "mode": "rl",
+      "windows": 6,
+      "fallback": false,
+      "offered": 240,
+      "errors": 0,
+      "mean_ms": 41.26249999999724,
+      "p95_ms": 77.99999999997453,
+      "p99_ms": 172.00000000002547,
+      "weights": [
+        [
+          6,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          4
+        ]
+      ],
+      "raw": "unequal-rl.json"
+    },
+    {
+      "scenario": "unequal",
+      "mode": "rule",
+      "windows": 6,
+      "fallback": false,
+      "offered": 240,
+      "errors": 0,
+      "mean_ms": 32.2291666666672,
+      "p95_ms": 47.000000000025466,
+      "p99_ms": 61.99999999989814,
+      "weights": [
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          4
+        ]
+      ],
+      "raw": "unequal-rule.json"
+    },
+    {
+      "scenario": "swap",
+      "mode": "baseline",
+      "windows": 6,
+      "fallback": false,
+      "offered": 240,
+      "errors": 0,
+      "mean_ms": 39.37499999999735,
+      "p95_ms": 63.00000000010186,
+      "p99_ms": 77.99999999997453,
+      "weights": [
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ]
+      ],
+      "raw": "swap-baseline.json"
+    },
+    {
+      "scenario": "swap",
+      "mode": "rl",
+      "windows": 6,
+      "fallback": false,
+      "offered": 240,
+      "errors": 0,
+      "mean_ms": 34.233333333331,
+      "p95_ms": 47.000000000025466,
+      "p99_ms": 61.99999999989814,
+      "weights": [
+        [
+          6,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          3,
+          7
+        ]
+      ],
+      "raw": "swap-rl.json"
+    },
+    {
+      "scenario": "swap",
+      "mode": "rule",
+      "windows": 6,
+      "fallback": false,
+      "offered": 240,
+      "errors": 0,
+      "mean_ms": 34.212500000006685,
+      "p95_ms": 61.99999999989814,
+      "p99_ms": 63.00000000010186,
+      "weights": [
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          7,
+          3
+        ],
+        [
+          7,
+          3
+        ],
+        [
+          7,
+          3
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          4
+        ]
+      ],
+      "raw": "swap-rule.json"
+    },
+    {
+      "scenario": "saturated",
+      "mode": "baseline",
+      "windows": 6,
+      "fallback": false,
+      "offered": 240,
+      "errors": 1,
+      "mean_ms": 41.82426778242337,
+      "p95_ms": 77.99999999997453,
+      "p99_ms": 94.00000000005093,
+      "weights": [
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ]
+      ],
+      "raw": "saturated-baseline.json"
+    },
+    {
+      "scenario": "saturated",
+      "mode": "rl",
+      "windows": 6,
+      "fallback": false,
+      "offered": 240,
+      "errors": 4,
+      "mean_ms": 43.44915254237633,
+      "p95_ms": 108.9999999999236,
+      "p99_ms": 139.99999999987267,
+      "weights": [
+        [
+          6,
+          4
+        ],
+        [
+          7,
+          3
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          7,
+          3
+        ]
+      ],
+      "raw": "saturated-rl.json"
+    },
+    {
+      "scenario": "saturated",
+      "mode": "rule",
+      "windows": 6,
+      "fallback": false,
+      "offered": 240,
+      "errors": 6,
+      "mean_ms": 35.3846153846143,
+      "p95_ms": 47.000000000025466,
+      "p99_ms": 77.99999999997453,
+      "weights": [
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          7,
+          3
+        ],
+        [
+          7,
+          3
+        ],
+        [
+          7,
+          3
+        ],
+        [
+          7,
+          3
+        ]
+      ],
+      "raw": "saturated-rule.json"
+    }
+  ]
+}

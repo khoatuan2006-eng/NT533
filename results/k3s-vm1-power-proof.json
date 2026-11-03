@@ -1,0 +1,10 @@
+{
+  "observed_unix_s": 1793197358.245525,
+  "server": {
+    "id": "50ffce03-5bfc-4137-90aa-a9960f8a09c7",
+    "name": "k3s-server",
+    "status": "SHUTOFF",
+    "OS-EXT-STS:power_state": 4,
+    "OS-EXT-STS:task_state": "powering-on"
+  }
+}

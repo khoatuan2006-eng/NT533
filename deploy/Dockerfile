@@ -31,9 +31,11 @@ COPY pyproject.toml ./
 
 # Cài đúng runtime dependencies đồng bộ với pyproject.toml
 RUN pip install --no-cache-dir \
-    "grpcio>=1.71.2,<1.72" \
-    "grpcio-health-checking>=1.71.2,<1.72" \
-    "protobuf>=5.29.0,<6"
+    "grpcio==1.84.0" \
+    "grpcio-health-checking==1.84.0" \
+    "protobuf==7.36.2" \
+    "xds-protos==1.84.0" \
+    "httpx==0.28.1"
 
 # ── Copy source ───────────────────────────────────────────────────────────────
 COPY api/            ./api/

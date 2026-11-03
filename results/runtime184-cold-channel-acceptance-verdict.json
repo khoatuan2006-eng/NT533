@@ -1,0 +1,11 @@
+{
+  "functional_checks_passed": false,
+  "late_successes_by_stage": {
+    "initial_graph": 0,
+    "baseline": 0,
+    "heavy": 0,
+    "bounded_stress": 0
+  },
+  "client_wall_deadline_accepted": true,
+  "overall_accepted": false
+}

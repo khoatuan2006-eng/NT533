@@ -1,0 +1,45 @@
+{
+  "services": {
+    "probe": {
+      "image": "loadbalance-deadline-probe:local",
+      "build": {
+        "context": "/mnt/d/LoadBalance",
+        "dockerfile": "deploy/Dockerfile"
+      },
+      "command": [
+        "python",
+        "/app/scripts/deadline_probe.py",
+        "--serve",
+        "--address",
+        "[::]:50051"
+      ],
+      "volumes": [
+        "/mnt/d/LoadBalance/scripts:/app/scripts:ro"
+      ],
+      "ports": [
+        "127.0.0.1:50251:50051"
+      ]
+    },
+    "ingress": {
+      "image": "envoyproxy/envoy:v1.35.5",
+      "command": [
+        "-c",
+        "/etc/envoy/envoy.yaml",
+        "--concurrency",
+        "2",
+        "--log-level",
+        "warning"
+      ],
+      "volumes": [
+        "/mnt/d/LoadBalance/results/deadline-lab-grpc184-both/envoy.yaml:/etc/envoy/envoy.yaml:ro"
+      ],
+      "ports": [
+        "127.0.0.1:50250:50050",
+        "127.0.0.1:50291:9901"
+      ],
+      "depends_on": [
+        "probe"
+      ]
+    }
+  }
+}

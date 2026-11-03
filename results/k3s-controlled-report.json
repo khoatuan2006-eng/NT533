@@ -1,0 +1,458 @@
+{
+  "heavy/50.0/static": {
+    "trials": [
+      {
+        "scheduled": 1000,
+        "attempted": 1000,
+        "successful": 1000,
+        "codes": {
+          "OK": 1000
+        },
+        "successful_rps_offered_window": 50.0,
+        "successful_rps_elapsed": 49.53179501149694,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 145.46950000112702,
+          "p95": 208.51819999916188,
+          "p99": 243.9133000007132
+        },
+        "all_rpc_latency_ms": {
+          "p50": 145.46950000112702,
+          "p95": 208.51819999916188,
+          "p99": 243.9133000007132
+        },
+        "schedule_lag_ms_p99": 22.60109999973814,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      },
+      {
+        "scheduled": 1000,
+        "attempted": 1000,
+        "successful": 1000,
+        "codes": {
+          "OK": 1000
+        },
+        "successful_rps_offered_window": 50.0,
+        "successful_rps_elapsed": 49.54801753377728,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 141.86119999976654,
+          "p95": 201.44540000001143,
+          "p99": 223.14790000018547
+        },
+        "all_rpc_latency_ms": {
+          "p50": 141.86119999976654,
+          "p95": 201.44540000001143,
+          "p99": 223.14790000018547
+        },
+        "schedule_lag_ms_p99": 18.897399999040942,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      }
+    ],
+    "passed": true
+  },
+  "heavy/50.0/xds": {
+    "trials": [
+      {
+        "scheduled": 1000,
+        "attempted": 1000,
+        "successful": 1000,
+        "codes": {
+          "OK": 1000
+        },
+        "successful_rps_offered_window": 50.0,
+        "successful_rps_elapsed": 49.575088938208246,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 138.5487000006833,
+          "p95": 196.56710000163002,
+          "p99": 229.38559999965946
+        },
+        "all_rpc_latency_ms": {
+          "p50": 138.5487000006833,
+          "p95": 196.56710000163002,
+          "p99": 229.38559999965946
+        },
+        "schedule_lag_ms_p99": 20.649699998394055,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      },
+      {
+        "scheduled": 1000,
+        "attempted": 1000,
+        "successful": 1000,
+        "codes": {
+          "OK": 1000
+        },
+        "successful_rps_offered_window": 50.0,
+        "successful_rps_elapsed": 49.63322904978319,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 139.15959999940242,
+          "p95": 194.182200000796,
+          "p99": 227.83519999939017
+        },
+        "all_rpc_latency_ms": {
+          "p50": 139.15959999940242,
+          "p95": 194.182200000796,
+          "p99": 227.83519999939017
+        },
+        "schedule_lag_ms_p99": 20.68559999919728,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      }
+    ],
+    "passed": true
+  },
+  "heavy/150.0/static": {
+    "trials": [
+      {
+        "scheduled": 3000,
+        "attempted": 3000,
+        "successful": 3000,
+        "codes": {
+          "OK": 3000
+        },
+        "successful_rps_offered_window": 150.0,
+        "successful_rps_elapsed": 148.87563685089575,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 143.11050000105752,
+          "p95": 188.42319999930623,
+          "p99": 215.9603000000061
+        },
+        "all_rpc_latency_ms": {
+          "p50": 143.11050000105752,
+          "p95": 188.42319999930623,
+          "p99": 215.9603000000061
+        },
+        "schedule_lag_ms_p99": 19.370466666682518,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      },
+      {
+        "scheduled": 3000,
+        "attempted": 3000,
+        "successful": 3000,
+        "codes": {
+          "OK": 3000
+        },
+        "successful_rps_offered_window": 150.0,
+        "successful_rps_elapsed": 148.64077671345404,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 140.8888999994815,
+          "p95": 182.91040000076464,
+          "p99": 201.1702999989211
+        },
+        "all_rpc_latency_ms": {
+          "p50": 140.8888999994815,
+          "p95": 182.91040000076464,
+          "p99": 201.1702999989211
+        },
+        "schedule_lag_ms_p99": 19.88326666733542,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      }
+    ],
+    "passed": true
+  },
+  "heavy/150.0/xds": {
+    "trials": [
+      {
+        "scheduled": 3000,
+        "attempted": 3000,
+        "successful": 3000,
+        "codes": {
+          "OK": 3000
+        },
+        "successful_rps_offered_window": 150.0,
+        "successful_rps_elapsed": 148.688456299087,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 142.28250000087428,
+          "p95": 187.42460000066785,
+          "p99": 206.653200000801
+        },
+        "all_rpc_latency_ms": {
+          "p50": 142.28250000087428,
+          "p95": 187.42460000066785,
+          "p99": 206.653200000801
+        },
+        "schedule_lag_ms_p99": 18.105000000652183,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      },
+      {
+        "scheduled": 3000,
+        "attempted": 3000,
+        "successful": 3000,
+        "codes": {
+          "OK": 3000
+        },
+        "successful_rps_offered_window": 150.0,
+        "successful_rps_elapsed": 148.66570743587607,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 147.73830000012822,
+          "p95": 217.29919999961567,
+          "p99": 299.72389999966254
+        },
+        "all_rpc_latency_ms": {
+          "p50": 147.73830000012822,
+          "p95": 217.29919999961567,
+          "p99": 299.72389999966254
+        },
+        "schedule_lag_ms_p99": 19.744000000208928,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      }
+    ],
+    "passed": true
+  },
+  "light/50.0/static": {
+    "trials": [
+      {
+        "scheduled": 1000,
+        "attempted": 1000,
+        "successful": 1000,
+        "codes": {
+          "OK": 1000
+        },
+        "successful_rps_offered_window": 50.0,
+        "successful_rps_elapsed": 49.648414011450356,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 111.98929999954998,
+          "p95": 175.2411999987089,
+          "p99": 214.2740999988746
+        },
+        "all_rpc_latency_ms": {
+          "p50": 111.98929999954998,
+          "p95": 175.2411999987089,
+          "p99": 214.2740999988746
+        },
+        "schedule_lag_ms_p99": 21.127700000725724,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      },
+      {
+        "scheduled": 1000,
+        "attempted": 1000,
+        "successful": 1000,
+        "codes": {
+          "OK": 1000
+        },
+        "successful_rps_offered_window": 50.0,
+        "successful_rps_elapsed": 49.8016224581713,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 111.8372000000818,
+          "p95": 175.71940000016184,
+          "p99": 209.69160000095144
+        },
+        "all_rpc_latency_ms": {
+          "p50": 111.8372000000818,
+          "p95": 175.71940000016184,
+          "p99": 209.69160000095144
+        },
+        "schedule_lag_ms_p99": 21.19420000039096,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      }
+    ],
+    "passed": true
+  },
+  "light/50.0/xds": {
+    "trials": [
+      {
+        "scheduled": 1000,
+        "attempted": 1000,
+        "successful": 1000,
+        "codes": {
+          "OK": 1000
+        },
+        "successful_rps_offered_window": 50.0,
+        "successful_rps_elapsed": 49.62764502010584,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 106.61679999975604,
+          "p95": 170.45929999949294,
+          "p99": 187.74690000100236
+        },
+        "all_rpc_latency_ms": {
+          "p50": 106.61679999975604,
+          "p95": 170.45929999949294,
+          "p99": 187.74690000100236
+        },
+        "schedule_lag_ms_p99": 19.789000000455914,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      },
+      {
+        "scheduled": 1000,
+        "attempted": 1000,
+        "successful": 1000,
+        "codes": {
+          "OK": 1000
+        },
+        "successful_rps_offered_window": 50.0,
+        "successful_rps_elapsed": 49.79122117735197,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 110.29179999968619,
+          "p95": 173.8308000003599,
+          "p99": 224.27930000048946
+        },
+        "all_rpc_latency_ms": {
+          "p50": 110.29179999968619,
+          "p95": 173.8308000003599,
+          "p99": 224.27930000048946
+        },
+        "schedule_lag_ms_p99": 21.72339999968287,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      }
+    ],
+    "passed": true
+  },
+  "light/150.0/static": {
+    "trials": [
+      {
+        "scheduled": 3000,
+        "attempted": 3000,
+        "successful": 3000,
+        "codes": {
+          "OK": 3000
+        },
+        "successful_rps_offered_window": 150.0,
+        "successful_rps_elapsed": 148.88708171953988,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 148.31890000095882,
+          "p95": 343.0960000005143,
+          "p99": 472.40380000039295
+        },
+        "all_rpc_latency_ms": {
+          "p50": 148.31890000095882,
+          "p95": 343.0960000005143,
+          "p99": 472.40380000039295
+        },
+        "schedule_lag_ms_p99": 28.3447666677481,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      },
+      {
+        "scheduled": 3000,
+        "attempted": 3000,
+        "successful": 3000,
+        "codes": {
+          "OK": 3000
+        },
+        "successful_rps_offered_window": 150.0,
+        "successful_rps_elapsed": 148.66712783870375,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 115.52389999997104,
+          "p95": 169.49770000064746,
+          "p99": 190.07290000081412
+        },
+        "all_rpc_latency_ms": {
+          "p50": 115.52389999997104,
+          "p95": 169.49770000064746,
+          "p99": 190.07290000081412
+        },
+        "schedule_lag_ms_p99": 18.393033334480613,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      }
+    ],
+    "passed": true
+  },
+  "light/150.0/xds": {
+    "trials": [
+      {
+        "scheduled": 3000,
+        "attempted": 3000,
+        "successful": 3000,
+        "codes": {
+          "OK": 3000
+        },
+        "successful_rps_offered_window": 150.0,
+        "successful_rps_elapsed": 149.41184698786768,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 124.61400000029244,
+          "p95": 176.48819999885745,
+          "p99": 188.11010000172246
+        },
+        "all_rpc_latency_ms": {
+          "p50": 124.61400000029244,
+          "p95": 176.48819999885745,
+          "p99": 188.11010000172246
+        },
+        "schedule_lag_ms_p99": 20.758733333035018,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      },
+      {
+        "scheduled": 3000,
+        "attempted": 3000,
+        "successful": 3000,
+        "codes": {
+          "OK": 3000
+        },
+        "successful_rps_offered_window": 150.0,
+        "successful_rps_elapsed": 148.89907818516528,
+        "failure_fraction_including_generator_drops": 0.0,
+        "rpc_error_fraction": 0.0,
+        "valid_load": true,
+        "success_latency_ms": {
+          "p50": 123.5990999994101,
+          "p95": 175.9961999996449,
+          "p99": 202.42640000105894
+        },
+        "all_rpc_latency_ms": {
+          "p50": 123.5990999994101,
+          "p95": 175.9961999996449,
+          "p99": 202.42640000105894
+        },
+        "schedule_lag_ms_p99": 17.276033332649376,
+        "observed_recovery_s": null,
+        "recovery_stable_window_s": 5
+      }
+    ],
+    "passed": true
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "experiment": "real-grpc-local-q-learning",
+  "baseline": true,
+  "seed": 42,
+  "records": [
+    {
+      "window": 0,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "two": 20,
+        "one": 20
+      },
+      "errors": 0,
+      "p95_ms": 31.999999991967343
+    },
+    {
+      "window": 1,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "two": 20,
+        "one": 20
+      },
+      "errors": 0,
+      "p95_ms": 31.000000002677552
+    },
+    {
+      "window": 2,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "two": 20,
+        "one": 20
+      },
+      "errors": 0,
+      "p95_ms": 32.00000000651926
+    },
+    {
+      "window": 3,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "two": 20,
+        "one": 20
+      },
+      "errors": 0,
+      "p95_ms": 31.999999991967343
+    },
+    {
+      "window": 4,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "two": 20,
+        "one": 20
+      },
+      "errors": 0,
+      "p95_ms": 32.00000000651926
+    },
+    {
+      "window": 5,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "two": 20,
+        "one": 20
+      },
+      "errors": 0,
+      "p95_ms": 31.999999991967343
+    },
+    {
+      "window": 6,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "two": 20,
+        "one": 20
+      },
+      "errors": 0,
+      "p95_ms": 31.999999991967343
+    },
+    {
+      "window": 7,
+      "weights_sorted_addresses": [
+        5,
+        5
+      ],
+      "counts": {
+        "two": 20,
+        "one": 20
+      },
+      "errors": 0,
+      "p95_ms": 32.00000000651926
+    }
+  ],
+  "q": []
+}

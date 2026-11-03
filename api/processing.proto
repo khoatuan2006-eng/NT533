@@ -1,0 +1,20 @@
+syntax = "proto3";
+package processing.v1;
+
+// Generic simulated workload; topology and behavior live in configuration.
+service ProcessingService {
+  rpc Execute(TaskRequest) returns (TaskResult);
+}
+message TaskRequest {
+  string request_id = 1;
+  string target_service = 2;
+  string workload = 3; // light or heavy
+  repeated string visited_services = 4;
+  uint32 remaining_hops = 5;
+}
+message TaskResult {
+  string request_id = 1;
+  string service_id = 2;
+  string instance_id = 3;
+  repeated TaskResult children = 4;
+}

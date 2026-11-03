@@ -1,5 +1,5 @@
 """
-gen_proto.py — Sinh mã Python từ api/workload.proto
+gen_proto.py — Sinh mã Python từ các proto trong api/
 
 Chạy từ gốc repo:
     python scripts/gen_proto.py
@@ -15,7 +15,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).parent.parent.resolve()
 PROTO_DIR = REPO_ROOT / "api"
 OUT_DIR = REPO_ROOT / "src" / "grpc_lb" / "generated"
-PROTO_FILES = ["workload.proto"]
+PROTO_FILES = ["workload.proto", "processing.proto"]
 
 
 def main() -> None:
@@ -38,15 +38,19 @@ def main() -> None:
         sys.exit(result.returncode)
 
     # Fix bare import in generated grpc file (grpcio-tools < 1.72 uses bare imports)
-    grpc_file = OUT_DIR / "workload_pb2_grpc.py"
-    if grpc_file.exists():
+    for proto in PROTO_FILES:
+        module = Path(proto).stem
+        grpc_file = OUT_DIR / f"{module}_pb2_grpc.py"
+        if not grpc_file.exists():
+            continue
         content = grpc_file.read_text(encoding="utf-8")
-        bare = "import workload_pb2 as workload__pb2\n"
+        alias = f"{module}__pb2"
+        bare = f"import {module}_pb2 as {alias}\n"
         relative = (
             "try:\n"
-            "    from . import workload_pb2 as workload__pb2\n"
+            f"    from . import {module}_pb2 as {alias}\n"
             "except ImportError:\n"
-            "    import workload_pb2 as workload__pb2\n"
+            f"    import {module}_pb2 as {alias}\n"
         )
         if bare in content and relative not in content:
             content = content.replace(bare, relative)

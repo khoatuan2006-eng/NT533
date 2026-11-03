@@ -1,10 +1,21 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
-import pytest
 
+import pytest
+from test_client import LocalTestCluster
+
+from grpc_lb.client import WorkloadClient
 from grpc_lb.contracts import CallResult, CallStatus
+from grpc_lb.loadgen import WorkloadConfig, WorkloadGenerator
+from grpc_lb.summarize import (
+    RunSummary,
+    aggregate_runs,
+    compute_percentiles,
+    format_summary_table,
+    summarize_file,
+    summarize_records,
+)
 from grpc_lb.telemetry import TelemetryWriter, read_telemetry, result_to_dict
 
 
@@ -118,16 +129,6 @@ def test_telemetry_writer_context_manager(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 # Unit tests for Summarize module
 # ---------------------------------------------------------------------------
-
-from grpc_lb.summarize import (
-    AggregatedSummary,
-    RunSummary,
-    aggregate_runs,
-    compute_percentiles,
-    format_summary_table,
-    summarize_file,
-    summarize_records,
-)
 
 
 def test_compute_percentiles_accuracy() -> None:
@@ -289,10 +290,6 @@ def test_aggregate_runs() -> None:
 # Unit tests for Load Generator module
 # ---------------------------------------------------------------------------
 
-from grpc_lb.client import WorkloadClient
-from grpc_lb.loadgen import LoadGenReport, WorkloadConfig, WorkloadGenerator
-from test_client import LocalTestCluster
-
 
 def test_workload_config_parsing() -> None:
     cfg = WorkloadConfig.from_file("configs/low.json")
@@ -378,5 +375,3 @@ async def test_loadgen_concurrency_saturation_drop() -> None:
             assert report.total_completed == report.total_dispatched
     finally:
         await cluster.shutdown()
-
-

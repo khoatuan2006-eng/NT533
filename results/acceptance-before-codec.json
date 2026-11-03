@@ -1,0 +1,145 @@
+{
+  "scope": "single-host Docker/Envoy, synthetic asynchronous-delay workload",
+  "started_at_unix": 1792942397.6171196,
+  "stages": {
+    "envoy_config_validation": "passed",
+    "initial_graph": {
+      "service-a": {
+        "a-1": 22,
+        "a-2": 2
+      },
+      "service-b": {
+        "b-1": 12,
+        "b-2": 12
+      },
+      "service-c": {
+        "c-1": 12,
+        "c-2": 12
+      }
+    },
+    "baseline": {
+      "requests": 1000,
+      "concurrency": 32,
+      "workload": "light",
+      "elapsed_s": 1.653,
+      "codes": {
+        "OK": 1000
+      },
+      "successful_rps": 604.79,
+      "success_latency_ms": {
+        "p50": 38.958,
+        "p95": 54.12,
+        "p99": 399.491
+      },
+      "instance_visits": {
+        "a-2": 500,
+        "b-1": 500,
+        "c-1": 500,
+        "a-1": 500,
+        "b-2": 500,
+        "c-2": 500
+      }
+    },
+    "heavy": {
+      "requests": 300,
+      "concurrency": 16,
+      "workload": "heavy",
+      "elapsed_s": 2.582,
+      "codes": {
+        "OK": 300
+      },
+      "successful_rps": 116.18,
+      "success_latency_ms": {
+        "p50": 113.735,
+        "p95": 442.167,
+        "p99": 459.636
+      },
+      "instance_visits": {
+        "a-1": 150,
+        "b-2": 150,
+        "c-2": 150,
+        "a-2": 150,
+        "b-1": 150,
+        "c-1": 150
+      }
+    },
+    "bounded_stress": {
+      "requests": 5000,
+      "concurrency": 64,
+      "workload": "light",
+      "elapsed_s": 19.162,
+      "codes": {
+        "OK": 5000
+      },
+      "successful_rps": 260.94,
+      "success_latency_ms": {
+        "p50": 206.769,
+        "p95": 539.043,
+        "p99": 658.683
+      },
+      "instance_visits": {
+        "a-1": 2500,
+        "b-2": 2500,
+        "c-2": 2500,
+        "a-2": 2500,
+        "b-1": 2500,
+        "c-1": 2500
+      }
+    },
+    "overload": {
+      "requests": 1000,
+      "concurrency": 128,
+      "workload": "heavy",
+      "elapsed_s": 38.613,
+      "codes": {
+        "RESOURCE_EXHAUSTED": 506,
+        "OK": 277,
+        "DEADLINE_EXCEEDED": 134,
+        "UNAVAILABLE": 83
+      },
+      "successful_rps": 7.17,
+      "success_latency_ms": {
+        "p50": 3273.303,
+        "p95": 5535.3,
+        "p99": 6167.021
+      },
+      "instance_visits": {
+        "a-1": 109,
+        "b-1": 140,
+        "c-1": 139,
+        "b-2": 137,
+        "c-2": 138,
+        "a-2": 168
+      },
+      "entry_concurrency_per_instance": 2
+    },
+    "linux_client_overload": {
+      "requests": 1000,
+      "concurrency": 128,
+      "workload": "heavy",
+      "elapsed_s": 1.154,
+      "codes": {
+        "RESOURCE_EXHAUSTED": 954,
+        "OK": 46
+      },
+      "successful_rps": 39.87,
+      "success_latency_ms": {
+        "p50": 236.282,
+        "p95": 382.998,
+        "p99": 387.494
+      },
+      "instance_visits": {
+        "a-2": 24,
+        "b-1": 23,
+        "c-1": 23,
+        "a-1": 22,
+        "b-2": 23,
+        "c-2": 23
+      }
+    }
+  },
+  "passed": false,
+  "error": "Unexpected Windows overload failure: {'RESOURCE_EXHAUSTED': 506, 'OK': 277, 'DEADLINE_EXCEEDED': 134, 'UNAVAILABLE': 83}",
+  "cleanup": "passed",
+  "finished_at_unix": 1792942504.63336
+}

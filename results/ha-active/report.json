@@ -1,0 +1,45 @@
+{
+  "profile": {
+    "performance": {
+      "raft_multiplier": 1
+    },
+    "limits": {
+      "rpc_client_timeout": "2s"
+    }
+  },
+  "controller_mode": "active",
+  "passed": true,
+  "trials": [
+    {
+      "leader": "consul-1",
+      "fault_started_unix_s": 1792992736.2986696,
+      "health_convergence_s": 2.969,
+      "codes": {
+        "OK": 2444
+      },
+      "late_ok": 0
+    },
+    {
+      "leader": "consul-2",
+      "fault_started_unix_s": 1792992809.6904721,
+      "health_convergence_s": 3.047,
+      "codes": {
+        "OK": 2471
+      },
+      "late_ok": 0
+    },
+    {
+      "leader": "consul-1",
+      "fault_started_unix_s": 1792992883.6395142,
+      "health_convergence_s": 2.157,
+      "codes": {
+        "OK": 2471
+      },
+      "late_ok": 0
+    }
+  ],
+  "agent_effective_config": {
+    "RPCClientTimeout": "2s"
+  },
+  "cleanup": "passed"
+}

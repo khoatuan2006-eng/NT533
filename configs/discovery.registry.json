@@ -1,0 +1,4 @@
+{
+  "schema_version": 1,
+  "services": {"service-b": [], "service-c": []}
+}

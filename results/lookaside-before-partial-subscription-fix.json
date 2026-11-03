@@ -1,0 +1,9 @@
+{
+  "scope": "single-host Docker, native Python grpcio 1.84.0 xDS, Envoy ingress",
+  "started_at_unix": 1792984058.703725,
+  "passed": false,
+  "stages": {},
+  "error": "Graph did not converge: <AioRpcError of RPC that terminated with:\n\tstatus = StatusCode.UNAVAILABLE\n\tdetails = \"Dependency: empty address list (LDS resource service-b: does not exist (node ID:loadbalance-workloads))\"\n\tdebug_error_string = \"UNAVAILABLE:Dependency: empty address list (LDS resource service-b: does not exist (node ID:loadbalance-workloads))\"\n>",
+  "cleanup": "passed",
+  "finished_at_unix": 1792984605.7860894
+}

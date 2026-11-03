@@ -9,7 +9,7 @@ from .contracts import CallResult
 
 def result_to_dict(result: CallResult) -> dict[str, Any]:
     """Chuyển đổi đối tượng CallResult thành dictionary chuẩn hóa 10 trường theo M1.md.
-    
+
     Đảm bảo định dạng nhất quán, không tự suy đoán lại trạng thái và tương thích với JSON.
     """
     status_val = result.status.value if hasattr(result.status, "value") else str(result.status)
@@ -29,7 +29,7 @@ def result_to_dict(result: CallResult) -> dict[str, Any]:
 
 class TelemetryWriter:
     """Bộ ghi dữ liệu telemetry ra file JSON Lines (JSONL).
-    
+
     Vai trò:
     - Nhận CallResult từ các đợt phát tải và ghi nối tiếp (append-only) ra file.
     - Tự động tạo thư mục cha nếu chưa tồn tại.
@@ -58,7 +58,7 @@ class TelemetryWriter:
         """Ghi 1 đối tượng CallResult thành 1 dòng JSONL."""
         if self._file is None:
             raise ValueError(f"TelemetryWriter đã bị đóng, không thể ghi vào {self._path}")
-        
+
         data = result_to_dict(result)
         line = json.dumps(data, ensure_ascii=False)
         self._file.write(line + "\n")
@@ -91,7 +91,7 @@ class TelemetryWriter:
 
 def read_telemetry(file_path: str | Path) -> list[dict[str, Any]]:
     """Hàm tiện ích đọc lại toàn bộ file JSONL thành danh sách các dictionary.
-    
+
     Phục vụ cho module summarize.py tổng hợp và cho các bộ unit test.
     Bỏ qua các dòng trống (nếu có).
     """
@@ -109,8 +109,6 @@ def read_telemetry(file_path: str | Path) -> list[dict[str, Any]]:
                 record = json.loads(line)
                 records.append(record)
             except json.JSONDecodeError as exc:
-                raise ValueError(
-                    f"Dòng {line_num} trong file {path} không phải JSON hợp lệ: {exc}"
-                ) from exc
+                raise ValueError(f"Dòng {line_num} trong file {path} không phải JSON hợp lệ: {exc}") from exc
 
     return records

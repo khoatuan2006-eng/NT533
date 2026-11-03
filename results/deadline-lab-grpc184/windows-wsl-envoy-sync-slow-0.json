@@ -1,0 +1,1602 @@
+{
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10",
+  "grpc": "1.84.0",
+  "api": "sync",
+  "profile": "slow",
+  "address": "127.0.0.1:50250",
+  "requests": 128,
+  "concurrency": 32,
+  "timeout_s": 0.05,
+  "codes": {
+    "DEADLINE_EXCEEDED": 128
+  },
+  "late_ok": 0,
+  "elapsed_s": 0.3729883000000882,
+  "p99_all_ms": 86.4374,
+  "max_loop_lag_ms": null,
+  "max_clock_disagreement_ms": 14.656999999999996,
+  "max_creation_ms": 2.0284,
+  "rows": [
+    {
+      "index": 0,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 87.3319,
+      "monotonic_ms": 78.0,
+      "wall_ms": 88.2631,
+      "call_creation_ms": 1.4985,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 1,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 86.4374,
+      "monotonic_ms": 78.0,
+      "wall_ms": 86.2529,
+      "call_creation_ms": 1.5192,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 2,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 62.2051,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 1.3677,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 3,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 80.0554,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.804,
+      "call_creation_ms": 1.3885,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 4,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 78.0933,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.804,
+      "call_creation_ms": 1.1172,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 5,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 80.9869,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.804,
+      "call_creation_ms": 0.9624,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 6,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 73.7109,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.7604,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 7,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 75.0875,
+      "monotonic_ms": 78.0,
+      "wall_ms": 77.0429,
+      "call_creation_ms": 0.8645,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 8,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 81.1122,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.804,
+      "call_creation_ms": 0.7854,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 9,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 80.4562,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.804,
+      "call_creation_ms": 0.7871,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 10,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 71.6195,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.6616,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 11,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 77.2062,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.804,
+      "call_creation_ms": 0.5547,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 12,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 74.3273,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.804,
+      "call_creation_ms": 0.5188,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 13,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 80.6598,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.804,
+      "call_creation_ms": 0.4054,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 14,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 65.5262,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.4459,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 15,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 60.1426,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.4099,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 16,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 67.0733,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.409,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 17,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 61.8832,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.4037,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 18,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 56.2524,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.4873,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 19,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 57.3987,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.5419,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 20,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 70.7685,
+      "monotonic_ms": 78.0,
+      "wall_ms": 77.0429,
+      "call_creation_ms": 0.3779,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 21,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 55.1217,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.4228,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 22,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 77.5985,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.804,
+      "call_creation_ms": 0.4185,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 23,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 62.2356,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.4004,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 24,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 71.2379,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.804,
+      "call_creation_ms": 0.4805,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 25,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 57.7753,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.4516,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 26,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 73.9414,
+      "monotonic_ms": 78.0,
+      "wall_ms": 78.804,
+      "call_creation_ms": 0.4066,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 27,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 64.4158,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.3767,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 28,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 52.3233,
+      "monotonic_ms": 63.0,
+      "wall_ms": 61.2191,
+      "call_creation_ms": 0.4303,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 29,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 60.1826,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.4413,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 30,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 65.7,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.3702,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 31,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 64.5949,
+      "monotonic_ms": 63.0,
+      "wall_ms": 62.2314,
+      "call_creation_ms": 0.2872,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {}
+    },
+    {
+      "index": 32,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 45.2892,
+      "monotonic_ms": 31.0,
+      "wall_ms": 31.8013,
+      "call_creation_ms": 0.3733,
+      "sdk_remaining_at_receive_s": 0.01819896697998047,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 33,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 45.446,
+      "monotonic_ms": 31.0,
+      "wall_ms": 30.789,
+      "call_creation_ms": 0.7125,
+      "sdk_remaining_at_receive_s": 0.0192110538482666,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 34,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 42.4828,
+      "monotonic_ms": 31.0,
+      "wall_ms": 30.789,
+      "call_creation_ms": 0.9771,
+      "sdk_remaining_at_receive_s": 0.0192110538482666,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 35,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 48.133,
+      "monotonic_ms": 46.0,
+      "wall_ms": 46.5369,
+      "call_creation_ms": 1.5281,
+      "sdk_remaining_at_receive_s": 0.0034630298614501953,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 36,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 45.1751,
+      "monotonic_ms": 46.0,
+      "wall_ms": 46.5369,
+      "call_creation_ms": 1.137,
+      "sdk_remaining_at_receive_s": 0.0034630298614501953,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 37,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 39.5393,
+      "monotonic_ms": 31.0,
+      "wall_ms": 30.789,
+      "call_creation_ms": 0.9817,
+      "sdk_remaining_at_receive_s": 0.0192110538482666,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 38,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 39.3379,
+      "monotonic_ms": 31.0,
+      "wall_ms": 30.789,
+      "call_creation_ms": 1.2542,
+      "sdk_remaining_at_receive_s": 0.0192110538482666,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 39,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 39.8676,
+      "monotonic_ms": 31.0,
+      "wall_ms": 30.789,
+      "call_creation_ms": 0.8486,
+      "sdk_remaining_at_receive_s": 0.0192110538482666,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 40,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 38.1009,
+      "monotonic_ms": 31.0,
+      "wall_ms": 30.789,
+      "call_creation_ms": 0.795,
+      "sdk_remaining_at_receive_s": 0.0192110538482666,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 41,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 39.3601,
+      "monotonic_ms": 46.0,
+      "wall_ms": 46.5369,
+      "call_creation_ms": 1.6668,
+      "sdk_remaining_at_receive_s": 0.0034630298614501953,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 42,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 38.7292,
+      "monotonic_ms": 46.0,
+      "wall_ms": 46.5369,
+      "call_creation_ms": 1.6532,
+      "sdk_remaining_at_receive_s": 0.0034630298614501953,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 43,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 34.2956,
+      "monotonic_ms": 31.0,
+      "wall_ms": 30.789,
+      "call_creation_ms": 0.8412,
+      "sdk_remaining_at_receive_s": 0.0192110538482666,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 44,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 32.538,
+      "monotonic_ms": 31.0,
+      "wall_ms": 30.789,
+      "call_creation_ms": 0.9285,
+      "sdk_remaining_at_receive_s": 0.0192110538482666,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 45,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 32.0152,
+      "monotonic_ms": 31.0,
+      "wall_ms": 30.789,
+      "call_creation_ms": 0.4381,
+      "sdk_remaining_at_receive_s": 0.0192110538482666,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 46,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 35.8588,
+      "monotonic_ms": 46.0,
+      "wall_ms": 46.5369,
+      "call_creation_ms": 0.7147,
+      "sdk_remaining_at_receive_s": 0.0034630298614501953,
+      "trailers": {
+        "x-envoy-upstream-service-time": "30",
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 47,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 34.8622,
+      "monotonic_ms": 46.0,
+      "wall_ms": 46.5369,
+      "call_creation_ms": 1.3032,
+      "sdk_remaining_at_receive_s": 0.0034630298614501953,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 48,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 33.7023,
+      "monotonic_ms": 46.0,
+      "wall_ms": 46.5369,
+      "call_creation_ms": 0.9929,
+      "sdk_remaining_at_receive_s": 0.0034630298614501953,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 49,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 43.0985,
+      "monotonic_ms": 31.0,
+      "wall_ms": 38.3858,
+      "call_creation_ms": 0.5457,
+      "sdk_remaining_at_receive_s": 0.011614084243774414,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 50,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 42.4022,
+      "monotonic_ms": 31.0,
+      "wall_ms": 38.3858,
+      "call_creation_ms": 0.4981,
+      "sdk_remaining_at_receive_s": 0.011614084243774414,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 51,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 40.8378,
+      "monotonic_ms": 31.0,
+      "wall_ms": 36.6247,
+      "call_creation_ms": 0.5476,
+      "sdk_remaining_at_receive_s": 0.013375282287597656,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 52,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 43.9058,
+      "monotonic_ms": 31.0,
+      "wall_ms": 36.6247,
+      "call_creation_ms": 1.3775,
+      "sdk_remaining_at_receive_s": 0.013375282287597656,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 53,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 42.446,
+      "monotonic_ms": 31.0,
+      "wall_ms": 36.6247,
+      "call_creation_ms": 1.3899,
+      "sdk_remaining_at_receive_s": 0.013375282287597656,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 54,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 42.3425,
+      "monotonic_ms": 31.0,
+      "wall_ms": 36.6247,
+      "call_creation_ms": 0.6818,
+      "sdk_remaining_at_receive_s": 0.013375282287597656,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 55,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 40.3079,
+      "monotonic_ms": 31.0,
+      "wall_ms": 36.6247,
+      "call_creation_ms": 0.7235,
+      "sdk_remaining_at_receive_s": 0.013375282287597656,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 56,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 40.4227,
+      "monotonic_ms": 31.0,
+      "wall_ms": 36.6247,
+      "call_creation_ms": 0.3635,
+      "sdk_remaining_at_receive_s": 0.013375282287597656,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 57,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 35.8802,
+      "monotonic_ms": 31.0,
+      "wall_ms": 36.6247,
+      "call_creation_ms": 0.5405,
+      "sdk_remaining_at_receive_s": 0.013375282287597656,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 58,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 39.1475,
+      "monotonic_ms": 31.0,
+      "wall_ms": 36.6247,
+      "call_creation_ms": 0.6357,
+      "sdk_remaining_at_receive_s": 0.013375282287597656,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 59,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 38.7785,
+      "monotonic_ms": 31.0,
+      "wall_ms": 36.6247,
+      "call_creation_ms": 0.8938,
+      "sdk_remaining_at_receive_s": 0.013375282287597656,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 60,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 36.519,
+      "monotonic_ms": 31.0,
+      "wall_ms": 36.6247,
+      "call_creation_ms": 0.9535,
+      "sdk_remaining_at_receive_s": 0.013375282287597656,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 61,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 35.0522,
+      "monotonic_ms": 31.0,
+      "wall_ms": 36.6247,
+      "call_creation_ms": 0.6254,
+      "sdk_remaining_at_receive_s": 0.013375282287597656,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 62,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 43.1003,
+      "monotonic_ms": 47.0,
+      "wall_ms": 38.2394,
+      "call_creation_ms": 0.3358,
+      "sdk_remaining_at_receive_s": 0.011760473251342773,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 63,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 43.0191,
+      "monotonic_ms": 47.0,
+      "wall_ms": 38.2394,
+      "call_creation_ms": 0.3884,
+      "sdk_remaining_at_receive_s": 0.011760473251342773,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 64,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 30.5186,
+      "monotonic_ms": 31.0,
+      "wall_ms": 31.4719,
+      "call_creation_ms": 0.482,
+      "sdk_remaining_at_receive_s": 0.018527746200561523,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 65,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 37.8922,
+      "monotonic_ms": 47.0,
+      "wall_ms": 49.2079,
+      "call_creation_ms": 0.6183,
+      "sdk_remaining_at_receive_s": 0.0007917881011962891,
+      "trailers": {
+        "x-envoy-upstream-service-time": "32",
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 66,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 35.4893,
+      "monotonic_ms": 47.0,
+      "wall_ms": 47.1972,
+      "call_creation_ms": 0.66,
+      "sdk_remaining_at_receive_s": 0.002802610397338867,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 67,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 32.886,
+      "monotonic_ms": 31.0,
+      "wall_ms": 31.4719,
+      "call_creation_ms": 0.554,
+      "sdk_remaining_at_receive_s": 0.018527746200561523,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 68,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 32.775,
+      "monotonic_ms": 31.0,
+      "wall_ms": 31.4719,
+      "call_creation_ms": 0.3034,
+      "sdk_remaining_at_receive_s": 0.018527746200561523,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 69,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 32.8159,
+      "monotonic_ms": 31.0,
+      "wall_ms": 31.4719,
+      "call_creation_ms": 0.3156,
+      "sdk_remaining_at_receive_s": 0.018527746200561523,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 70,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 31.756,
+      "monotonic_ms": 31.0,
+      "wall_ms": 31.4719,
+      "call_creation_ms": 0.2212,
+      "sdk_remaining_at_receive_s": 0.018527746200561523,
+      "trailers": {
+        "x-envoy-upstream-service-time": "28",
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 71,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 40.8331,
+      "monotonic_ms": 47.0,
+      "wall_ms": 49.2079,
+      "call_creation_ms": 0.7252,
+      "sdk_remaining_at_receive_s": 0.0007917881011962891,
+      "trailers": {
+        "x-envoy-upstream-service-time": "28",
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 72,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 40.4235,
+      "monotonic_ms": 47.0,
+      "wall_ms": 49.2079,
+      "call_creation_ms": 0.872,
+      "sdk_remaining_at_receive_s": 0.0007917881011962891,
+      "trailers": {
+        "x-envoy-upstream-service-time": "28",
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 73,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 40.8977,
+      "monotonic_ms": 47.0,
+      "wall_ms": 49.2079,
+      "call_creation_ms": 0.9508,
+      "sdk_remaining_at_receive_s": 0.0007917881011962891,
+      "trailers": {
+        "x-envoy-upstream-service-time": "28",
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 74,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 56.1612,
+      "monotonic_ms": 47.0,
+      "wall_ms": 46.7671,
+      "call_creation_ms": 0.4402,
+      "sdk_remaining_at_receive_s": 0.003232717514038086,
+      "trailers": {
+        "x-envoy-upstream-service-time": "43",
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 75,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 56.5404,
+      "monotonic_ms": 47.0,
+      "wall_ms": 46.7671,
+      "call_creation_ms": 0.5057,
+      "sdk_remaining_at_receive_s": 0.003232717514038086,
+      "trailers": {
+        "x-envoy-upstream-service-time": "43",
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 76,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 56.0084,
+      "monotonic_ms": 47.0,
+      "wall_ms": 46.7671,
+      "call_creation_ms": 0.6769,
+      "sdk_remaining_at_receive_s": 0.003232717514038086,
+      "trailers": {
+        "x-envoy-upstream-service-time": "43",
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 77,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 52.8414,
+      "monotonic_ms": 47.0,
+      "wall_ms": 46.7671,
+      "call_creation_ms": 0.4518,
+      "sdk_remaining_at_receive_s": 0.003232717514038086,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 78,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 52.2456,
+      "monotonic_ms": 47.0,
+      "wall_ms": 46.7671,
+      "call_creation_ms": 0.2945,
+      "sdk_remaining_at_receive_s": 0.003232717514038086,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 79,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 50.6694,
+      "monotonic_ms": 47.0,
+      "wall_ms": 46.7671,
+      "call_creation_ms": 0.2325,
+      "sdk_remaining_at_receive_s": 0.003232717514038086,
+      "trailers": {
+        "x-envoy-upstream-service-time": "40",
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 80,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 50.9708,
+      "monotonic_ms": 47.0,
+      "wall_ms": 46.7671,
+      "call_creation_ms": 0.2299,
+      "sdk_remaining_at_receive_s": 0.003232717514038086,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 81,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 52.6188,
+      "monotonic_ms": 63.0,
+      "wall_ms": 55.8912,
+      "call_creation_ms": 0.4519,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 82,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 52.1725,
+      "monotonic_ms": 63.0,
+      "wall_ms": 55.8912,
+      "call_creation_ms": 0.3209,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 83,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 50.7057,
+      "monotonic_ms": 63.0,
+      "wall_ms": 55.8912,
+      "call_creation_ms": 0.4655,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 84,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 50.1201,
+      "monotonic_ms": 63.0,
+      "wall_ms": 55.8912,
+      "call_creation_ms": 0.5893,
+      "sdk_remaining_at_receive_s": 0,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 85,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 49.3655,
+      "monotonic_ms": 47.0,
+      "wall_ms": 40.1067,
+      "call_creation_ms": 0.7996,
+      "sdk_remaining_at_receive_s": 0.009893178939819336,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 86,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 47.4748,
+      "monotonic_ms": 47.0,
+      "wall_ms": 40.1067,
+      "call_creation_ms": 0.4592,
+      "sdk_remaining_at_receive_s": 0.009893178939819336,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 87,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 47.8405,
+      "monotonic_ms": 47.0,
+      "wall_ms": 40.1067,
+      "call_creation_ms": 0.5595,
+      "sdk_remaining_at_receive_s": 0.009893178939819336,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 88,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 46.3687,
+      "monotonic_ms": 47.0,
+      "wall_ms": 40.1067,
+      "call_creation_ms": 0.3242,
+      "sdk_remaining_at_receive_s": 0.009893178939819336,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 89,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 43.9969,
+      "monotonic_ms": 47.0,
+      "wall_ms": 40.1067,
+      "call_creation_ms": 0.5783,
+      "sdk_remaining_at_receive_s": 0.009893178939819336,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 90,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 43.956,
+      "monotonic_ms": 47.0,
+      "wall_ms": 40.1067,
+      "call_creation_ms": 0.6554,
+      "sdk_remaining_at_receive_s": 0.009893178939819336,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 91,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 43.9625,
+      "monotonic_ms": 47.0,
+      "wall_ms": 40.1067,
+      "call_creation_ms": 0.6287,
+      "sdk_remaining_at_receive_s": 0.009893178939819336,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 92,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 45.1265,
+      "monotonic_ms": 47.0,
+      "wall_ms": 40.1067,
+      "call_creation_ms": 0.7875,
+      "sdk_remaining_at_receive_s": 0.009893178939819336,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 93,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 44.5757,
+      "monotonic_ms": 47.0,
+      "wall_ms": 40.1067,
+      "call_creation_ms": 0.8266,
+      "sdk_remaining_at_receive_s": 0.009893178939819336,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 94,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 43.9566,
+      "monotonic_ms": 47.0,
+      "wall_ms": 49.5458,
+      "call_creation_ms": 0.2627,
+      "sdk_remaining_at_receive_s": 0.00045418739318847656,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 95,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 43.5988,
+      "monotonic_ms": 47.0,
+      "wall_ms": 46.8276,
+      "call_creation_ms": 0.2964,
+      "sdk_remaining_at_receive_s": 0.0031723976135253906,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 96,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 38.0885,
+      "monotonic_ms": 47.0,
+      "wall_ms": 49.5458,
+      "call_creation_ms": 0.2574,
+      "sdk_remaining_at_receive_s": 0.00045418739318847656,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 97,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 34.4181,
+      "monotonic_ms": 47.0,
+      "wall_ms": 46.8276,
+      "call_creation_ms": 0.3765,
+      "sdk_remaining_at_receive_s": 0.0031723976135253906,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 98,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 33.7739,
+      "monotonic_ms": 47.0,
+      "wall_ms": 46.8276,
+      "call_creation_ms": 0.4254,
+      "sdk_remaining_at_receive_s": 0.0031723976135253906,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 99,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 31.3264,
+      "monotonic_ms": 31.0,
+      "wall_ms": 31.0431,
+      "call_creation_ms": 0.6709,
+      "sdk_remaining_at_receive_s": 0.018956899642944336,
+      "trailers": {
+        "x-envoy-upstream-service-time": "27",
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 100,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 32.6859,
+      "monotonic_ms": 47.0,
+      "wall_ms": 46.8276,
+      "call_creation_ms": 1.2747,
+      "sdk_remaining_at_receive_s": 0.0031723976135253906,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 101,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 45.9262,
+      "monotonic_ms": 47.0,
+      "wall_ms": 47.2253,
+      "call_creation_ms": 0.3626,
+      "sdk_remaining_at_receive_s": 0.0027747154235839844,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 102,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 43.6165,
+      "monotonic_ms": 31.0,
+      "wall_ms": 31.8098,
+      "call_creation_ms": 0.2168,
+      "sdk_remaining_at_receive_s": 0.01819014549255371,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 103,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 50.0467,
+      "monotonic_ms": 47.0,
+      "wall_ms": 45.2146,
+      "call_creation_ms": 0.3479,
+      "sdk_remaining_at_receive_s": 0.0047855377197265625,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 104,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 49.6831,
+      "monotonic_ms": 47.0,
+      "wall_ms": 45.2146,
+      "call_creation_ms": 0.5899,
+      "sdk_remaining_at_receive_s": 0.0047855377197265625,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 105,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 49.2737,
+      "monotonic_ms": 47.0,
+      "wall_ms": 45.2146,
+      "call_creation_ms": 0.4399,
+      "sdk_remaining_at_receive_s": 0.0047855377197265625,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 106,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 36.9133,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 0.2538,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 107,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 35.8414,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 0.3155,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 108,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 39.4764,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 1.9709,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 109,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 35.5868,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 2.0284,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 110,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 37.677,
+      "monotonic_ms": 47.0,
+      "wall_ms": 47.7813,
+      "call_creation_ms": 0.3651,
+      "sdk_remaining_at_receive_s": 0.002218961715698242,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 111,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 36.9181,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 0.8013,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 112,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 36.743,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 0.789,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 113,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 35.084,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 0.4895,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 114,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 35.6357,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 0.6388,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 115,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 31.8951,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 0.6901,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 116,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 30.9933,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 0.264,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 117,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 30.4153,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 0.2858,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 118,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 30.334,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 0.6017,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 119,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 29.5149,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 0.4491,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 120,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 33.4173,
+      "monotonic_ms": 47.0,
+      "wall_ms": 47.7813,
+      "call_creation_ms": 0.2361,
+      "sdk_remaining_at_receive_s": 0.002218961715698242,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 121,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 32.4105,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 0.2351,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 122,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 31.9004,
+      "monotonic_ms": 32.0,
+      "wall_ms": 31.9075,
+      "call_creation_ms": 0.29,
+      "sdk_remaining_at_receive_s": 0.018092632293701172,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 123,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 45.7368,
+      "monotonic_ms": 47.0,
+      "wall_ms": 44.0168,
+      "call_creation_ms": 0.4852,
+      "sdk_remaining_at_receive_s": 0.005983114242553711,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 124,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 45.6645,
+      "monotonic_ms": 47.0,
+      "wall_ms": 44.0168,
+      "call_creation_ms": 0.2946,
+      "sdk_remaining_at_receive_s": 0.005983114242553711,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 125,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 45.0038,
+      "monotonic_ms": 47.0,
+      "wall_ms": 44.0168,
+      "call_creation_ms": 0.3237,
+      "sdk_remaining_at_receive_s": 0.005983114242553711,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 126,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 44.7042,
+      "monotonic_ms": 47.0,
+      "wall_ms": 44.0168,
+      "call_creation_ms": 0.4625,
+      "sdk_remaining_at_receive_s": 0.005983114242553711,
+      "trailers": {
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    },
+    {
+      "index": 127,
+      "code": "DEADLINE_EXCEEDED",
+      "perf_ms": 58.4851,
+      "monotonic_ms": 47.0,
+      "wall_ms": 48.3825,
+      "call_creation_ms": 0.6187,
+      "sdk_remaining_at_receive_s": 0.0016176700592041016,
+      "trailers": {
+        "x-envoy-upstream-service-time": "42",
+        "date": "Mon, 26 Oct 2026 02:06:44 GMT",
+        "server": "envoy"
+      }
+    }
+  ]
+}

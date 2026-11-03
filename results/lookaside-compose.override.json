@@ -1,0 +1,1 @@
+{"services": {"controlplane": {"volumes": [{"type": "bind", "source": "/mnt/d/LoadBalance/results/lookaside-discovery.json", "target": "/config/discovery.json", "read_only": true}]}}}

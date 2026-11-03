@@ -1,0 +1,51 @@
+{
+  "statuses": {
+    "loadbalancer": {
+      "id": "62877bb9-c24d-4f24-8f57-cb6f4491ece7",
+      "name": "lb-ha-entry",
+      "operating_status": "ONLINE",
+      "provisioning_status": "ACTIVE",
+      "listeners": [
+        {
+          "id": "56cb2b12-5c65-4c69-b99b-6c7e481ca649",
+          "name": "lb-ha-grpc-tcp",
+          "operating_status": "ONLINE",
+          "provisioning_status": "ACTIVE",
+          "pools": [
+            {
+              "id": "cbf6cf17-84d0-485c-9277-be38a047ebe1",
+              "name": "lb-ha-envoy-pool",
+              "provisioning_status": "ACTIVE",
+              "operating_status": "ONLINE",
+              "health_monitor": {
+                "id": "37817e09-a05d-484f-85af-2458c1760365",
+                "name": "lb-ha-tcp-health",
+                "type": "TCP",
+                "provisioning_status": "ACTIVE",
+                "operating_status": "ONLINE"
+              },
+              "members": [
+                {
+                  "id": "c35a8dbf-89ec-45bf-9a5b-29d28bc701fb",
+                  "name": "",
+                  "operating_status": "ONLINE",
+                  "provisioning_status": "ACTIVE",
+                  "address": "192.168.1.172",
+                  "protocol_port": 18080
+                },
+                {
+                  "id": "2ffb44f5-667d-4ad8-83e4-268c30c2a30c",
+                  "name": "",
+                  "operating_status": "ONLINE",
+                  "provisioning_status": "ACTIVE",
+                  "address": "192.168.1.238",
+                  "protocol_port": 18080
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "fault": "vm1",
+  "mode": "xds",
+  "endpoint": "192.168.120.109:80",
+  "fault_dispatch_s": 10.020720299999084,
+  "fault_confirmed_s": 15.83886050000001,
+  "ingress_status_while_vm1_off": {
+    "statuses": {
+      "loadbalancer": {
+        "id": "62877bb9-c24d-4f24-8f57-cb6f4491ece7",
+        "name": "lb-ha-entry",
+        "operating_status": "DEGRADED",
+        "provisioning_status": "ACTIVE",
+        "listeners": [
+          {
+            "id": "56cb2b12-5c65-4c69-b99b-6c7e481ca649",
+            "name": "lb-ha-grpc-tcp",
+            "operating_status": "DEGRADED",
+            "provisioning_status": "ACTIVE",
+            "pools": [
+              {
+                "id": "cbf6cf17-84d0-485c-9277-be38a047ebe1",
+                "name": "lb-ha-envoy-pool",
+                "provisioning_status": "ACTIVE",
+                "operating_status": "DEGRADED",
+                "health_monitor": {
+                  "id": "37817e09-a05d-484f-85af-2458c1760365",
+                  "name": "lb-ha-tcp-health",
+                  "type": "TCP",
+                  "provisioning_status": "ACTIVE",
+                  "operating_status": "ONLINE"
+                },
+                "members": [
+                  {
+                    "id": "c35a8dbf-89ec-45bf-9a5b-29d28bc701fb",
+                    "name": "",
+                    "operating_status": "ONLINE",
+                    "provisioning_status": "ACTIVE",
+                    "address": "192.168.1.172",
+                    "protocol_port": 18080
+                  },
+                  {
+                    "id": "2ffb44f5-667d-4ad8-83e4-268c30c2a30c",
+                    "name": "",
+                    "operating_status": "ERROR",
+                    "provisioning_status": "ACTIVE",
+                    "address": "192.168.1.238",
+                    "protocol_port": 18080
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "restore_dispatch_s": 37.79310129999976,
+  "restore_confirmed_s": 44.51220049999938,
+  "before_restore_summary": {
+    "scheduled": 756,
+    "attempted": 756,
+    "successful": 738,
+    "codes": {
+      "OK": 738,
+      "UNAVAILABLE": 18
+    },
+    "successful_rps_offered_window": 19.527373372769613,
+    "successful_rps_elapsed": 19.527373372769613,
+    "failure_fraction_including_generator_drops": 0.023809523809523836,
+    "rpc_error_fraction": 0.023809523809523836,
+    "valid_load": true,
+    "success_latency_ms": {
+      "p50": 69.59890000143787,
+      "p95": 107.18959999940125,
+      "p99": 161.75830000065616
+    },
+    "all_rpc_latency_ms": {
+      "p50": 69.36809999933757,
+      "p95": 106.97780000009516,
+      "p99": 161.75830000065616
+    },
+    "schedule_lag_ms_p99": 23.482399998465908,
+    "observed_recovery_s": 5.8292797000009156,
+    "recovery_stable_window_s": 5
+  },
+  "recovery_after_confirmation_s": 0.011139499999989866,
+  "rpc_interruption": {
+    "first_error_s": 10.95,
+    "last_error_s": 12.65,
+    "rpc_interruption_s": 1.75
+  },
+  "successes_while_fault_confirmed": 439,
+  "instances_while_fault_confirmed": [
+    "a-2",
+    "b-2",
+    "c-1",
+    "c-2"
+  ]
+}

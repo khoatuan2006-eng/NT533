@@ -1,0 +1,4 @@
+{
+  "performance": {"raft_multiplier": 1},
+  "limits": {"rpc_client_timeout": "2s"}
+}

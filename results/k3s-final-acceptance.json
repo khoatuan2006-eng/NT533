@@ -1,0 +1,11 @@
+{
+  "scope": "three Ubuntu VMs, same availability zone; physical-host separation unverified",
+  "started_unix": 1793197688.7844982,
+  "passed": false,
+  "stages": {},
+  "release_sha256": "80857261bfb6b4d962650bdf767bf140320aff6fe17248aa697732ef652dc963",
+  "error": "SSH 192.168.121.214 failed: k3s-server\n6d7b3f56-e07c-4235-9d59-11991987309b\n sha256sum: /tmp/loadbalance-release.tar.gz: No such file or directory\n",
+  "vm3_may_be_powered_off": false,
+  "finished_unix": 1793197706.6367881,
+  "resource_policy": "retain the named three-VM lab; restore faults; do not delete cloud VMs/volumes"
+}

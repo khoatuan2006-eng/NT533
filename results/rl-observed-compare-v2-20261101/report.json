@@ -1,0 +1,147 @@
+{
+  "rows": [
+    {
+      "mode": "rl",
+      "seed": 41,
+      "offered": 200,
+      "success": 200,
+      "errors": 0,
+      "mean_ms": 23.749999999998863,
+      "p95_ms": 47.000000000025466,
+      "p99_ms": 62.99999999987449,
+      "weights": [
+        [
+          7,
+          3
+        ],
+        [
+          7,
+          3
+        ],
+        [
+          7,
+          3
+        ],
+        [
+          7,
+          3
+        ],
+        [
+          7,
+          3
+        ]
+      ],
+      "raw": "rl-41.json"
+    },
+    {
+      "mode": "baseline",
+      "seed": 41,
+      "offered": 200,
+      "success": 200,
+      "errors": 0,
+      "mean_ms": 35.15999999999849,
+      "p95_ms": 63.00000000010186,
+      "p99_ms": 125.0,
+      "weights": [
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ]
+      ],
+      "raw": "baseline-41.json"
+    },
+    {
+      "mode": "baseline",
+      "seed": 42,
+      "offered": 200,
+      "success": 200,
+      "errors": 0,
+      "mean_ms": 29.13499999999999,
+      "p95_ms": 47.000000000025466,
+      "p99_ms": 62.00000000012551,
+      "weights": [
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          5
+        ]
+      ],
+      "raw": "baseline-42.json"
+    },
+    {
+      "mode": "rl",
+      "seed": 42,
+      "offered": 200,
+      "success": 200,
+      "errors": 0,
+      "mean_ms": 27.734999999997854,
+      "p95_ms": 62.00000000012551,
+      "p99_ms": 63.00000000010186,
+      "weights": [
+        [
+          4,
+          6
+        ],
+        [
+          3,
+          7
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          3,
+          7
+        ],
+        [
+          4,
+          6
+        ]
+      ],
+      "raw": "rl-42.json"
+    }
+  ],
+  "conditions": {
+    "output_dir": "results/rl-observed-compare-v2-20261101",
+    "train_windows": 4,
+    "eval_windows": 5,
+    "requests": 40,
+    "seeds": [
+      41,
+      42
+    ],
+    "model": "results/rl-observed-model.json"
+  }
+}
