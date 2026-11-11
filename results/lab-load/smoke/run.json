@@ -1,0 +1,38 @@
+{
+  "started_unix_s": 1794367811.9956307,
+  "provenance": {
+    "git_commit": "39789831b75edf0ea3f8e56af0c6bdd09badbe31",
+    "git_dirty_files": 10,
+    "python": "3.12.10",
+    "platform": "win32",
+    "docker_host": {
+      "kernel": "6.18.33.2-microsoft-standard-WSL2",
+      "cpus": "8",
+      "mem_kb": "10137208",
+      "docker": "29.1.3"
+    }
+  },
+  "parameters": {
+    "variants": [
+      "xds",
+      "static-lr"
+    ],
+    "scenarios": [
+      "even",
+      "slow-node3"
+    ],
+    "rates": [
+      50.0
+    ],
+    "repetitions": 1,
+    "duration": 15.0,
+    "workload": "light",
+    "slow_ms": 50,
+    "max_inflight": 512,
+    "seed": 1,
+    "output": "results\\lab-load\\smoke",
+    "report": null,
+    "wsl": "Ubuntu-22.04",
+    "compose": null
+  }
+}

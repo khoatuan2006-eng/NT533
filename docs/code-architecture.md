@@ -7,6 +7,7 @@
 | Module | Trách nhiệm |
 |---|---|
 | `topology.py` | Đọc và kiểm tra DAG, ID, endpoint, workload và giới hạn hop |
+| `endpoints.py` | Địa chỉ `host:port` chuẩn hóa và `EndpointResolver`, dùng chung cho control plane và caller |
 | `service_identity.py` | Tên RPC/health dùng chung cho handler, registry và probe |
 | `dependencies.py` | Hợp đồng `DependencyClient`, static/xDS client và factory chọn transport |
 | `processing.py` | Handler `Service`: validation request, admission, budget và orchestration |
@@ -74,7 +75,7 @@ $env:DISCOVERY_CONFIG = "configs/discovery.registry.json"
 .\.venv\Scripts\python.exe -m pytest -q tests/test_controlplane.py tests/test_controlplane_ads.py tests/test_controlplane_sources.py
 ```
 
-Dockerfile control plane chạy bộ test Python trước khi hoàn tất image runtime không có dev dependencies. Hai stack triển khai giữ lệnh Compose trong [lookaside](lookaside.md) và [lookaside HA](lookaside-ha.md). Bản Python phục vụ SotW ADS v3 LDS/CDS/EDS cho các caller hiện tại; Delta ADS chưa hỗ trợ.
+Dockerfile control plane chạy bộ test Python trước khi hoàn tất image runtime không có dev dependencies. Hai stack triển khai giữ lệnh Compose trong [lookaside](history/lookaside.md) và [lookaside HA](history/lookaside-ha.md). Bản Python phục vụ SotW ADS v3 LDS/CDS/EDS cho các caller hiện tại; Delta ADS chưa hỗ trợ.
 
 ## Những lỗi logic đã sửa trong đợt rà soát
 
@@ -89,13 +90,17 @@ Dockerfile control plane chạy bộ test Python trước khi hoàn tất image 
 | M1 server lỗi bind có thể để log file mở | Factory cleanup server/log cả khi khởi tạo lỗi; test bind thật vào port đang chiếm |
 | Client M1 cancel health task nhưng chưa chờ cleanup hoàn tất | Join task trước khi đóng channel; test cleanup bất đồng bộ đã hoàn thành khi close trả về |
 
-Các kiểm tra này tập trung vào ranh giới và lỗi thực tế. Chưa phải bằng chứng không còn mọi lỗi hoặc đủ production; phạm vi HA vẫn là lab một host như các tài liệu nghiệm thu.
+Các kiểm tra này tập trung vào ranh giới và lỗi thực tế, chưa phải bằng chứng không còn mọi lỗi. Số liệu đợt rà soát 26/10 (gồm cả bản Go cũ) nằm trong `results/code-quality-review.json`.
 
-## Kết quả refactor trước migration Python — 26/10/2026
+## Công cụ thí nghiệm — `scripts/`
 
-- Ruff lint và format đạt trên 43 file Python được quản lý; 105/105 kiểm thử Python đạt.
-- `go vet` và bộ kiểm thử Go đạt trong Docker build; kiểm thử ADS, health khi registry treo, freshness, snapshot rollback và startup cleanup được giữ/bổ sung.
-- Launcher 6 process đạt cho cả hai entry instance. Benchmark M1 smoke đạt 30/30 request với mỗi policy Round Robin và Least Request; đây là smoke test, không dùng để so sánh hiệu năng hai policy.
-- Nghiệm thu HA sau refactor đạt, cleanup xác nhận project trống. 6.300 request tải đều OK, không OK nào nhận sau deadline; phép thử health update khi mất leader hội tụ sau 3,109 giây, nằm trong gate 10 giây.
+| File | Trách nhiệm |
+|---|---|
+| `labenv.py` | Giao diện `LabEnvironment` (dừng instance/node, phân mảnh, độ trễ, gỡ lỗi, đổi phương án), bảng phương án `VARIANTS`, CLI quản lý và `make_lab` chọn môi trường |
+| `labenv_ssh.py` | `SshLab`: thực hiện giao diện trên ba VM qua SSH (môi trường chính) |
+| `run_faults.py` | Danh sách tình huống lỗi, chạy lặp, tính gián đoạn và phục hồi, báo cáo đạt / không đạt |
+| `run_load.py` | Quét mức tải theo phương án và kịch bản, báo goodput, P95/P99, điểm bão hòa |
+| `controlled_probe.py` | Bộ phát tải tốc độ cố định, ghi từng request; dùng chung cho hai bộ chạy trên |
+| `multihost.py` | Sinh cấu hình ba node, đóng gói và triển khai lên VM |
 
-Bằng chứng tổng hợp lịch sử: `results/code-quality-review.json`, `results/code-quality-python.txt`, `results/before-python-controlplane-ha.json`. Kết quả HA ngay trước refactor giữ ở `results/before-code-cleanup-ha-acceptance.json`. Migration Python và nghiệm thu mới được mô tả trong [chuyển control plane sang Python](python-controlplane.md).
+Bộ chạy chỉ gọi các thao tác của `LabEnvironment`, không biết đang chạy ở đâu; thêm môi trường mới là viết thêm một lớp thực hiện giao diện đó và nối vào `make_lab`. `ComposeLab` trong `labenv.py` là bản dựng một máy dùng để thử code.

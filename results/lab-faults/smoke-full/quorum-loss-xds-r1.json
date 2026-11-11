@@ -1,0 +1,51 @@
+{
+  "schema_version": 2,
+  "run_id": "6b8057aa073646618936bf48684d3dd8",
+  "started_unix_s": 1794356290.0510542,
+  "python": "3.12.10",
+  "grpc": "1.84.0",
+  "parameters": {
+    "address": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+    "output": "results\\lab-faults\\smoke-full\\quorum-loss-xds-r1.json",
+    "mode": "xds",
+    "entry": "service-a",
+    "workload": "light",
+    "rate": 20,
+    "duration": 80,
+    "timeout": 3,
+    "ready_timeout": 30,
+    "max_inflight": 256,
+    "warmup": 40,
+    "fault_at": 9.988878199999817,
+    "stable_window": 5
+  },
+  "completion_elapsed_s": 79.99829849999969,
+  "raw": "results\\lab-faults\\smoke-full\\quorum-loss-xds-r1.jsonl",
+  "summary": {
+    "scheduled": 1600,
+    "attempted": 1600,
+    "successful": 1118,
+    "codes": {
+      "OK": 1118,
+      "UNAVAILABLE": 482
+    },
+    "successful_rps_offered_window": 13.975,
+    "successful_rps_elapsed": 13.975,
+    "failure_fraction_including_generator_drops": 0.30125,
+    "rpc_error_fraction": 0.30125,
+    "valid_load": true,
+    "success_latency_ms": {
+      "p50": 31.838900000366266,
+      "p95": 38.62420000041311,
+      "p99": 66.37769999997545
+    },
+    "all_rpc_latency_ms": {
+      "p50": 30.611799999860523,
+      "p95": 37.16329999951995,
+      "p99": 56.890300000304705
+    },
+    "schedule_lag_ms_p99": 26.253199999153765,
+    "observed_recovery_s": 0.011121800000182702,
+    "recovery_stable_window_s": 5
+  }
+}

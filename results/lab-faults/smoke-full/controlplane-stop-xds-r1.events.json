@@ -1,0 +1,10 @@
+{
+  "fault": "controlplane-stop",
+  "mode": "xds",
+  "endpoint": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+  "expect": "continue",
+  "fault_dispatch_s": 10.001176400000077,
+  "fault_confirmed_s": 13.826835900000333,
+  "restore_dispatch_s": 50.00372679999964,
+  "restore_confirmed_s": 53.0087381000003
+}

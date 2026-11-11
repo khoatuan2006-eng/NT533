@@ -1,0 +1,28 @@
+{
+  "started_unix_s": 1794359253.3836951,
+  "nodes": [
+    "node1",
+    "node2",
+    "node3"
+  ],
+  "parameters": {
+    "scenarios": [
+      "backend-stop",
+      "quorum-loss",
+      "node1-down"
+    ],
+    "variants": [
+      "static",
+      "static-lr"
+    ],
+    "repetitions": 1,
+    "rate": 20,
+    "before": 10,
+    "hold": 40,
+    "after": 30,
+    "output": "results\\lab-faults\\static-smoke",
+    "report": null,
+    "wsl": "Ubuntu-22.04",
+    "compose": null
+  }
+}

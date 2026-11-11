@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="390" viewBox="0 0 680 390" role="img" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+  <title>Bố trí thành phần trên ba node</title>
+  <desc>Node 1 chạy consul-1, controlplane-1, envoy-1, a-1, b-1. Node 2 chạy consul-2, controlplane-2, envoy-2, a-2, c-1. Node 3 chạy consul-3, b-2, c-2. Bộ phát tải nằm ngoài cụm và gọi cả hai Envoy.</desc>
+  <defs>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <style>
+    .t { font-size: 14px; dominant-baseline: central; text-anchor: middle; }
+    .h { font-size: 14px; font-weight: 600; dominant-baseline: central; text-anchor: middle; }
+    .node rect { fill: #444441; stroke: #888780; stroke-width: 0.5; }
+    .node text { fill: #D3D1C7; }
+    .data rect { fill: #085041; stroke: #5DCAA5; stroke-width: 0.5; }
+    .data text { fill: #9FE1CB; }
+    .ctl rect { fill: #3C3489; stroke: #AFA9EC; stroke-width: 0.5; }
+    .ctl text { fill: #CECBF6; }
+    .legend { fill: #B4B2A9; font-size: 12px; dominant-baseline: central; }
+  </style>
+
+  <rect x="0" y="0" width="680" height="390" rx="12" fill="#1F1F1E"/>
+
+  <g class="node"><rect x="40" y="40" width="180" height="240" rx="12"/><text class="h" x="130" y="58">node1</text></g>
+  <g class="ctl"><rect x="55" y="76" width="150" height="32" rx="6"/><text class="t" x="130" y="92">consul-1</text></g>
+  <g class="ctl"><rect x="55" y="116" width="150" height="32" rx="6"/><text class="t" x="130" y="132">controlplane-1</text></g>
+  <g class="data"><rect x="55" y="156" width="150" height="32" rx="6"/><text class="t" x="130" y="172">envoy-1</text></g>
+  <g class="data"><rect x="55" y="196" width="150" height="32" rx="6"/><text class="t" x="130" y="212">a-1</text></g>
+  <g class="data"><rect x="55" y="236" width="150" height="32" rx="6"/><text class="t" x="130" y="252">b-1</text></g>
+
+  <g class="node"><rect x="250" y="40" width="180" height="240" rx="12"/><text class="h" x="340" y="58">node2</text></g>
+  <g class="ctl"><rect x="265" y="76" width="150" height="32" rx="6"/><text class="t" x="340" y="92">consul-2</text></g>
+  <g class="ctl"><rect x="265" y="116" width="150" height="32" rx="6"/><text class="t" x="340" y="132">controlplane-2</text></g>
+  <g class="data"><rect x="265" y="156" width="150" height="32" rx="6"/><text class="t" x="340" y="172">envoy-2</text></g>
+  <g class="data"><rect x="265" y="196" width="150" height="32" rx="6"/><text class="t" x="340" y="212">a-2</text></g>
+  <g class="data"><rect x="265" y="236" width="150" height="32" rx="6"/><text class="t" x="340" y="252">c-1</text></g>
+
+  <g class="node"><rect x="460" y="40" width="180" height="240" rx="12"/><text class="h" x="550" y="58">node3</text></g>
+  <g class="ctl"><rect x="475" y="76" width="150" height="32" rx="6"/><text class="t" x="550" y="92">consul-3</text></g>
+  <g class="data"><rect x="475" y="196" width="150" height="32" rx="6"/><text class="t" x="550" y="212">b-2</text></g>
+  <g class="data"><rect x="475" y="236" width="150" height="32" rx="6"/><text class="t" x="550" y="252">c-2</text></g>
+
+  <line x1="130" y1="316" x2="130" y2="284" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
+  <line x1="340" y1="316" x2="340" y2="284" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
+  <rect x="90" y="316" width="290" height="44" rx="8" fill="#2C2C2A" stroke="#5F5E5A" stroke-width="0.5"/>
+  <text class="h" x="235" y="338" fill="#F1EFE8">Bộ phát tải (ngoài cụm)</text>
+
+  <rect x="470" y="324" width="14" height="14" rx="3" fill="#3C3489" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text class="legend" x="492" y="331">Discovery, cấu hình</text>
+  <rect x="470" y="348" width="14" height="14" rx="3" fill="#085041" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text class="legend" x="492" y="355">Đường request</text>
+</svg>

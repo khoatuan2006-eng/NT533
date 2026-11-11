@@ -1,0 +1,10 @@
+{
+  "fault": "backend-stop",
+  "mode": "xds",
+  "endpoint": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+  "expect": "continue",
+  "fault_dispatch_s": 9.996485700000449,
+  "fault_confirmed_s": 14.770350900000267,
+  "restore_dispatch_s": 50.00737460000073,
+  "restore_confirmed_s": 54.385181400000874
+}

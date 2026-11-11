@@ -84,7 +84,7 @@ class RunSummary:
 
 @dataclass(frozen=True, slots=True)
 class AggregatedSummary:
-    """Tóm tắt tổng hợp qua nhiều lần chạy lặp lại (ví dụ 3 lần theo M1.md)."""
+    """Tóm tắt tổng hợp qua nhiều lần chạy lặp lại (ví dụ 3 lần theo docs/history/M1.md)."""
 
     policy: str
     runs_count: int

@@ -1,0 +1,41 @@
+{
+  "driver": "ssh",
+  "address": "192.168.120.109:80",
+  "ssh_config": "configs/ssh-config",
+  "project": "lb-cloud",
+  "remote_dir": "/opt/loadbalance/cluster",
+  "jump_node": "node1",
+  "nodes": {
+    "node1": {
+      "ssh": "192.168.121.214",
+      "ip": "192.168.1.238",
+      "services": {
+        "consul-1": "consul",
+        "controlplane-1": "controlplane",
+        "envoy-1": "ingress",
+        "a-1": "a-1",
+        "b-1": "b-1"
+      }
+    },
+    "node2": {
+      "ssh": "192.168.1.172",
+      "ip": "192.168.1.172",
+      "services": {
+        "consul-2": "consul",
+        "controlplane-2": "controlplane",
+        "envoy-2": "ingress",
+        "a-2": "a-2",
+        "c-1": "c-1"
+      }
+    },
+    "node3": {
+      "ssh": "192.168.1.217",
+      "ip": "192.168.1.217",
+      "services": {
+        "consul-3": "consul",
+        "b-2": "b-2",
+        "c-2": "c-2"
+      }
+    }
+  }
+}

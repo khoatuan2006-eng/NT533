@@ -1,12 +1,50 @@
 # Hệ thống cân bằng tải phân tán
 
-Dự án tập trung vào hai tầng: **Envoy cân bằng request vào service điều phối** và **lookaside hỗ trợ cân bằng lời gọi từ service điều phối tới các service xử lý**.
+Đồ án môn Hệ tính toán phân bố. Hệ thống cân bằng tải hai tầng: **Envoy cân bằng request vào service điều phối** và **lookaside (gRPC xDS) cân bằng lời gọi từ service điều phối tới các service xử lý**.
 
-## Kiến trúc triển khai trên k3s — kế hoạch
+## Câu hỏi của đồ án
 
-![Cụm k3s với Envoy, Lookaside, các pod điều phối và hai service xử lý](docs/images/load-balancing-overview.png)
+**Câu hỏi chính:** hệ thống cân bằng tải hai tầng này tiếp tục phục vụ thế nào khi từng thành phần phân tán bị lỗi — backend, máy chủ, control plane, registry, hoặc khi mạng bị phân mảnh?
 
-**Service điều phối** nhận request và tổng hợp kết quả từ **hai service xử lý mô phỏng**. Mỗi service có nhiều pod. Lookaside cấp endpoint và policy cho gRPC client trong từng pod điều phối; client chọn pod xử lý và gọi trực tiếp. Hai nhóm xử lý là hai service riêng, không phải hai replica của cùng service.
+Câu hỏi này chia thành hai nhánh theo loại lỗi; mọi phần của đồ án đều thuộc một trong hai nhánh:
+
+| Nhánh | Lỗi | Cơ chế chịu lỗi | Câu hỏi cần trả lời |
+|---|---|---|---|
+| **Lỗi cứng** | Thành phần ngừng trả lời: backend, node, control plane, Consul chết; mạng phân mảnh | Phát hiện lỗi (health probe, timeout), nhân bản, quorum, fail closed | Ai phát hiện, sau bao lâu; hệ thống gián đoạn bao lâu và tự phục hồi thế nào? |
+| **Lỗi mềm** | Thành phần vẫn trả lời nhưng chậm: backend chậm, mạng trễ hoặc rớt gói | Health probe không bắt được, nên **chiến lược cân bằng tải** là cơ chế chịu lỗi duy nhất | Round Robin, Least Request hay RL né backend chậm tốt hơn, và vì sao? |
+
+**RL là phần mở rộng trong nhánh lỗi mềm**, không phải câu hỏi riêng. Nó phải trả lời thêm một điều: bộ điều khiển học được có an toàn khi chính nó lỗi hoặc thiếu dữ liệu không (xem [tiêu chí cho phần RL](#tiêu-chí-cho-phần-rl)).
+
+## Kiến trúc
+
+### Kiến trúc logic: request đi đâu, ai quyết định
+
+![Kiến trúc logic: client gọi hai Envoy, Envoy chia tải vào service A, A gọi trực tiếp service B và C; Consul và control plane phát endpoint cho A qua xDS](docs/images/architecture-logical.svg)
+
+- Có **hai lần cân bằng tải**: Envoy chọn a-1 hay a-2; sau đó chính A chọn instance B và C rồi gọi thẳng tới đó (mô hình lookaside).
+- **Control plane không nằm trên đường đi của request.** Nó kiểm tra health, lấy danh sách instance từ Consul, và chỉ phát cập nhật khi có thay đổi. Control plane chết thì A vẫn dùng danh sách đã có.
+- **RL là phần mở rộng tùy chọn**: nó chỉ đổi trọng số mà control plane phát ra, không tác động trực tiếp lên request.
+
+### Bố trí trên ba node: một node chết thì mất gì
+
+![Bố trí trên ba node: node1 và node2 mỗi node có Consul, control plane, Envoy, một bản A và một backend; node3 có Consul và hai backend; bộ phát tải nằm ngoài cụm](docs/images/architecture-nodes.svg)
+
+- **Hai bản của cùng một thành phần không bao giờ nằm chung node.** Chết một node bất kỳ thì thành phần nào cũng còn ít nhất một bản, và Consul còn 2/3, vẫn đủ quorum.
+- **Node 1 gánh nặng nhất** (có cả Envoy lẫn control plane), nên "node 1 chết" là bài thử khó nhất.
+- **Bộ phát tải nằm ngoài cụm** và giữ kết nối tới cả hai Envoy, nên khi một node chết nó vẫn tới được Envoy còn lại.
+
+Mỗi node là một VM trên cloud UIT-IoT; các thành phần trên mỗi VM chạy bằng Docker Compose. Việc chuyển sang workload do k3s quản lý **nằm ngoài phạm vi đồ án** (xem [Ngoài phạm vi](#ngoài-phạm-vi)).
+
+## Khái niệm hệ phân tán được thể hiện
+
+| Khái niệm | Thể hiện trong đồ án | Bằng chứng |
+|---|---|---|
+| Đồng thuận, quorum | Ba Consul voter (Raft); mất leader vẫn cập nhật endpoint | [HA lookaside](docs/history/lookaside-ha.md) |
+| Nhất quán so với sẵn sàng | Mất quorum quá lease 15 giây thì fail closed, trả `UNAVAILABLE` thay vì dùng endpoint cũ | [Cải thiện HA](docs/history/ha-improvement.md) |
+| Phát hiện lỗi | Control plane probe health trực tiếp, độc lập với catalog; hội tụ khi mất leader từ ~34 giây xuống 2–3 giây | [Cải thiện HA](docs/history/ha-improvement.md) |
+| Nhân bản, chịu lỗi | Hai control plane, hai Envoy; tắt VM1 gián đoạn 1,75–3,95 giây | [Báo cáo nghiệm thu](docs/history/cloud-validation-report.md) |
+| Khám phá dịch vụ | Registry + xDS; caller giữ cấu hình hợp lệ gần nhất | [Lookaside](docs/history/lookaside.md) |
+| Deadline xuyên chuỗi gọi | Một budget cho hàng đợi, xử lý cục bộ và lời gọi phụ thuộc | [Điều tra deadline](docs/history/deadline-investigation.md) |
 
 ## Đã hoàn thành
 
@@ -14,58 +52,53 @@ Dự án tập trung vào hai tầng: **Envoy cân bằng request vào service �
 - Service điều phối và các service xử lý với nhiều instance, workload cấu hình được và kiểm soát deadline.
 - Lookaside bằng gRPC xDS: cập nhật endpoint động, baseline Round Robin.
 - Đăng ký service với Consul, health checking và HA cho control plane.
-- Triển khai bằng Docker Compose trên ba VM; có công cụ tạo tải, đo đạc và thử lỗi/phục hồi.
+- Triển khai trên ba VM; có công cụ tạo tải, đo đạc và thử lỗi/phục hồi.
+- Nguyên mẫu Q-learning điều chỉnh trọng số qua xDS, chạy trong lab với một caller và hai instance.
 
-Nền tảng đã được nghiệm thu trong phạm vi lab/cloud của đồ án. Kết quả và giới hạn được ghi trong [báo cáo nghiệm thu](docs/cloud-validation-report.md).
+Kết quả và giới hạn: [báo cáo nghiệm thu](docs/history/cloud-validation-report.md), [thử nghiệm RL](docs/rl-lookaside-experiment.md).
 
-## Hướng tiếp theo
+Tài liệu các giai đoạn trước (Go, k3s, AIOps, các đợt nghiệm thu cũ) nằm trong [`docs/history/`](docs/history/README.md); chúng giữ bằng chứng, không mô tả cách làm hiện tại.
 
-### Triển khai lên k3s
+## Cách nhóm làm việc (11–18/11/2026)
 
-Chuyển ứng dụng từ Compose sang các workload do k3s quản lý, hỗ trợ định danh/địa chỉ pod động, readiness và rút pod khỏi routing khi dừng. Kiểm chứng toàn tuyến và tăng/giảm replica thủ công trước; HPA và RL tắt ở đợt baseline.
+Mọi thành viên đều tự chạy, kiểm tra, đánh giá và sửa; không ai chỉ nhận kết quả của người khác. Mỗi người làm theo [hướng dẫn cho nhóm](docs/team-guide.md):
 
-**Triển khai và đánh giá trực tiếp trên cùng cụm k3s.** Dữ liệu Compose cũ giữ làm tham khảo; mọi đối chứng mới chạy trên k3s với cùng điều kiện. Sau baseline mới đánh giá HPA, rồi RL.
+1. **Chạy**: thử lỗi (`run_faults.py`) và đo tải (`run_load.py`) trên ba VM.
+2. **Kiểm tra**: đọc bảng kết quả, đối chiếu với trace gốc, tự giải thích từng con số.
+3. **Đánh giá**: kết luận đạt / không đạt theo tiêu chí, nêu nguyên nhân cho ô không đạt.
+4. **Sửa để cải thiện**: đặt giả thuyết, sửa trên nhánh riêng, triển khai, chạy lại đúng ô đó, ghi cặp trước / sau.
 
-### Đánh giá thực nghiệm
+Hai quy ước chung: **ghi dự đoán trước khi đo** (ai phát hiện, theo timeout nào, gián đoạn bao lâu) để so với số đo; và mọi bảng "trước" đều đo trên **một bản baseline chung** đã gắn tag, trước khi ai triển khai bản sửa.
 
-**Mục tiêu:** xác định hệ thống phân phối tải ra sao, chịu được mức tải nào và cập nhật/phục hồi thế nào khi backend thay đổi. Đợt này đánh giá nền tảng trước khi bật RL.
+Cả nhóm dùng chung một cụm ba VM nên **mỗi lúc chỉ một người chạy**; các script tự giữ khóa cụm và từ chối nếu người khác đang chạy. Báo trong nhóm trước khi triển khai code mới, vì triển khai khởi động lại toàn bộ cụm.
 
-**So sánh:** static Round Robin và lookaside xDS Round Robin, cùng health checking, tài nguyên, workload và deadline. Đây là so sánh hai cách triển khai discovery/LB, chưa phải đối chứng thuật toán RL.
+Để báo cáo không trùng lặp, mỗi người đứng tên một phần (vẫn tự chạy cả phần còn lại để hiểu):
 
-| Kịch bản | Cách thử | Nội dung đánh giá |
+| Người | Nhánh | Đứng tên trong báo cáo |
 |---|---|---|
-| Tải ổn định | Backend đồng đều; tăng tải từ thấp đến vượt ngưỡng xử lý | Phân bố request, goodput, latency và điểm bão hòa |
-| Backend không đồng đều | Làm một pod xử lý chậm hơn hoặc giảm giới hạn xử lý của nó | Backend chậm có gây nghẽn, tăng latency/lỗi không |
-| Tải đột biến | Tăng rồi hạ tốc độ gửi request | Mức suy giảm và thời gian trở lại ổn định |
-| Thay đổi membership | Scale service xử lý 1: 2 → 4 → 2 pod, giữ các pod điều phối đang chạy | Thời gian nhận endpoint mới, ngừng chọn endpoint đã rút |
-| Nhiều caller | Chạy 1, 2, 4 pod điều phối với cùng tổng tải gửi vào | Phân phối tải theo caller và trên toàn hệ thống |
-| Backend lỗi/phục hồi | Xóa một pod xử lý trong lúc có traffic, theo dõi k3s tạo pod thay thế | Request lỗi, chuyển tải sang pod còn sống và phục hồi replica |
-| Discovery gặp lỗi | Lần lượt thử mất CP, mất Consul leader/quorum | Caller cũ/mới, cập nhật endpoint và xử lý cấu hình hết hạn |
-| Ingress gặp lỗi | Dừng một Envoy trong cấu hình ingress HA | Khả năng tiếp tục truy cập và thời gian gián đoạn đầu vào |
+| Đạt | Lỗi cứng | Thử lỗi và phân mảnh mạng: gián đoạn, phục hồi, fail closed |
+| Lầu | Lỗi mềm | Backend chậm trên cụm: Round Robin so với Least Request; điểm bão hòa làm mốc tải |
+| Khoa | Lỗi mềm (mở rộng) | RL so với Round Robin và quy tắc khi có backend chậm; ghép báo cáo |
 
-**Cách chạy dự kiến:** khảo sát trước điểm bão hòa; dùng cùng các mức RPS cho hai phương án. Mỗi lượt warmup 60 giây, đo 180 giây; lặp sáu lần/phương án và đảo thứ tự chạy. Tách từng thay đổi tải/sự cố, giữ trace cả thành công lẫn lỗi.
+Ba chiến lược không chạy trên cùng một đường dữ liệu (Least Request chỉ có ở caller static, RL chỉ có ở caller xDS trong lab cục bộ), nên chỉ so sánh trong cùng một đường; xem [quy tắc so sánh](docs/running.md#quy-tắc-so-sánh-chiến-lược).
 
-**Chỉ số và kết quả:** số request theo instance, goodput (request thành công/giây), p50/p95/p99, tỷ lệ lỗi/timeout, thời gian cập nhật endpoint và phục hồi. Báo riêng request toàn tuyến và RPC nội bộ; xuất đồ thị theo thời gian, bảng đối chứng và dữ liệu gốc. Không kết luận tốt hơn chỉ từ latency của các request thành công.
+Ô nghi là "không đạt" để cả nhóm luyện quy trình sửa: phục hồi chậm sau khi gỡ phân mảnh node 1. Hiện tượng này mới thấy trên bản dựng một máy, cần tái hiện trên cụm trước (xem [tham chiếu thí nghiệm](docs/running.md#vấn-đề-đã-biết)).
 
-**Đánh giá và tối ưu:** mỗi kịch bản phải kết luận đạt/chưa đạt/chưa đủ bằng chứng theo tiêu chí, đồng thời so sánh với baseline. Nếu chưa đạt, người phụ trách phải tìm nguyên nhân, thử phương án tối ưu và đo lặp trước–sau; kiểm tra cả ảnh hưởng lên các kịch bản khác. Bàn giao phương án tốt nhất đã kiểm chứng trong giới hạn tài nguyên, ghi rõ phần chưa đạt và giới hạn còn lại. [Quy trình đánh giá và tối ưu](docs/controlled-experiments.md#danh-gia-toi-uu).
+### Tiêu chí cho phần RL
 
-Kế hoạch chi tiết, tiêu chí đạt và phần công cụ cần bổ sung: [đợt đánh giá tiếp theo](docs/controlled-experiments.md#ke-hoach-tiep-theo).
+- RL không nằm trên đường xử lý request; khi telemetry cũ, sai hoặc thiếu mẫu thì quay về Round Robin.
+- Trọng số mỗi endpoint giới hạn 30–70%; không chạy exploration trên cấu hình mặc định.
+- Chỉ kết luận RL tốt hơn khi vượt policy theo quy tắc trên nhiều seed. Kết quả hiện tại chưa cho thấy điều đó.
 
-**Phân công thực nghiệm:**
+### Cách đo và báo cáo
 
-| Người phụ trách | Công việc | Bàn giao |
-|---|---|---|
-| **Lầu** | Chuẩn bị workload/Envoy trên k3s; E1, E2, E3, E5: hiệu năng/phân phối tải | Cấu hình workload, bộ phát tải/telemetry và đối chứng trước–sau tối ưu |
-| **Đạt** | Chuẩn bị discovery/health trên k3s; E4, E6, E7, E8: cập nhật endpoint/phục hồi | Cấu hình discovery, runner sự kiện và đối chứng trước–sau tối ưu |
+Chỉ số: số request theo instance, goodput, p50/p95/p99, tỷ lệ lỗi/timeout, thời gian cập nhật endpoint và thời gian phục hồi. Giữ trace cả thành công lẫn lỗi; không kết luận tốt hơn chỉ từ latency của request thành công. Phương pháp và định nghĩa chỉ số: [thực nghiệm đối chứng](docs/history/controlled-experiments.md). Phần kế hoạch k3s và ma trận E1–E8 trong tài liệu đó được thay bằng bảng trên.
 
-Hai người thống nhất cấu hình và định dạng dữ liệu, kiểm tra chéo kết quả rồi ghép báo cáo. [Đầu việc và tiêu chí bàn giao](docs/controlled-experiments.md#phan-cong).
+## Ngoài phạm vi
 
-### RL cho lookaside
+Ghi vào mục hướng phát triển của báo cáo, không làm trong tuần này:
 
-Đã có nguyên mẫu Q-learning điều chỉnh trọng số qua xDS trong lab với một caller và hai instance của một service xử lý; chưa tích hợp vào cụm HA.
-
-- Mở rộng telemetry và state/action cho nhiều caller, số backend thay đổi.
-- Hoàn thiện reward; kiểm chứng hội tụ, độ ổn định và khả năng thích nghi.
-- Đối chứng với Round Robin và policy theo quy tắc trước khi tích hợp.
-
-Chưa đủ bằng chứng RL cải thiện ổn định so với baseline. Xem [thử nghiệm RL](docs/rl-lookaside-experiment.md).
+- Chạy ứng dụng bằng Kubernetes (k3s) và HPA. Ba VM có cài sẵn k3s từ trước, nhưng đồ án không dùng; ứng dụng chạy bằng Docker Compose.
+- Observability đầy đủ (Prometheus, tracing) và AIOps.
+- RL cho số backend bất kỳ.
+- TLS/mTLS, nhiều zone/region.

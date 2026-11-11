@@ -209,3 +209,63 @@ async def test_running_controlplane_publishes_rl_then_expires_to_baseline(tmp_pa
         stop.set()
         await task
     assert source.closed
+
+
+async def test_endpoint_errors_are_written_per_endpoint(tmp_path):
+    path = tmp_path / "window.json"
+    collector = TelemetryCollector("worker", {"one": "127.0.0.1:1234", "two": "127.0.0.1:1235"}, str(path))
+    collector.observe("one", 12)
+    collector.observe("one", 40, ok=False)
+    collector.observe(None, 30, ok=False)
+    await collector.flush()
+    data = json.loads(path.read_text())
+    assert data["offered"] == 3 and data["errors"] == 2
+    assert data["endpoint_errors"] == {"127.0.0.1:1234": 1, "127.0.0.1:1235": 0}
+
+
+async def test_xds_pool_attributes_error_to_identified_instance(tmp_path):
+    import grpc
+
+    class Stub:
+        def __init__(self, trailers):
+            self.trailers = trailers
+
+        async def Execute(self, request, **kwargs):
+            raise grpc.aio.AioRpcError(
+                grpc.StatusCode.UNAVAILABLE, grpc.aio.Metadata(), grpc.aio.Metadata(*self.trailers)
+            )
+
+    collector = TelemetryCollector("worker", {"one": "127.0.0.1:1234"}, str(tmp_path / "w"))
+    pool = XdsDependencyPool.__new__(XdsDependencyPool)
+    pool.telemetry = collector
+    for trailers in ((("x-instance-id", "one"),), ()):
+        pool.stub = Stub(trailers)
+        with pytest.raises(grpc.aio.AioRpcError):
+            await pool.call(pb.TaskRequest(request_id="one"), timeout=1)
+    assert collector.failed == {"127.0.0.1:1234": 1} and collector.errors == 2
+
+
+async def test_rl_controller_penalizes_endpoint_error_rate(tmp_path):
+    endpoints = ["127.0.0.1:1234", "127.0.0.1:1235"]
+    base = await ResourceBuilder().build({"worker": endpoints})
+    path = tmp_path / "telemetry.json"
+    controller = RLController(str(path), "worker")
+    data = {
+        "timestamp": time.time(),
+        "service": "worker",
+        "sequence": 1,
+        "endpoints": {endpoints[0]: [10] * 10, endpoints[1]: [8] * 10},
+        "offered": 20,
+        "errors": 0,
+    }
+    path.write_text(json.dumps(data))
+    controller.apply(base)
+    assert controller.last_category == 1
+    # Same latencies, but the first endpoint now fails 2 of 12 calls.
+    data.update(sequence=2, offered=22, errors=2, endpoint_errors={endpoints[0]: 2})
+    path.write_text(json.dumps(data))
+    controller.apply(base)
+    assert controller.last_category == 2
+    data.update(sequence=3, endpoint_errors={endpoints[0]: 3})
+    path.write_text(json.dumps(data))
+    assert controller.apply(base).version == base.version

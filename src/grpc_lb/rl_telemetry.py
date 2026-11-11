@@ -8,7 +8,7 @@ import os
 import time
 from pathlib import Path
 
-from .controlplane.config import EndpointResolver
+from .endpoints import EndpointResolver
 
 
 class TelemetryCollector:
@@ -18,13 +18,18 @@ class TelemetryCollector:
         self.path = Path(path)
         self.interval = interval
         self.samples: dict[str, list[float]] = {address: [] for address in instances.values()}
+        self.failed: dict[str, int] = {address: 0 for address in instances.values()}
         self.errors = 0
         self.sequence = time.time_ns()
         self.task = None
 
-    def observe(self, instance: str | None, duration_ms: float):
+    def observe(self, instance: str | None, duration_ms: float, *, ok: bool = True):
+        # A failure counts against an endpoint only when that server identified itself.
         if instance not in self.instances:
             self.errors += 1
+        elif not ok:
+            self.errors += 1
+            self.failed[self.instances[instance]] += 1
         else:
             self.samples[self.instances[instance]].append(duration_ms)
 
@@ -37,19 +42,21 @@ class TelemetryCollector:
             await self.flush()
 
     async def flush(self):
-        samples, errors = self.samples, self.errors
+        samples, failed, errors = self.samples, self.failed, self.errors
         self.samples = {address: [] for address in self.instances.values()}
+        self.failed = {address: 0 for address in self.instances.values()}
         self.errors = 0
         self.sequence += 1
         try:
-            resolved = await EndpointResolver().resolve({"target": list(samples)})
-            mapping = {}
+            resolver = EndpointResolver()
+            mapping, endpoint_errors = {}, {}
             for address in samples:
-                one = await EndpointResolver().resolve({"target": [address]})
-                if len(one["target"]) != 1:
+                one = (await resolver.resolve({"target": [address]}))["target"]
+                if len(one) != 1:
                     raise ValueError("instance must resolve to one endpoint")
-                mapping[one["target"][0]] = samples[address]
-            if len(mapping) != len(samples) or set(mapping) != set(resolved["target"]):
+                mapping[one[0]] = samples[address]
+                endpoint_errors[one[0]] = failed[address]
+            if len(mapping) != len(samples):
                 raise ValueError("ambiguous endpoint identity")
             document = {
                 "timestamp": time.time(),
@@ -58,6 +65,7 @@ class TelemetryCollector:
                 "offered": sum(map(len, samples.values())) + errors,
                 "errors": errors,
                 "endpoints": mapping,
+                "endpoint_errors": endpoint_errors,
             }
             temp = self.path.with_name(f".{self.path.name}.{os.getpid()}.tmp")
             await asyncio.to_thread(temp.write_text, json.dumps(document), encoding="utf-8")

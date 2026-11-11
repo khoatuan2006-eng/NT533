@@ -10,12 +10,12 @@ import random
 import re
 import time
 from typing import Protocol
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 import grpc
 from grpc_health.v1 import health_pb2, health_pb2_grpc
 
-from .balancer import RoundRobinBalancer
+from .balancer import create_balancer
 from .generated import processing_pb2 as pb
 from .generated import processing_pb2_grpc as rpc
 from .rl_telemetry import TelemetryCollector
@@ -30,7 +30,9 @@ class NoBackend(Exception):
 
 
 class StaticDependencyPool:
-    def __init__(self, service_id: str, addresses: list[str], interval: float = 1) -> None:
+    def __init__(
+        self, service_id: str, addresses: list[str], interval: float = 1, policy: str = "round_robin"
+    ) -> None:
         if not service_id or not addresses or len(set(addresses)) != len(addresses):
             raise ValueError("Service ID and unique endpoints required")
         if not math.isfinite(interval) or interval <= 0:
@@ -39,7 +41,7 @@ class StaticDependencyPool:
         self.interval = interval
         self.channels = {a: grpc.aio.insecure_channel(a) for a in addresses}
         self.stubs = {a: rpc.ProcessingServiceStub(ch) for a, ch in self.channels.items()}
-        self.balancer = RoundRobinBalancer(addresses)
+        self.balancer = create_balancer(policy, addresses)
         self.balancer.set_active_backends([])
         self._tasks: list[asyncio.Task] = []
 
@@ -92,9 +94,13 @@ class StaticDependencyPool:
             raise NoBackend(f"No healthy instance for {self.service_id}")
         # Application UNAVAILABLE can mean load shedding, not endpoint death.
         # Only the service-specific health watcher changes endpoint eligibility.
-        return await self.stubs[address].Execute(
-            request, timeout=timeout, metadata=(("x-request-id", quote(request.request_id, safe="")),)
-        )
+        try:
+            return await self.stubs[address].Execute(
+                request, timeout=timeout, metadata=(("x-request-id", quote(request.request_id, safe="")),)
+            )
+        finally:
+            # Least Request counts in-flight RPCs; Round Robin ignores the release.
+            self.balancer.release(address)
 
     async def close(self) -> None:
         for task in self._tasks:
@@ -127,9 +133,16 @@ class XdsDependencyPool:
                 request, timeout=timeout, metadata=(("x-request-id", quote(request.request_id, safe="")),)
             )
             result = await call
-        except grpc.RpcError:
+        except grpc.RpcError as error:
             if self.telemetry:
-                self.telemetry.observe(None, (time.monotonic() - start) * 1000)
+                # Only a server that answered can be blamed; transport failures stay unattributed.
+                instance = None
+                trailers = error.trailing_metadata() if isinstance(error, grpc.aio.AioRpcError) else None
+                for key, value in trailers or ():
+                    if key == "x-instance-id":
+                        instance = unquote(value)
+                        break
+                self.telemetry.observe(instance, (time.monotonic() - start) * 1000, ok=False)
             raise
         if self.telemetry:
             duration = (time.monotonic() - start) * 1000
@@ -167,23 +180,37 @@ Pool = DependencyClient
 class DependencyPoolFactory:
     """Select a transport once at startup; request handling stays transport-neutral."""
 
-    def __init__(self, mode: str = "static", health_interval: float = 1) -> None:
+    def __init__(
+        self,
+        mode: str = "static",
+        health_interval: float = 1,
+        *,
+        telemetry_service: str = "",
+        telemetry_path: str = "",
+        static_policy: str = "round_robin",
+    ) -> None:
         if mode not in ("static", "xds"):
             raise ValueError("DISCOVERY_MODE must be static or xds")
+        create_balancer(static_policy)  # rejects unknown policy names at startup
+        self.static_policy = static_policy
+        if bool(telemetry_service) != bool(telemetry_path):
+            raise ValueError("RL telemetry service and output path must be set together")
         self.mode = mode
         self.health_interval = health_interval
+        self.telemetry_service = telemetry_service
+        self.telemetry_path = telemetry_path
 
     def create(self, service_id: str, config: ServiceConfig) -> DependencyClient:
         if self.mode == "xds":
-            path = os.environ.get("EXPERIMENTAL_RL_TELEMETRY_OUTPUT")
-            target = os.environ.get("EXPERIMENTAL_RL_SERVICE")
             telemetry = (
-                TelemetryCollector(service_id, config.instances, path)
-                if path and target == service_id
+                TelemetryCollector(service_id, config.instances, self.telemetry_path)
+                if self.telemetry_service == service_id
                 else None
             )
             return XdsDependencyPool(service_id, telemetry)
-        return StaticDependencyPool(service_id, list(config.instances.values()), self.health_interval)
+        return StaticDependencyPool(
+            service_id, list(config.instances.values()), self.health_interval, self.static_policy
+        )
 
 
 # Existing callers can keep the original static-pool name.

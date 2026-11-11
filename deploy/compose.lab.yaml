@@ -1,0 +1,157 @@
+# Three logical nodes on one Docker host. Every container carries a lab.node label;
+# scripts/labenv.py stops, partitions or degrades a whole node through that label.
+#
+#   node1: consul-1, envoy-1, controlplane-1, a-1, b-1
+#   node2: consul-2, envoy-2, controlplane-2, a-2, c-1
+#   node3: consul-3,                          b-2, c-2
+#
+# The load generator runs outside the three nodes and reaches both Envoys on localhost.
+name: lb-lab
+
+x-service: &service
+  image: loadbalance-workload:lab
+  build:
+    context: ..
+    dockerfile: deploy/Dockerfile
+  command: ["python", "-m", "grpc_lb.microservices"]
+  volumes:
+    - ../configs/topology.compose.json:/app/configs/topology.json:ro
+    - ../configs/xds-bootstrap.ha.json:/app/configs/xds-bootstrap.json:ro
+  restart: unless-stopped
+
+x-env: &env
+  TOPOLOGY_PATH: /app/configs/topology.json
+  LISTEN_ADDRESS: "[::]:50051"
+  DRAIN_FILE: /tmp/drain
+
+x-caller: &caller
+  # static = health-checked fixed endpoints; xds = lookaside through the control planes.
+  DISCOVERY_MODE: ${LAB_DISCOVERY_MODE:-xds}
+  # Only the static pool can use least_request: gRPC Python 1.84 has no least_request policy,
+  # so a cluster delivered through xDS can only be round_robin.
+  STATIC_LB_POLICY: ${LAB_STATIC_POLICY:-round_robin}
+  GRPC_XDS_BOOTSTRAP: /app/configs/xds-bootstrap.json
+
+x-consul: &consul
+  image: hashicorp/consul:2.1.0
+  restart: unless-stopped
+  environment:
+    CONSUL_BIND_INTERFACE: eth0
+  volumes:
+    - ../configs/consul-ha.json:/consul/config/ha-profile.json:ro
+
+x-controlplane: &controlplane
+  image: loadbalance-controlplane:lab
+  build:
+    context: ..
+    dockerfile: deploy/Dockerfile.controlplane
+  volumes:
+    - ../configs/discovery.registry.json:/config/discovery.json:ro
+  networks:
+    default:
+      aliases: [xds-controlplane]
+  restart: unless-stopped
+
+x-envoy: &envoy
+  image: envoyproxy/envoy:v1.35.5
+  command: ["-c", "/etc/envoy/envoy.yaml", "--log-level", "info", "--concurrency", "2"]
+  volumes:
+    - ./.lab/envoy.yaml:/etc/envoy/envoy.yaml:ro
+  restart: unless-stopped
+
+services:
+  # ---- node1 ---------------------------------------------------------------
+  consul-1:
+    <<: *consul
+    labels: {lab.node: node1}
+    command: [agent, -server, -bootstrap-expect=3, -node=consul-1, -client=0.0.0.0, -datacenter=lb-lab, -retry-join=consul-2, -retry-join=consul-3]
+  envoy-1:
+    <<: *envoy
+    labels: {lab.node: node1}
+    ports: ["127.0.0.1:50050:50050"]
+    depends_on: [a-1, a-2]
+  controlplane-1:
+    <<: *controlplane
+    labels: {lab.node: node1}
+    environment:
+      CONSUL_HTTP_ADDR: http://consul-1:8500
+      CONSUL_ACTIVE_HEALTH: "1"
+    depends_on: [consul-1]
+  a-1:
+    <<: *service
+    labels: {lab.node: node1}
+    environment:
+      <<: [*env, *caller]
+      SERVICE_ID: service-a
+      INSTANCE_ID: a-1
+      CONSUL_HTTP_ADDR: http://consul-1:8500
+    depends_on: [consul-1, controlplane-1, controlplane-2]
+  b-1:
+    <<: *service
+    labels: {lab.node: node1}
+    environment:
+      <<: *env
+      SERVICE_ID: service-b
+      INSTANCE_ID: b-1
+      CONSUL_HTTP_ADDR: http://consul-1:8500
+    depends_on: [consul-1]
+
+  # ---- node2 ---------------------------------------------------------------
+  consul-2:
+    <<: *consul
+    labels: {lab.node: node2}
+    command: [agent, -server, -bootstrap-expect=3, -node=consul-2, -client=0.0.0.0, -datacenter=lb-lab, -retry-join=consul-1, -retry-join=consul-3]
+  envoy-2:
+    <<: *envoy
+    labels: {lab.node: node2}
+    ports: ["127.0.0.1:50060:50050"]
+    depends_on: [a-1, a-2]
+  controlplane-2:
+    <<: *controlplane
+    labels: {lab.node: node2}
+    environment:
+      CONSUL_HTTP_ADDR: http://consul-2:8500
+      CONSUL_ACTIVE_HEALTH: "1"
+    depends_on: [consul-2]
+  a-2:
+    <<: *service
+    labels: {lab.node: node2}
+    environment:
+      <<: [*env, *caller]
+      SERVICE_ID: service-a
+      INSTANCE_ID: a-2
+      CONSUL_HTTP_ADDR: http://consul-2:8500
+    depends_on: [consul-2, controlplane-1, controlplane-2]
+  c-1:
+    <<: *service
+    labels: {lab.node: node2}
+    environment:
+      <<: *env
+      SERVICE_ID: service-c
+      INSTANCE_ID: c-1
+      CONSUL_HTTP_ADDR: http://consul-2:8500
+    depends_on: [consul-2]
+
+  # ---- node3 ---------------------------------------------------------------
+  consul-3:
+    <<: *consul
+    labels: {lab.node: node3}
+    command: [agent, -server, -bootstrap-expect=3, -node=consul-3, -client=0.0.0.0, -datacenter=lb-lab, -retry-join=consul-1, -retry-join=consul-2]
+  b-2:
+    <<: *service
+    labels: {lab.node: node3}
+    environment:
+      <<: *env
+      SERVICE_ID: service-b
+      INSTANCE_ID: b-2
+      CONSUL_HTTP_ADDR: http://consul-3:8500
+    depends_on: [consul-3]
+  c-2:
+    <<: *service
+    labels: {lab.node: node3}
+    environment:
+      <<: *env
+      SERVICE_ID: service-c
+      INSTANCE_ID: c-2
+      CONSUL_HTTP_ADDR: http://consul-3:8500
+    depends_on: [consul-3]

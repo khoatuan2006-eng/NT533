@@ -42,11 +42,20 @@ async def start_service(
     health_interval: float = 1,
     discovery_mode: str = "static",
     workload: Workload | None = None,
+    telemetry_service: str = "",
+    telemetry_path: str = "",
+    static_policy: str = "round_robin",
 ) -> RunningService:
     validate(topology)
     if topology.get(config.service_id) != config or instance_id not in config.instances:
         raise ValueError("Service and instance must be registered in topology")
-    factory = DependencyPoolFactory(discovery_mode, health_interval)
+    factory = DependencyPoolFactory(
+        discovery_mode,
+        health_interval,
+        telemetry_service=telemetry_service,
+        telemetry_path=telemetry_path,
+        static_policy=static_policy,
+    )
     pools: dict[str, Pool] = {}
     # Admission belongs to Execute so health probes remain available under load.
     # Refuse a duplicate listener rather than silently sharing the endpoint.

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="520" viewBox="0 0 680 520" role="img" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+  <title>Kiến trúc logic của hệ thống cân bằng tải</title>
+  <desc>Client gọi hai Envoy, Envoy cân bằng tới service A, A gọi trực tiếp service B và C. Ba Consul cấp membership cho hai control plane, control plane phát endpoint cho A qua xDS; RL tùy chọn chỉnh trọng số qua control plane.</desc>
+  <defs>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <style>
+    .t { font-size: 14px; font-weight: 600; dominant-baseline: central; text-anchor: middle; }
+    .s { font-size: 12px; dominant-baseline: central; text-anchor: middle; }
+    .group rect { fill: #444441; stroke: #888780; stroke-width: 0.5; }
+    .group text { fill: #D3D1C7; }
+    .data rect { fill: #085041; stroke: #5DCAA5; stroke-width: 0.5; }
+    .data text { fill: #9FE1CB; }
+    .ctl rect { fill: #3C3489; stroke: #AFA9EC; stroke-width: 0.5; }
+    .ctl .t { fill: #EEEDFE; }
+    .ctl .s { fill: #CECBF6; }
+    .req { stroke: #888780; stroke-width: 1.5; fill: none; }
+    .cfg { stroke: #888780; stroke-width: 1.5; fill: none; stroke-dasharray: 4 3; }
+    .legend { fill: #B4B2A9; font-size: 12px; dominant-baseline: central; }
+  </style>
+
+  <rect x="0" y="0" width="680" height="520" rx="12" fill="#1F1F1E"/>
+
+  <rect x="140" y="40" width="200" height="44" rx="8" fill="#2C2C2A" stroke="#5F5E5A" stroke-width="0.5"/>
+  <text class="t" x="240" y="62" fill="#F1EFE8">Client / bộ phát tải</text>
+  <line class="req" x1="240" y1="84" x2="240" y2="108" marker-end="url(#arrow-gray)"/>
+
+  <g class="group"><rect x="40" y="110" width="400" height="84" rx="12"/>
+    <text class="t" x="240" y="126">Tầng 1 — Envoy ingress (Round Robin)</text></g>
+  <g class="data"><rect x="60" y="138" width="170" height="44" rx="8"/><text class="t" x="145" y="160">envoy-1</text></g>
+  <g class="data"><rect x="250" y="138" width="170" height="44" rx="8"/><text class="t" x="335" y="160">envoy-2</text></g>
+  <line class="req" x1="240" y1="194" x2="240" y2="232" marker-end="url(#arrow-gray)"/>
+
+  <g class="group"><rect x="40" y="234" width="400" height="84" rx="12"/>
+    <text class="t" x="240" y="250">Service A — điều phối (caller)</text></g>
+  <g class="data"><rect x="60" y="262" width="170" height="44" rx="8"/><text class="t" x="145" y="284">a-1</text></g>
+  <g class="data"><rect x="250" y="262" width="170" height="44" rx="8"/><text class="t" x="335" y="284">a-2</text></g>
+  <line class="req" x1="135" y1="318" x2="135" y2="370" marker-end="url(#arrow-gray)"/>
+  <line class="req" x1="345" y1="318" x2="345" y2="370" marker-end="url(#arrow-gray)"/>
+
+  <g class="group"><rect x="40" y="372" width="190" height="84" rx="12"/><text class="t" x="135" y="388">Service B</text></g>
+  <g class="data"><rect x="52" y="400" width="80" height="44" rx="8"/><text class="t" x="92" y="422">b-1</text></g>
+  <g class="data"><rect x="140" y="400" width="80" height="44" rx="8"/><text class="t" x="180" y="422">b-2</text></g>
+  <g class="group"><rect x="250" y="372" width="190" height="84" rx="12"/><text class="t" x="345" y="388">Service C</text></g>
+  <g class="data"><rect x="262" y="400" width="80" height="44" rx="8"/><text class="t" x="302" y="422">c-1</text></g>
+  <g class="data"><rect x="350" y="400" width="80" height="44" rx="8"/><text class="t" x="390" y="422">c-2</text></g>
+
+  <g class="ctl"><rect x="480" y="110" width="160" height="84" rx="8" stroke-dasharray="4 3"/>
+    <text class="t" x="560" y="140">RL controller</text><text class="s" x="560" y="162">Tùy chọn: trọng số</text></g>
+  <line class="cfg" x1="560" y1="194" x2="560" y2="230" marker-end="url(#arrow-gray)"/>
+
+  <g class="ctl"><rect x="480" y="234" width="160" height="84" rx="8"/>
+    <text class="t" x="560" y="264">Control plane ×2</text><text class="s" x="560" y="286">Phát endpoint qua xDS</text></g>
+  <line class="cfg" x1="478" y1="276" x2="444" y2="276" marker-end="url(#arrow-gray)"/>
+
+  <g class="ctl"><rect x="480" y="372" width="160" height="84" rx="8"/>
+    <text class="t" x="560" y="402">Consul ×3</text><text class="s" x="560" y="424">Registry, Raft quorum</text></g>
+  <line class="cfg" x1="560" y1="372" x2="560" y2="322" marker-end="url(#arrow-gray)"/>
+
+  <line class="req" x1="40" y1="490" x2="72" y2="490"/>
+  <text class="legend" x="80" y="490">Đường đi của request</text>
+  <line class="cfg" x1="260" y1="490" x2="292" y2="490"/>
+  <text class="legend" x="300" y="490">Cấu hình, discovery (không chở request)</text>
+</svg>

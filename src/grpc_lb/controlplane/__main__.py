@@ -3,7 +3,6 @@
 import argparse
 import asyncio
 import logging
-import os
 import signal
 from pathlib import Path
 
@@ -20,13 +19,9 @@ async def serve(settings: RuntimeSettings):
     try:
         for signum in (signal.SIGINT, signal.SIGTERM):
             previous[signum] = signal.signal(signum, lambda *_: loop.call_soon_threadsafe(stop.set))
-        telemetry = os.environ.get("EXPERIMENTAL_RL_TELEMETRY")
-        service = os.environ.get("EXPERIMENTAL_RL_SERVICE")
-        if bool(telemetry) != bool(service):
-            raise ValueError("EXPERIMENTAL_RL_TELEMETRY and EXPERIMENTAL_RL_SERVICE must be set together")
         policy = (
-            RLController(telemetry, service, model_path=os.environ.get("EXPERIMENTAL_RL_MODEL"))
-            if telemetry and service
+            RLController(settings.rl_telemetry, settings.rl_service, model_path=settings.rl_model or None)
+            if settings.rl_service
             else None
         )
         source = await create_source(settings)

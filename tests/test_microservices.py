@@ -239,6 +239,8 @@ async def test_configured_failure_injection():
                 await rpc.ProcessingServiceStub(channel).Execute(request(), timeout=2)
             assert exc.value.code() == grpc.StatusCode.UNAVAILABLE
             assert "Simulated" in exc.value.details()
+            # Failures still identify the answering instance for error attribution.
+            assert dict(exc.value.trailing_metadata())["x-instance-id"] == "gateway-1"
             # An application rejection is not proof that its endpoint died.
             assert len(nodes["gateway-1"].pools["worker-y"].balancer.get_active_backends()) == 2
 
@@ -251,7 +253,9 @@ async def test_success_trailers_expose_local_budget_and_duration():
             await call
             metadata = dict(list(await call.trailing_metadata()))
             assert 0 <= float(metadata["x-server-queue-ms"]) <= float(metadata["x-server-duration-ms"])
-            assert float(metadata["x-server-duration-ms"]) < float(metadata["x-server-budget-ms"]) <= 2000
+            # The server derives its budget from its own clock; allow coarse-timer skew.
+            assert float(metadata["x-server-duration-ms"]) < float(metadata["x-server-budget-ms"]) <= 2050
+            assert metadata["x-instance-id"] == "gateway-1"
 
 
 def test_topology_validation_and_config_files():

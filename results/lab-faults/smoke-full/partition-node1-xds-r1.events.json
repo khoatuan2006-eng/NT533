@@ -1,0 +1,10 @@
+{
+  "fault": "partition-node1",
+  "mode": "xds",
+  "endpoint": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+  "expect": "observe",
+  "fault_dispatch_s": 10.009262900000067,
+  "fault_confirmed_s": 12.833398599999782,
+  "restore_dispatch_s": 50.001000100000056,
+  "restore_confirmed_s": 53.32635070000015
+}

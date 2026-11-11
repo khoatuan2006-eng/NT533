@@ -1,0 +1,30 @@
+[
+  {
+    "fault": "node1-down",
+    "mode": "static-lr",
+    "verdict": "\u0111\u1ea1t",
+    "runs": [
+      {
+        "trace": "node1-down-static-lr-r1",
+        "fault": "node1-down",
+        "mode": "static-lr",
+        "expect": "continue",
+        "scheduled_in_fault": 799,
+        "errors_in_fault": 20,
+        "error_percent_in_fault": 2.5031289111389237,
+        "error_codes_in_fault": {
+          "UNAVAILABLE": 20
+        },
+        "interruption_s": 1.950000000000001,
+        "p95_ok_in_fault_ms": 40.14740000002348,
+        "instances_serving_in_fault": [
+          "a-2",
+          "b-2",
+          "c-1",
+          "c-2"
+        ],
+        "recovery_after_restore_s": 0.0008040999999820997
+      }
+    ]
+  }
+]

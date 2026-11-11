@@ -1,0 +1,10 @@
+{
+  "fault": "node3-down",
+  "mode": "xds",
+  "endpoint": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+  "expect": "continue",
+  "fault_dispatch_s": 9.997153000000253,
+  "fault_confirmed_s": 15.391210700000556,
+  "restore_dispatch_s": 50.00554600000032,
+  "restore_confirmed_s": 52.08411640000031
+}

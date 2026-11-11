@@ -1,0 +1,50 @@
+{
+  "schema_version": 2,
+  "run_id": "6b0b57cf772242739e60784b1ed4ba95",
+  "started_unix_s": 1794356204.6291392,
+  "python": "3.12.10",
+  "grpc": "1.84.0",
+  "parameters": {
+    "address": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+    "output": "results\\lab-faults\\smoke-full\\consul-leader-xds-r1.json",
+    "mode": "xds",
+    "entry": "service-a",
+    "workload": "light",
+    "rate": 20,
+    "duration": 80,
+    "timeout": 3,
+    "ready_timeout": 30,
+    "max_inflight": 256,
+    "warmup": 40,
+    "fault_at": 9.992951299999731,
+    "stable_window": 5
+  },
+  "completion_elapsed_s": 79.98662839999997,
+  "raw": "results\\lab-faults\\smoke-full\\consul-leader-xds-r1.jsonl",
+  "summary": {
+    "scheduled": 1600,
+    "attempted": 1600,
+    "successful": 1600,
+    "codes": {
+      "OK": 1600
+    },
+    "successful_rps_offered_window": 20.0,
+    "successful_rps_elapsed": 20.0,
+    "failure_fraction_including_generator_drops": 0.0,
+    "rpc_error_fraction": 0.0,
+    "valid_load": true,
+    "success_latency_ms": {
+      "p50": 31.507600000622915,
+      "p95": 38.283400000182155,
+      "p99": 46.88810000061494
+    },
+    "all_rpc_latency_ms": {
+      "p50": 31.507600000622915,
+      "p95": 38.283400000182155,
+      "p99": 46.88810000061494
+    },
+    "schedule_lag_ms_p99": 22.865700000330946,
+    "observed_recovery_s": 0.007048700000268582,
+    "recovery_stable_window_s": 5
+  }
+}

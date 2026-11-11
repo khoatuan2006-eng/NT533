@@ -1,0 +1,11 @@
+{
+  "fault": "consul-leader",
+  "mode": "xds",
+  "endpoint": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+  "expect": "continue",
+  "fault_dispatch_s": 9.992951299999731,
+  "fault_detail": "consul-1",
+  "fault_confirmed_s": 19.442771500000163,
+  "restore_dispatch_s": 50.01180260000001,
+  "restore_confirmed_s": 59.61438910000015
+}
