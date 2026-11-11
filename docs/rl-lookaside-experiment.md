@@ -1,5 +1,18 @@
 # Thử nghiệm RL cho lookaside
 
+## Vị trí trong đồ án
+
+RL thuộc **nhánh lỗi mềm** của câu hỏi chính (xem [README](../README.md#câu-hỏi-của-đồ-án)): một backend vẫn trả lời nhưng chậm, health probe không rút nó ra, nên việc né nó phụ thuộc vào chiến lược cân bằng tải. RL là một chiến lược như vậy: đọc latency theo endpoint và đổi trọng số mà control plane phát qua xDS.
+
+Phần này cần trả lời hai điều:
+
+1. **Có né được backend chậm không**, so với Round Robin và một quy tắc đơn giản, trên cùng đường xDS và trong cùng lượt chạy.
+2. **Có an toàn khi chính nó lỗi không**: telemetry cũ, thiếu mẫu hoặc lỗi vượt 10% thì phải quay về Round Robin.
+
+Giới hạn khi so sánh: RL chạy trong lab cục bộ với một caller và hai backend, còn Least Request đo trên cụm ba VM với caller static. Hai bên khác đường dữ liệu và khác môi trường, nên không xếp hạng RL với Least Request bằng số tuyệt đối; chỉ so mỗi bên với Round Robin cùng đường ([quy tắc so sánh chiến lược](running.md#quy-tắc-so-sánh-chiến-lược)). Nếu RL không hơn quy tắc đơn giản thì báo cáo ghi đúng như vậy.
+
+Lệnh dùng cho báo cáo là lượt nhiều seed trong [tham chiếu thí nghiệm](running.md#rl-nhiều-seed--compare_rl_scenariospy). Phần còn lại của tài liệu này là nhật ký các lượt thử trước.
+
 Agent Q-learning trong `src/grpc_lb/rl.py` có hai đường thử nghiệm. `scripts/train_lookaside_rl.py` chạy mô phỏng hai backend; state mô phỏng chứa danh tính backend chậm và mức tải lý tưởng, không đại diện cho telemetry thật. Model JSON của script này không được control plane đọc.
 
 `scripts/experiment_rl_lookaside.py` chạy vòng Q-learning trực tiếp trong lab localhost: RPC qua gRPC xDS đến hai service, đo latency theo instance, đưa telemetry vào `SnapshotPublisher` và `RLController` thực, phát trọng số, đo reward và cập nhật Q. Đây là học online có exploration, chỉ dành cho lab; ADS và service được script tạo và đóng riêng. Độ trễ 1 giây sau publish là giả định, không xác nhận ACK và không đảm bảo mọi RPC đã nhận policy mới. Mẫu nhỏ và tải tuần tự không chứng minh RL cải thiện hiệu năng.

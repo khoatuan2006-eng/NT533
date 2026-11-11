@@ -6,7 +6,14 @@
 
 **Câu hỏi chính:** hệ thống cân bằng tải hai tầng này tiếp tục phục vụ thế nào khi từng thành phần phân tán bị lỗi — backend, máy chủ, control plane, registry, hoặc khi mạng bị phân mảnh?
 
-**Câu hỏi mở rộng (RL):** một bộ điều khiển học được có thể điều chỉnh trọng số qua control plane nhân bản mà vẫn an toàn khi chính nó lỗi hoặc thiếu dữ liệu không?
+Câu hỏi này chia thành hai nhánh theo loại lỗi; mọi phần của đồ án đều thuộc một trong hai nhánh:
+
+| Nhánh | Lỗi | Cơ chế chịu lỗi | Câu hỏi cần trả lời |
+|---|---|---|---|
+| **Lỗi cứng** | Thành phần ngừng trả lời: backend, node, control plane, Consul chết; mạng phân mảnh | Phát hiện lỗi (health probe, timeout), nhân bản, quorum, fail closed | Ai phát hiện, sau bao lâu; hệ thống gián đoạn bao lâu và tự phục hồi thế nào? |
+| **Lỗi mềm** | Thành phần vẫn trả lời nhưng chậm: backend chậm, mạng trễ hoặc rớt gói | Health probe không bắt được, nên **chiến lược cân bằng tải** là cơ chế chịu lỗi duy nhất | Round Robin, Least Request hay RL né backend chậm tốt hơn, và vì sao? |
+
+**RL là phần mở rộng trong nhánh lỗi mềm**, không phải câu hỏi riêng. Nó phải trả lời thêm một điều: bộ điều khiển học được có an toàn khi chính nó lỗi hoặc thiếu dữ liệu không (xem [tiêu chí cho phần RL](#tiêu-chí-cho-phần-rl)).
 
 ## Kiến trúc
 
@@ -61,17 +68,21 @@ Mọi thành viên đều tự chạy, kiểm tra, đánh giá và sửa; không
 3. **Đánh giá**: kết luận đạt / không đạt theo tiêu chí, nêu nguyên nhân cho ô không đạt.
 4. **Sửa để cải thiện**: đặt giả thuyết, sửa trên nhánh riêng, triển khai, chạy lại đúng ô đó, ghi cặp trước / sau.
 
+Hai quy ước chung: **ghi dự đoán trước khi đo** (ai phát hiện, theo timeout nào, gián đoạn bao lâu) để so với số đo; và mọi bảng "trước" đều đo trên **một bản baseline chung** đã gắn tag, trước khi ai triển khai bản sửa.
+
 Cả nhóm dùng chung một cụm ba VM nên **mỗi lúc chỉ một người chạy**; các script tự giữ khóa cụm và từ chối nếu người khác đang chạy. Báo trong nhóm trước khi triển khai code mới, vì triển khai khởi động lại toàn bộ cụm.
 
 Để báo cáo không trùng lặp, mỗi người đứng tên một phần (vẫn tự chạy cả phần còn lại để hiểu):
 
-| Người | Đứng tên trong báo cáo |
-|---|---|
-| Đạt | Thử lỗi và phân mảnh mạng: gián đoạn, phục hồi, fail closed |
-| Lầu | Tải và cân bằng: điểm bão hòa, Round Robin so với Least Request, backend chậm |
-| Khoa | RL (phần mở rộng) và ghép báo cáo |
+| Người | Nhánh | Đứng tên trong báo cáo |
+|---|---|---|
+| Đạt | Lỗi cứng | Thử lỗi và phân mảnh mạng: gián đoạn, phục hồi, fail closed |
+| Lầu | Lỗi mềm | Backend chậm trên cụm: Round Robin so với Least Request; điểm bão hòa làm mốc tải |
+| Khoa | Lỗi mềm (mở rộng) | RL so với Round Robin và quy tắc khi có backend chậm; ghép báo cáo |
 
-Ô đã biết là "không đạt" để cả nhóm luyện quy trình sửa: phục hồi chậm sau khi gỡ phân mảnh node 1 (xem [tham chiếu thí nghiệm](docs/running.md#vấn-đề-đã-biết)).
+Ba chiến lược không chạy trên cùng một đường dữ liệu (Least Request chỉ có ở caller static, RL chỉ có ở caller xDS trong lab cục bộ), nên chỉ so sánh trong cùng một đường; xem [quy tắc so sánh](docs/running.md#quy-tắc-so-sánh-chiến-lược).
+
+Ô nghi là "không đạt" để cả nhóm luyện quy trình sửa: phục hồi chậm sau khi gỡ phân mảnh node 1. Hiện tượng này mới thấy trên bản dựng một máy, cần tái hiện trên cụm trước (xem [tham chiếu thí nghiệm](docs/running.md#vấn-đề-đã-biết)).
 
 ### Tiêu chí cho phần RL
 

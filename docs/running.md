@@ -68,6 +68,21 @@ An toàn:
 
 Phương án có Least Request ở tầng trong cần code triển khai sau ngày 28/10 (xem bước triển khai trong [hướng dẫn cho nhóm](team-guide.md)).
 
+### Quy tắc so sánh chiến lược
+
+Ba chiến lược của nhánh lỗi mềm không chạy trên cùng một đường dữ liệu, cũng không cùng môi trường:
+
+| Chiến lược | Đường A → B/C | Môi trường | Công cụ | Mốc Round Robin cùng đường |
+|---|---|---|---|---|
+| Round Robin | static và xDS | Cụm ba VM | `run_load.py` | — |
+| Least Request | static | Cụm ba VM | `run_load.py`, phương án `static-lr` | `static` |
+| RL, quy tắc | xDS (trọng số locality) | Lab cục bộ, một caller, hai backend | `compare_rl_scenarios.py` | Round Robin trong cùng lượt chạy |
+
+- **Chỉ kết luận hơn / kém trong cùng một dòng mốc**: Least Request so với `static`; RL và quy tắc so với Round Robin của chính lượt đó.
+- **Không đặt số của Least Request và RL vào chung một bảng xếp hạng.** Khác đường dữ liệu, khác môi trường, khác mức tải; số tuyệt đối không so được.
+- Thứ so được giữa hai bên là **mức cải thiện tương đối so với Round Robin cùng đường** và **cơ chế**: Least Request phản ứng theo từng request bằng số request đang chờ; RL phản ứng theo cửa sổ 10 giây bằng latency đo được, qua control plane.
+- `xds` so với `static` (cùng Round Robin) cho biết chi phí của cách khám phá endpoint, không nói gì về chiến lược.
+
 ## Bài lỗi và phân mảnh — `run_faults.py`
 
 ```powershell
@@ -89,6 +104,8 @@ Mỗi lần lặp: 20 RPS, 10 giây bình thường, gây lỗi, giữ 40 giây,
 | `delay-node3` | Node 3 thêm 100 ms độ trễ | Gián đoạn ≤ 30 giây |
 | `loss-node3` | Node 3 rớt 20% gói | Chỉ quan sát |
 
+Tám tình huống đầu là **lỗi cứng**. `delay-node3` và `loss-node3` là **lỗi mềm**: thành phần vẫn trả lời nên health probe không rút nó ra; chúng nối sang bài tải, nơi đo xem chiến lược cân bằng tải có né được không.
+
 **Gián đoạn** tính từ request lỗi đầu tiên đến đầu cửa sổ 5 giây toàn thành công, trong lúc lỗi còn hiệu lực. `quorum-loss` với phương án static chỉ quan sát, vì caller static không phụ thuộc Consul.
 
 Kết quả ở `results/lab-faults/<thời điểm>/`. Dựng lại bảng từ trace có sẵn: `run_faults.py --report results/lab-faults/<thời điểm>`.
@@ -108,7 +125,7 @@ Tự đổi phương án (mặc định `xds`, `static`, `static-lr`), chạy t�
 
 Một ô (phương án, kịch bản, mức tải) **đạt** khi mọi lần lặp có lỗi ≤ 1%, goodput ≥ 98% tải đặt, P99 request thành công < 3 giây và bộ phát tải không bỏ request. Nếu mọi mức đều đạt thì chưa thấy điểm bão hòa: tăng `--rates`.
 
-Bảng trả lời ba câu hỏi: (1) static và xDS khác nhau thế nào ở cùng tải; (2) Least Request có né backend chậm không (so `static-lr` với `static` ở `slow-node3`, cột "Phần b-2"; Round Robin ≈ 50%); (3) điểm bão hòa. Dựng lại bảng: `run_load.py --report results/lab-load/<thời điểm>`.
+Bảng trả lời ba câu hỏi, theo thứ tự quan trọng với đồ án: (1) Least Request có né backend chậm không, tức câu hỏi của nhánh lỗi mềm (so `static-lr` với `static` ở `slow-node3`, cột "Phần b-2"; Round Robin ≈ 50%); (2) điểm bão hòa, dùng làm mốc để biết kết quả (1) đo ở mức tải nhẹ hay gần bão hòa; (3) static và xDS khác nhau thế nào ở cùng tải. Khi so sánh, theo [quy tắc so sánh chiến lược](#quy-tắc-so-sánh-chiến-lược). Dựng lại bảng: `run_load.py --report results/lab-load/<thời điểm>`.
 
 Bộ phát tải đi qua VPN, và ba VM còn cài sẵn k3s (đồ án không dùng nhưng nó vẫn chiếm một phần CPU, RAM); cần ghi hai điều này khi diễn giải độ trễ.
 
@@ -120,16 +137,18 @@ Chạy trên máy cục bộ, không dùng cloud: script tự dựng hai service
 .\.venv\Scripts\python.exe scripts/compare_rl_scenarios.py --model results/rl-convergence-balanced-20261101/model-7.json --output-dir results/rl-multiseed --seeds 41 42 43 44 45
 ```
 
-Bốn kịch bản × ba policy × năm seed, khoảng 15 phút. `report.md` có median [min–max] giữa các seed và cột hiệu RL − policy theo từng seed. Chỉ kết luận RL tốt hơn khi nó nhanh hơn ở hầu hết seed và khoảng hiệu không chứa 0. Bối cảnh và các lượt trước: [thử nghiệm RL](rl-lookaside-experiment.md).
+Bốn kịch bản × ba policy × năm seed, khoảng 15 phút. `report.md` có median [min–max] giữa các seed và cột hiệu RL − policy theo từng seed. Chỉ kết luận RL tốt hơn khi nó nhanh hơn ở hầu hết seed và khoảng hiệu không chứa 0. Kết quả này chỉ so với Round Robin và quy tắc trong cùng lượt, không so với số Least Request đo trên cụm ([quy tắc so sánh chiến lược](#quy-tắc-so-sánh-chiến-lược)). Bối cảnh và các lượt trước: [thử nghiệm RL](rl-lookaside-experiment.md).
 
 ## Vấn đề đã biết
+
+**Cả hai vấn đề dưới đây mới quan sát trên bản dựng một máy, mỗi tình huống một lần.** Lượt đó có 7/10 tình huống đạt; chưa ô nào được đo trên cụm. Việc đầu tiên trên cụm là chạy lại đúng tình huống đó với 5 lần lặp trên bản baseline: nếu tái hiện được thì nó là bảng "trước"; nếu không thì ghi lại là hiện tượng riêng của bản một máy và chọn ô không đạt khác từ bảng baseline. Với mỗi ô không đạt, phân loại trước khi sửa: lỗi của hệ thống, lỗi của công cụ đo, hay tiêu chí đặt chưa hợp lý.
 
 **Phục hồi chậm sau phân mảnh dài** (`partition-node1`, lượt chạy thử 11/11). Sau khi gỡ phân mảnh, khoảng 50% request vẫn lỗi; a-1 khoảng 2 phút sau mới phục vụ lại. Manh mối từ log, chưa được kiểm chứng:
 
 - Health probe của control plane đánh dấu b-1 hỏng 4 giây sau khi phân mảnh, nhưng 2 phút 3 giây sau khi gỡ mới đánh dấu khỏe lại. Hãy tìm hiểu cơ chế kết nối lại (reconnect backoff) của kênh gRPC.
 - consul-1 trả lỗi cho đọc nhất quán thêm khoảng 35 giây sau khi gỡ.
 
-Đây là một ô "không đạt" để nhóm luyện quy trình: đo trước, tìm nguyên nhân, sửa, đo lại.
+Nếu tái hiện được trên cụm, đây là ô "không đạt" để nhóm luyện quy trình: đo trước, tìm nguyên nhân, sửa, đo lại.
 
 **Đăng ký theo node.** Mỗi instance đăng ký qua Consul cùng node. Khi Consul của một node chết, instance cùng node có thể bị rút khỏi routing một thời gian dù vẫn khỏe (lượt chạy thử: b-1 vắng khoảng 20 giây khi consul-1 dừng).
 
