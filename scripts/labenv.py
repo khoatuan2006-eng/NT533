@@ -367,6 +367,18 @@ class ComposeLab:
         return tools
 
 
+def make_lab(*, wsl: str | None = None, compose: str | None = None, env: str | Path | None = None):
+    """Compose lab on this machine by default; a JSON description selects another environment."""
+    if not env:
+        return ComposeLab(wsl=wsl, compose=compose)
+    description = json.loads(Path(env).read_text(encoding="utf-8"))
+    if description.get("driver") != "ssh":
+        raise ValueError("lab description: driver must be ssh")
+    from labenv_ssh import SshLab
+
+    return SshLab(description)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -375,6 +387,7 @@ def main():
         "--wsl", help="WSL distribution holding Docker (Windows only; default distro if unset)"
     )
     parser.add_argument("--compose", help="Compose binary on the Docker host")
+    parser.add_argument("--env", help="Lab description (JSON) for a multi-VM lab; default is this machine")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("check")
     up = commands.add_parser("up")
@@ -396,10 +409,12 @@ def main():
     slow.add_argument("--delay-ms", type=int, default=0)
     slow.add_argument("--loss-percent", type=float, default=0)
     args = parser.parse_args()
-    lab = ComposeLab(wsl=args.wsl, compose=args.compose)
+    lab = make_lab(wsl=args.wsl, compose=args.compose, env=args.env)
     if args.command == "check":
         tools = lab.check()
         print(json.dumps(tools, indent=2))
+        for name, reason in getattr(lab, "check_errors", {}).items():
+            print(f"{name}: {reason}", file=sys.stderr)
         sys.exit(0 if all(value for key, value in tools.items() if key != "netem") else 1)
     elif args.command == "up":
         lab.up_variant(args.variant, build=args.build)

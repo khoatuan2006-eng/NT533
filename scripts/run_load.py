@@ -20,7 +20,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from controlled_probe import Probe, summarize
-from labenv import VARIANTS, ComposeLab, LabEnvironment
+from labenv import VARIANTS, LabEnvironment, make_lab
 from run_faults import wait_ready
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -204,6 +204,7 @@ def main():
     parser.add_argument("--report", type=Path, help="Only rebuild report.md from an existing run directory")
     parser.add_argument("--wsl", help="WSL distribution holding Docker (Windows only)")
     parser.add_argument("--compose", help="Compose binary on the Docker host")
+    parser.add_argument("--env", help="Lab description (JSON) for a multi-VM lab; default is this machine")
     args = parser.parse_args()
     if args.report:
         print(report(args.report))
@@ -212,7 +213,7 @@ def main():
         parser.error("repetitions >= 1, duration >= 10, positive rates and slow-ms required")
     directory = args.output or ROOT / "results/lab-load" / time.strftime("%Y%m%d-%H%M%S")
     directory.mkdir(parents=True, exist_ok=False)
-    lab = ComposeLab(wsl=args.wsl, compose=args.compose)
+    lab = make_lab(wsl=args.wsl, compose=args.compose, env=args.env)
     (directory / "run.json").write_text(
         json.dumps(
             {

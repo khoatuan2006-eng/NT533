@@ -23,7 +23,7 @@ from typing import Callable
 
 import grpc
 from controlled_probe import Probe, interruption, summarize
-from labenv import NODES, VARIANTS, ComposeLab, LabEnvironment
+from labenv import NODES, VARIANTS, LabEnvironment, make_lab
 
 from grpc_lb.generated import processing_pb2 as pb
 from grpc_lb.generated import processing_pb2_grpc as rpc
@@ -345,6 +345,7 @@ def main():
     parser.add_argument("--report", type=Path, help="Only rebuild report.md from an existing run directory")
     parser.add_argument("--wsl", help="WSL distribution holding Docker (Windows only)")
     parser.add_argument("--compose", help="Compose binary on the Docker host")
+    parser.add_argument("--env", help="Lab description (JSON) for a multi-VM lab; default is this machine")
     args = parser.parse_args()
     if args.report:
         print(report(args.report))
@@ -353,7 +354,7 @@ def main():
         parser.error("repetitions >= 1, rate > 0, before >= 5, hold >= 20 and after >= 10 required")
     directory = args.output or ROOT / "results/lab-faults" / time.strftime("%Y%m%d-%H%M%S")
     directory.mkdir(parents=True, exist_ok=False)
-    lab = ComposeLab(wsl=args.wsl, compose=args.compose)
+    lab = make_lab(wsl=args.wsl, compose=args.compose, env=args.env)
     (directory / "run.json").write_text(
         json.dumps(
             {

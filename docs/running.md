@@ -115,6 +115,37 @@ Ba câu hỏi bảng này trả lời: (1) static và xDS khác nhau thế nào 
 
 Bộ phát tải cũng chạy trên máy này (Windows có timer thô) và các node chung CPU. Dùng số liệu để so sánh tương đối giữa các phương án, không làm số tuyệt đối; cần ghi rõ điều đó trong báo cáo.
 
+## Chạy trên ba VM cloud
+
+Cùng hai bộ chạy, thêm `--env` trỏ tới file mô tả môi trường. Sao chép `configs/lab.cloud.example.json`, sửa địa chỉ nếu cần, rồi:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/labenv.py --env configs/lab.cloud.json check
+.\.venv\Scripts\python.exe scripts/labenv.py --env configs/lab.cloud.json status
+.\.venv\Scripts\python.exe scripts/run_faults.py --env configs/lab.cloud.json --scenarios backend-stop --repetitions 1
+```
+
+File mô tả ghi: địa chỉ cửa vào (LB cloud), file cấu hình SSH, và với mỗi node là địa chỉ SSH, IP nội bộ, bảng tên service của lab → tên service Compose trên VM (ví dụ `envoy-1` → `ingress` trên node1).
+
+Cùng một thao tác được thực hiện khác nhau ở hai môi trường:
+
+| Thao tác | Lab một máy | Ba VM |
+|---|---|---|
+| Dừng instance / node | `docker stop` các container | `docker compose stop` trên VM chứa nó (VM vẫn bật) |
+| Phân mảnh | `iptables` trong network namespace của từng container | `iptables` trên VM, chặn IP nội bộ của nhóm bên kia |
+| Độ trễ, rớt gói | `tc netem` trên `eth0` của container | `tc netem` chỉ cho gói gửi tới các node khác của lab |
+| Đổi phương án | Biến môi trường của Compose, tạo lại container | Ghi `mode.json` trên VM, sửa `envoy.yaml`, tạo lại service liên quan |
+
+Ba điểm an toàn riêng của cloud:
+
+- **Luật mạng tự hết hạn sau 15 phút.** Nếu mất phiên SSH giữa chừng, các VM không bị cắt khỏi nhau mãi.
+- **Luật phân mảnh luôn đặt ở phía còn SSH tới được.** node2 và node3 nằm sau node1 (jump host), nên khi cô lập node3 luật được đặt trên node1 và node2, không đặt trên node3.
+- **Độ trễ không ảnh hưởng SSH**, vì chỉ áp cho gói đi tới IP nội bộ của các node khác.
+
+Khác biệt cần ghi trong báo cáo: "node chết" trên cloud là dừng mọi container của lab trên VM đó, không tắt VM; ba VM còn chạy chung k3s nên phân mảnh cũng ảnh hưởng tới k3s. Code mới (trailer `x-instance-id`, `STATIC_LB_POLICY`) chỉ có trên VM sau khi triển khai lại bằng `scripts/multihost.py`; phương án `static-lr` cần bước đó.
+
+> **Trạng thái:** driver ba VM đã qua kiểm thử logic (lệnh sinh ra đúng) nhưng **chưa chạy trên VM thật**. Lần đầu chạy theo đúng thứ tự ba lệnh ở trên, rồi `partition-node3` một lần, trước khi chạy cả bộ.
+
 ## Việc 4 — RL nhiều seed (Khoa)
 
 Không cần Docker; script tự dựng hai service và control plane trên localhost.
