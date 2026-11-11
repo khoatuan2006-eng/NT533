@@ -26,7 +26,7 @@
 - **Node 1 gánh nặng nhất** (có cả Envoy lẫn control plane), nên "node 1 chết" là bài thử khó nhất.
 - **Bộ phát tải nằm ngoài cụm** và giữ kết nối tới cả hai Envoy, nên khi một node chết nó vẫn tới được Envoy còn lại.
 
-Cùng một bố trí dùng cho cả hai môi trường: ở đợt nghiệm thu cloud mỗi node là một VM; trong các thí nghiệm hiện tại mỗi node là một nhóm container trên cùng một máy ([`deploy/compose.lab.yaml`](deploy/compose.lab.yaml)). Việc chuyển sang workload do k3s quản lý **nằm ngoài phạm vi đồ án** (xem [Ngoài phạm vi](#ngoài-phạm-vi)).
+Mỗi node là một VM trên cloud UIT-IoT; các thành phần trên mỗi VM chạy bằng Docker Compose. Việc chuyển sang workload do k3s quản lý **nằm ngoài phạm vi đồ án** (xem [Ngoài phạm vi](#ngoài-phạm-vi)).
 
 ## Khái niệm hệ phân tán được thể hiện
 
@@ -64,7 +64,7 @@ Các việc xếp theo thứ tự ưu tiên; dừng ở đâu cũng phải có k
 | 6 | Gom telemetry từ cả hai caller A thay vì chỉ A-1 | Khoa | Quyết định dựa trên dữ liệu toàn bộ caller |
 | 7 | Dọn dẹp: sửa test phụ thuộc thời gian, điền hoặc xóa tài liệu rỗng, ghép báo cáo | Cả nhóm | Bộ test xanh, báo cáo cuối |
 
-Môi trường chạy chính là lab ba node logic trên một máy (`deploy/compose.lab.yaml`); làm theo [hướng dẫn từng bước cho nhóm](docs/team-guide.md); tham số chi tiết ở [hướng dẫn chạy](docs/running.md). Cùng các lệnh đó chạy được trên ba VM cloud bằng tùy chọn `--env`, sau khi triển khai lại code mới lên VM.
+Môi trường chạy là ba VM trên cloud UIT-IoT; làm theo [hướng dẫn từng bước cho nhóm](docs/team-guide.md), tham số chi tiết ở [hướng dẫn chạy](docs/running.md).
 
 ### Tiêu chí cho phần RL
 

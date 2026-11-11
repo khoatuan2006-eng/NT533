@@ -1,8 +1,10 @@
 # Hướng dẫn chạy thí nghiệm
 
-Mỗi việc trong [kế hoạch một tuần](../README.md#kế-hoạch-một-tuần-1118112026) có một lệnh ở đây. Mọi lệnh chạy từ thư mục gốc của repo.
+> **Đọc [hướng dẫn từng bước cho nhóm](team-guide.md) trước.** Hệ thống chạy trên ba VM của cloud UIT-IoT; hướng dẫn đó đi theo đúng thứ tự làm việc trên cloud. Tài liệu này là **tham chiếu chi tiết**: danh sách tình huống lỗi, phương án, tiêu chí đạt, tham số, và các vấn đề đã biết.
+>
+> Các lệnh mẫu bên dưới viết cho bản chạy thử trên một máy (`--wsl`). **Trên cloud, thay `--wsl Ubuntu-22.04` bằng `--env configs/lab.cloud.json`**, phần còn lại giữ nguyên.
 
-> **Trạng thái kiểm chứng (11/11/2026).** Phần RL nhiều seed đã chạy thử thành công. Lab ba node đã chạy thật trên Docker trong WSL: đủ 10 tình huống, mỗi tình huống một lần, kết quả ở `results/lab-faults/smoke-full/`. Một vấn đề đã biết: sau khi gỡ phân mảnh node 1, a-1 mất khoảng hai phút mới phục vụ lại (xem [Vấn đề đã biết](#vấn-đề-đã-biết)).
+**Trạng thái kiểm chứng (11/11/2026).** Bộ công cụ đã chạy thật trên bản một máy: đủ 10 tình huống lỗi một lần mỗi tình huống, và một lượt tải ngắn. Driver điều khiển ba VM đã qua kiểm thử logic nhưng **chưa chạy trên VM thật**. Phần RL nhiều seed đã chạy thử thành công. Một vấn đề đã biết: sau khi gỡ phân mảnh node 1, a-1 mất khoảng hai phút mới phục vụ lại (xem [Vấn đề đã biết](#vấn-đề-đã-biết)).
 
 ## Chuẩn bị
 
@@ -22,7 +24,7 @@ Trên Linux, các thao tác mạng cần `sudo` không hỏi mật khẩu cho `n
 .\.venv\Scripts\python.exe scripts/labenv.py hold
 ```
 
-## Lab ba node
+## Ba node và phương án
 
 Ba node là ba nhóm container cùng nhãn `lab.node` trên một máy:
 
