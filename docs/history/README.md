@@ -1,6 +1,6 @@
 # Tài liệu lịch sử
 
-Các tài liệu trong thư mục này ghi lại những giai đoạn **đã qua** của dự án. Chúng giữ bằng chứng và quyết định thiết kế để trích dẫn trong báo cáo, nhưng **không mô tả cách làm hiện tại**: nhiều chỗ nói về Go, k3s, AIOps, một host, hay ba VM đã bị xóa. Cách làm hiện tại nằm ở [README](../../README.md), [hướng dẫn cho nhóm](../team-guide.md) và [tham chiếu thí nghiệm](../running.md).
+Các tài liệu trong thư mục này ghi lại những giai đoạn **đã qua** của dự án. Chúng giữ bằng chứng và quyết định thiết kế để trích dẫn trong báo cáo, nhưng **không mô tả cách làm hiện tại**: nhiều chỗ nói về Go, k3s, AIOps, một host, hay ba VM đã bị xóa. Cách làm hiện tại nằm ở [README](../../README.md), [hướng dẫn cho nhóm](../2-cong-viec/2-huong-dan.md) và [tham chiếu thí nghiệm](../2-cong-viec/3-tra-cuu.md).
 
 Các lệnh trong những tài liệu này dùng `scripts/...` và `deploy/...` theo vị trí cũ. Các script, file Compose và bốn tài liệu trung gian (ingress, nghiệm thu một host, đối chiếu tham khảo, ba VM đầu tiên) đã được xóa khỏi cây thư mục nhưng vẫn nằm trong lịch sử git. Muốn chạy lại hoặc đọc lại, lấy bản repo trước khi dọn: `git worktree add ..\LoadBalance-history 4d0a876`.
 
