@@ -176,6 +176,16 @@ Lệnh `deploy` build image trên từng VM nên mất vài phút. Nếu lỗi v
 6. **Chạy lại riêng tình huống đó** (`--scenarios <tên>`) với cùng số lần lặp. So với kết quả trước khi sửa.
 7. **Ghi cặp trước / sau** vào báo cáo, giữ cả hai thư mục kết quả. Nếu bản sửa tốt hơn, mở pull request vào `main`; nếu không, triển khai lại bản `main` để cụm trở về trạng thái chung. Trong cả hai trường hợp, báo nhóm bản nào đang chạy trên cụm (giá trị `release` mới), vì từ lúc đó kết quả của mọi người đo trên bản ấy.
 
+### Khi nào ngừng sửa và chuyển hướng
+
+Nguyên tắc chung: làm hết sức; gặp bug thì sửa; sửa không được thì chuyển hướng, không mắc kẹt.
+
+- **Giới hạn cho mỗi bug: một buổi làm việc** (khoảng 3–4 giờ, tính cả lúc chờ cụm). Hết giới hạn mà chưa có bản sửa đo được cải thiện thì dừng.
+- **Khi dừng, ghi lại** hiện tượng, các giả thuyết đã thử, số đo của từng lần thử và lý do nghĩ rằng chúng không đúng. Giữ nguyên các thư mục kết quả. Đây vẫn là một cặp trước / sau hợp lệ cho báo cáo: "không cải thiện, kèm lý do".
+- **Chuyển hướng theo thứ tự:** (1) chọn một ô không đạt khác trong bảng baseline của phần mình; (2) nếu không còn ô nào, chọn một ô đạt nhưng sát ngưỡng và thử cải thiện nó; (3) nếu vướng ở chính công cụ đo hoặc cụm, báo theo mục 6 và làm phần không cần cụm trong lúc chờ (ghi dự đoán, đọc trace đã có, RL nhiều seed).
+- **Trả cụm về baseline** trước khi chuyển hướng (bước 7), để người sau không đo trên bản sửa dở.
+- Bug nào ảnh hưởng tới phần của người khác (ví dụ công cụ đo sai) thì báo nhóm ngay, không đợi hết giới hạn.
+
 Ô nghi không đạt để luyện: sau khi gỡ phân mảnh node1, a-1 mất khoảng 2 phút mới phục vụ lại. Hiện tượng này mới thấy trên bản dựng một máy; chạy `--scenarios partition-node1 --repetitions 5` trên baseline để xem có tái hiện trên cụm không trước khi bắt tay sửa. Manh mối ở mục "Vấn đề đã biết" của [tham chiếu thí nghiệm](running.md#vấn-đề-đã-biết).
 
 **Lưu ý lần triển khai đầu tiên:** cụm đang chạy bản ngày 28/10, chưa có phương án Least Request cho caller và việc gán lỗi theo endpoint. Một người cần triển khai bản `main` hiện tại (bước 5) và gắn tag `lab-baseline` (mục 4, [Baseline chung](#baseline-chung)) trước khi cả nhóm bắt đầu đo. Phần điều khiển cụm qua SSH chưa từng chạy trên VM thật, nên dành riêng một buổi cho việc này và chỉ hẹn lịch chạy chính thức sau khi hai bài ngắn ở mục 4 chạy xong.
