@@ -127,7 +127,7 @@ Một ô (phương án, kịch bản, mức tải) **đạt** khi mọi lần l�
 
 Bảng trả lời ba câu hỏi, theo thứ tự quan trọng với đồ án: (1) Least Request có né backend chậm không, tức câu hỏi của nhánh lỗi mềm (so `static-lr` với `static` ở `slow-node3`, cột "Phần b-2"; Round Robin ≈ 50%); (2) điểm bão hòa, dùng làm mốc để biết kết quả (1) đo ở mức tải nhẹ hay gần bão hòa; (3) static và xDS khác nhau thế nào ở cùng tải. Khi so sánh, theo [quy tắc so sánh chiến lược](#quy-tắc-so-sánh-chiến-lược). Dựng lại bảng: `run_load.py --report results/lab-load/<thời điểm>`.
 
-Bộ phát tải đi qua VPN, và ba VM còn cài sẵn k3s (đồ án không dùng nhưng nó vẫn chiếm một phần CPU, RAM); cần ghi hai điều này khi diễn giải độ trễ.
+Bộ phát tải đi qua VPN; cần ghi điều này khi diễn giải độ trễ.
 
 ## RL nhiều seed — `compare_rl_scenarios.py`
 

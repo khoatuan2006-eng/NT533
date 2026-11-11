@@ -74,7 +74,7 @@ Tài liệu các giai đoạn trước (Go, k3s, AIOps, các đợt nghiệm thu
 
 Ghi vào mục hướng phát triển của báo cáo, không làm trong đồ án:
 
-- Chạy ứng dụng bằng Kubernetes (k3s) và HPA. Ba VM có cài sẵn k3s từ trước, nhưng đồ án không dùng; ứng dụng chạy bằng Docker Compose.
+- Chạy ứng dụng bằng Kubernetes (k3s) và HPA. k3s đã được gỡ khỏi ba VM; ứng dụng chạy bằng Docker Compose.
 - Observability đầy đủ (Prometheus, tracing) và AIOps.
 - RL cho số backend bất kỳ.
 - TLS/mTLS, nhiều zone/region.
