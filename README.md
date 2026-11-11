@@ -64,7 +64,7 @@ Các việc xếp theo thứ tự ưu tiên; dừng ở đâu cũng phải có k
 | 6 | Gom telemetry từ cả hai caller A thay vì chỉ A-1 | Khoa | Quyết định dựa trên dữ liệu toàn bộ caller |
 | 7 | Dọn dẹp: sửa test phụ thuộc thời gian, điền hoặc xóa tài liệu rỗng, ghép báo cáo | Cả nhóm | Bộ test xanh, báo cáo cuối |
 
-Môi trường chạy chính là lab ba node logic trên một máy (`deploy/compose.lab.yaml`); lệnh cho từng việc ở [hướng dẫn chạy](docs/running.md). Ba VM cloud là tùy chọn: nếu còn truy cập được thì chạy lại để có số liệu trên máy thật, nếu không thì dùng số liệu ngày 28/10.
+Môi trường chạy chính là lab ba node logic trên một máy (`deploy/compose.lab.yaml`); làm theo [hướng dẫn từng bước cho nhóm](docs/team-guide.md); tham số chi tiết ở [hướng dẫn chạy](docs/running.md). Cùng các lệnh đó chạy được trên ba VM cloud bằng tùy chọn `--env`, sau khi triển khai lại code mới lên VM.
 
 ### Tiêu chí cho phần RL
 
