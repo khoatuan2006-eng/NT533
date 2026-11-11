@@ -1,0 +1,10 @@
+{
+  "fault": "quorum-loss",
+  "mode": "static",
+  "endpoint": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+  "expect": "fail-closed",
+  "fault_dispatch_s": 9.985637200000383,
+  "fault_confirmed_s": 14.726519700000608,
+  "restore_dispatch_s": 49.989773700000114,
+  "restore_confirmed_s": 53.66808089999995
+}

@@ -3,7 +3,7 @@
 Each repetition sends a fixed-rate RPC trace through the ingress, injects one fault,
 holds it, restores it, and keeps the raw trace. Start the lab first:
 
-    python scripts/labenv.py up --mode xds --build
+    python scripts/labenv.py up --variant xds --build
     python scripts/run_faults.py --repetitions 5
     python scripts/run_faults.py --scenarios partition-node3 quorum-loss --repetitions 3
     python scripts/run_faults.py --report results/lab-faults/<run>      # rebuild tables only
@@ -23,7 +23,7 @@ from typing import Callable
 
 import grpc
 from controlled_probe import Probe, interruption, summarize
-from labenv import NODES, ComposeLab, LabEnvironment
+from labenv import NODES, VARIANTS, ComposeLab, LabEnvironment
 
 from grpc_lb.generated import processing_pb2 as pb
 from grpc_lb.generated import processing_pb2_grpc as rpc
@@ -42,6 +42,8 @@ class Scenario:
     # fail-closed = xDS callers must refuse (UNAVAILABLE) rather than use stale endpoints
     # observe     = no pass/fail; the behaviour itself is the result
     expect: str
+    # Minimum seconds to keep observing after restore; a long partition can need minutes to heal.
+    min_after: float = 0
 
 
 def _stop_leader(lab: LabEnvironment) -> str:
@@ -97,6 +99,7 @@ SCENARIOS: dict[str, Scenario] = {
         lambda lab: lab.partition(["node1"], ["node2", "node3"]),
         lambda lab: lab.heal(),
         "observe",
+        min_after=150,
     ),
     "delay-node3": Scenario(
         "Node 3 ở xa: thêm 100 ms độ trễ",
@@ -156,7 +159,7 @@ async def run_once(lab: LabEnvironment, name: str, mode: str, output: Path, args
         entry="service-a",
         workload="light",
         rate=args.rate,
-        duration=args.before + args.hold + args.after,
+        duration=args.before + args.hold + max(args.after, scenario.min_after),
         timeout=3,
         ready_timeout=30,
         max_inflight=256,
@@ -240,7 +243,7 @@ def analyse(trace: Path) -> dict:
 
 def verdict(runs: list[dict]) -> str:
     expect, mode = runs[0]["expect"], runs[0]["mode"]
-    if expect == "observe" or (expect == "fail-closed" and mode != "xds"):
+    if expect == "observe" or (expect == "fail-closed" and VARIANTS.get(mode, ("xds",))[0] != "xds"):
         return "quan sát"
     if any(run["recovery_after_restore_s"] is None for run in runs):
         return "KHÔNG ĐẠT: không phục hồi sau khi khôi phục"
@@ -316,8 +319,8 @@ def report(directory: Path) -> str:
 
 
 async def suite(args, lab: LabEnvironment, directory: Path) -> None:
-    for mode in args.modes:
-        await asyncio.to_thread(lab.up, mode)
+    for mode in args.variants:
+        await asyncio.to_thread(lab.up_variant, mode)
         for name in args.scenarios:
             for repetition in range(1, args.repetitions + 1):
                 trace = directory / f"{name}-{mode}-r{repetition}.json"
@@ -330,14 +333,14 @@ def main():
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("--scenarios", nargs="+", choices=list(SCENARIOS), default=list(SCENARIOS))
-    parser.add_argument("--modes", nargs="+", choices=["static", "xds"], default=["xds"])
+    parser.add_argument("--variants", nargs="+", choices=list(VARIANTS), default=["xds"])
     parser.add_argument("--repetitions", type=int, default=5)
     parser.add_argument("--rate", type=float, default=20)
     parser.add_argument(
         "--before", type=float, default=10, help="Seconds of healthy traffic before the fault"
     )
     parser.add_argument("--hold", type=float, default=40, help="Seconds the fault stays active")
-    parser.add_argument("--after", type=float, default=30, help="Seconds observed after restoring")
+    parser.add_argument("--after", type=float, default=60, help="Seconds observed after restoring")
     parser.add_argument("--output", type=Path, help="Run directory (default: results/lab-faults/<timestamp>)")
     parser.add_argument("--report", type=Path, help="Only rebuild report.md from an existing run directory")
     parser.add_argument("--wsl", help="WSL distribution holding Docker (Windows only)")
@@ -355,6 +358,7 @@ def main():
         json.dumps(
             {
                 "started_unix_s": time.time(),
+                "provenance": lab.provenance(),
                 "nodes": NODES,
                 "parameters": {k: str(v) if isinstance(v, Path) else v for k, v in vars(args).items()},
             },

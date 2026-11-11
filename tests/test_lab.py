@@ -152,3 +152,52 @@ def test_fail_closed_fails_when_callers_keep_serving(tmp_path):
     write_trace(tmp_path, "quorum-loss-xds-r1", "fail-closed", (0, 0))
     run_faults.report(tmp_path)
     assert json.loads((tmp_path / "report.json").read_text())[0]["verdict"].startswith("KHÔNG ĐẠT")
+
+
+import run_load  # noqa: E402
+
+
+def write_load_cell(directory, name, rate, *, ok_fraction=1.0, latency=20.0, b2_share=0.5, variant="xds"):
+    """30 s at `rate` RPS; a fraction of requests fail with UNAVAILABLE."""
+    count, fail_every = int(rate * 30), (round(1 / (1 - ok_fraction)) if ok_fraction < 1 else 0)
+    rows = []
+    for index in range(count):
+        failed = bool(fail_every) and index % fail_every == 0
+        row = {
+            "index": index,
+            "scheduled_s": index / rate,
+            "code": "UNAVAILABLE" if failed else "OK",
+            "latency_ms": latency,
+            "schedule_lag_ms": 0,
+            "completed_s": index / rate,
+        }
+        if not failed:
+            row["instances"] = ["a-1", "b-2" if index % 100 < b2_share * 100 else "b-1", "c-1"]
+        rows.append(row)
+    (directory / f"{name}.jsonl").write_text("\n".join(map(json.dumps, rows)) + "\n", encoding="utf-8")
+    (directory / f"{name}.json").write_text(json.dumps({"parameters": {"duration": 30}}), encoding="utf-8")
+    meta = {"variant": variant, "scenario": "even", "rate": rate, "repetition": 1}
+    (directory / f"{name}.meta.json").write_text(json.dumps(meta), encoding="utf-8")
+
+
+def test_load_report_applies_pass_criteria_and_finds_saturation(tmp_path):
+    write_load_cell(tmp_path, "even-xds-rps50-r1", 50)
+    write_load_cell(tmp_path, "even-xds-rps100-r1", 100, b2_share=0.2)
+    write_load_cell(tmp_path, "even-xds-rps200-r1", 200, ok_fraction=0.9)
+    write_load_cell(tmp_path, "even-xds-rps400-r1", 400, latency=5000.0)
+    run_load.report(tmp_path)
+    runs = {run["rate"]: run for run in json.loads((tmp_path / "report.json").read_text())}
+    assert runs[50]["passed"] and runs[100]["passed"]
+    assert runs[100]["share_b2_percent"] == pytest.approx(20, abs=1)
+    assert not runs[200]["passed"] and runs[200]["error_percent"] == pytest.approx(10, abs=1)
+    assert not runs[400]["passed"]  # P99 over the limit even with no errors
+    text = (tmp_path / "report.md").read_text(encoding="utf-8")
+    assert "| even | xds | 100 |" in text and "| even | xds | 100 |" in text
+    last = [line for line in text.splitlines() if line.startswith("| even | xds | 100 ")]
+    assert last and "| 100 |" in text.split("Mức tải cao nhất còn đạt")[1]
+
+
+def test_load_report_skips_unreadable_cell(tmp_path):
+    write_load_cell(tmp_path, "even-xds-rps50-r1", 50)
+    (tmp_path / "even-xds-rps50-r1.jsonl").write_text("not json\n", encoding="utf-8")
+    assert "không hoàn tất" in run_load.report(tmp_path)

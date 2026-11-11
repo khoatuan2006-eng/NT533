@@ -15,7 +15,7 @@ from urllib.parse import quote, unquote
 import grpc
 from grpc_health.v1 import health_pb2, health_pb2_grpc
 
-from .balancer import RoundRobinBalancer
+from .balancer import create_balancer
 from .generated import processing_pb2 as pb
 from .generated import processing_pb2_grpc as rpc
 from .rl_telemetry import TelemetryCollector
@@ -30,7 +30,9 @@ class NoBackend(Exception):
 
 
 class StaticDependencyPool:
-    def __init__(self, service_id: str, addresses: list[str], interval: float = 1) -> None:
+    def __init__(
+        self, service_id: str, addresses: list[str], interval: float = 1, policy: str = "round_robin"
+    ) -> None:
         if not service_id or not addresses or len(set(addresses)) != len(addresses):
             raise ValueError("Service ID and unique endpoints required")
         if not math.isfinite(interval) or interval <= 0:
@@ -39,7 +41,7 @@ class StaticDependencyPool:
         self.interval = interval
         self.channels = {a: grpc.aio.insecure_channel(a) for a in addresses}
         self.stubs = {a: rpc.ProcessingServiceStub(ch) for a, ch in self.channels.items()}
-        self.balancer = RoundRobinBalancer(addresses)
+        self.balancer = create_balancer(policy, addresses)
         self.balancer.set_active_backends([])
         self._tasks: list[asyncio.Task] = []
 
@@ -92,9 +94,13 @@ class StaticDependencyPool:
             raise NoBackend(f"No healthy instance for {self.service_id}")
         # Application UNAVAILABLE can mean load shedding, not endpoint death.
         # Only the service-specific health watcher changes endpoint eligibility.
-        return await self.stubs[address].Execute(
-            request, timeout=timeout, metadata=(("x-request-id", quote(request.request_id, safe="")),)
-        )
+        try:
+            return await self.stubs[address].Execute(
+                request, timeout=timeout, metadata=(("x-request-id", quote(request.request_id, safe="")),)
+            )
+        finally:
+            # Least Request counts in-flight RPCs; Round Robin ignores the release.
+            self.balancer.release(address)
 
     async def close(self) -> None:
         for task in self._tasks:
@@ -181,9 +187,12 @@ class DependencyPoolFactory:
         *,
         telemetry_service: str = "",
         telemetry_path: str = "",
+        static_policy: str = "round_robin",
     ) -> None:
         if mode not in ("static", "xds"):
             raise ValueError("DISCOVERY_MODE must be static or xds")
+        create_balancer(static_policy)  # rejects unknown policy names at startup
+        self.static_policy = static_policy
         if bool(telemetry_service) != bool(telemetry_path):
             raise ValueError("RL telemetry service and output path must be set together")
         self.mode = mode
@@ -199,7 +208,9 @@ class DependencyPoolFactory:
                 else None
             )
             return XdsDependencyPool(service_id, telemetry)
-        return StaticDependencyPool(service_id, list(config.instances.values()), self.health_interval)
+        return StaticDependencyPool(
+            service_id, list(config.instances.values()), self.health_interval, self.static_policy
+        )
 
 
 # Existing callers can keep the original static-pool name.

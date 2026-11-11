@@ -1,0 +1,10 @@
+{
+  "fault": "backend-stop",
+  "mode": "static",
+  "endpoint": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+  "expect": "continue",
+  "fault_dispatch_s": 10.005232999999862,
+  "fault_confirmed_s": 12.560465000000477,
+  "restore_dispatch_s": 50.01363399999991,
+  "restore_confirmed_s": 54.90022090000002
+}

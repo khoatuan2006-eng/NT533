@@ -21,3 +21,4 @@ results/*credential*
 results/*.tar.gz
 results/*.zip
 results/*.png
+deploy/.lab/

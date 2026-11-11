@@ -5,7 +5,7 @@ environment that implements them. ComposeLab is the single-host driver: three lo
 nodes are groups of containers sharing a lab.node label (deploy/compose.lab.yaml).
 
     python scripts/labenv.py check
-    python scripts/labenv.py up --mode xds --build
+    python scripts/labenv.py up --variant xds --build
     python scripts/labenv.py status
     python scripts/labenv.py partition --a node3 --b node1 node2
     python scripts/labenv.py heal
@@ -28,6 +28,17 @@ from typing import Protocol
 
 ROOT = Path(__file__).resolve().parents[1]
 NODES = ("node1", "node2", "node3")
+# name -> (caller discovery mode, caller policy for the static pool, Envoy ingress policy).
+# gRPC Python 1.84 has no least_request policy, so the xDS caller can only be round_robin.
+VARIANTS = {
+    "xds": ("xds", "round_robin", "round_robin"),
+    "static": ("static", "round_robin", "round_robin"),
+    "static-lr": ("static", "least_request", "round_robin"),
+    "xds-lr-ingress": ("xds", "round_robin", "least_request"),
+    "static-lr-ingress": ("static", "least_request", "least_request"),
+}
+ENVOY_SOURCE = ROOT / "deploy/envoy.microservices.yaml"
+ENVOY_GENERATED = ROOT / "deploy/.lab/envoy.yaml"
 
 
 class LabEnvironment(Protocol):
@@ -36,6 +47,7 @@ class LabEnvironment(Protocol):
     address: str  # gRPC target of the ingress, reachable from the load generator
 
     def up(self, mode: str = "xds", *, build: bool = False) -> None: ...
+    def up_variant(self, variant: str, *, build: bool = False) -> None: ...
     def down(self) -> None: ...
     def containers(self) -> list[dict]: ...
     def stop(self, *services: str) -> None: ...
@@ -46,6 +58,7 @@ class LabEnvironment(Protocol):
     def degrade(self, node: str, *, delay_ms: int = 0, loss_percent: float = 0) -> None: ...
     def heal(self) -> None: ...
     def consul_leader(self) -> str: ...
+    def provenance(self) -> dict: ...
 
 
 def posix_path(path: Path | str) -> str:
@@ -143,10 +156,41 @@ class ComposeLab:
             holder.terminate()
             holder.wait(timeout=10)
 
-    def up(self, mode: str = "xds", *, build: bool = False) -> None:
+    def up(
+        self,
+        mode: str = "xds",
+        *,
+        build: bool = False,
+        static_policy: str = "round_robin",
+        ingress_policy: str = "round_robin",
+    ) -> None:
         if mode not in ("static", "xds"):
             raise ValueError("mode must be static or xds")
-        self.compose("up", "-d", *(["--build"] if build else []), env={"LAB_DISCOVERY_MODE": mode})
+        if static_policy not in ("round_robin", "least_request") or ingress_policy not in (
+            "round_robin",
+            "least_request",
+        ):
+            raise ValueError("policies must be round_robin or least_request")
+        source = ENVOY_SOURCE.read_text(encoding="utf-8")
+        assert "lb_policy: ROUND_ROBIN" in source
+        config = source.replace("lb_policy: ROUND_ROBIN", f"lb_policy: {ingress_policy.upper()}")
+        previous = ENVOY_GENERATED.read_text(encoding="utf-8") if ENVOY_GENERATED.exists() else None
+        ENVOY_GENERATED.parent.mkdir(exist_ok=True)
+        ENVOY_GENERATED.write_bytes(config.encode("utf-8"))
+        env = {"LAB_DISCOVERY_MODE": mode, "LAB_STATIC_POLICY": static_policy}
+        if build:
+            # Services share two images; building every service in parallel races on the shared tag.
+            self.compose("build", "a-1", "controlplane-1", env=env)
+        self.compose("up", "-d", env=env)
+        if previous is not None and previous != config:
+            # A bind-mounted file changes without recreating the container; Envoy only reads it at start.
+            self.compose("up", "-d", "--no-deps", "--force-recreate", "envoy-1", "envoy-2", env=env)
+
+    def up_variant(self, variant: str, *, build: bool = False) -> None:
+        if variant not in VARIANTS:
+            raise ValueError(f"variant must be one of: {', '.join(VARIANTS)}")
+        mode, static_policy, ingress_policy = VARIANTS[variant]
+        self.up(mode, build=build, static_policy=static_policy, ingress_policy=ingress_policy)
 
     def down(self) -> None:
         self.compose("down", "-v", "--remove-orphans")
@@ -272,6 +316,37 @@ class ComposeLab:
                     return fields[0]
         raise RuntimeError("no Consul leader visible")
 
+    def provenance(self) -> dict:
+        """Which code and host produced a result, so a number can be traced back to its setup."""
+
+        def local(*command: str) -> str:
+            try:
+                return subprocess.run(
+                    command, cwd=ROOT, capture_output=True, text=True, timeout=30
+                ).stdout.strip()
+            except (OSError, subprocess.TimeoutExpired):
+                return ""
+
+        host = self.sh(
+            "echo kernel=$(uname -r); echo cpus=$(nproc); "
+            "echo mem_kb=$(awk '/MemTotal/ {print $2}' /proc/meminfo); "
+            "echo docker=$(docker version --format '{{.Server.Version}}')",
+            check=False,
+        ).stdout
+        return {
+            "git_commit": local("git", "rev-parse", "HEAD"),
+            "git_dirty_files": len(
+                [
+                    line
+                    for line in local("git", "status", "--porcelain").splitlines()
+                    if not line.startswith("??")
+                ]
+            ),
+            "python": sys.version.split()[0],
+            "platform": sys.platform,
+            "docker_host": dict(line.split("=", 1) for line in host.splitlines() if "=" in line),
+        }
+
     def check(self) -> dict[str, bool]:
         """Report which host tools the lab needs are present."""
         tools = {}
@@ -303,7 +378,7 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("check")
     up = commands.add_parser("up")
-    up.add_argument("--mode", choices=["static", "xds"], default="xds")
+    up.add_argument("--variant", choices=list(VARIANTS), default="xds", help="Caller and ingress policy")
     up.add_argument("--build", action="store_true")
     commands.add_parser("down")
     commands.add_parser("status")
@@ -327,7 +402,7 @@ def main():
         print(json.dumps(tools, indent=2))
         sys.exit(0 if all(value for key, value in tools.items() if key != "netem") else 1)
     elif args.command == "up":
-        lab.up(args.mode, build=args.build)
+        lab.up_variant(args.variant, build=args.build)
     elif args.command == "down":
         lab.down()
     elif args.command == "status":

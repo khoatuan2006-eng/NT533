@@ -1,0 +1,140 @@
+[
+  {
+    "fault": "backend-stop",
+    "mode": "static-lr",
+    "verdict": "\u0111\u1ea1t",
+    "runs": [
+      {
+        "trace": "backend-stop-static-lr-r1",
+        "fault": "backend-stop",
+        "mode": "static-lr",
+        "expect": "continue",
+        "scheduled_in_fault": 800,
+        "errors_in_fault": 0,
+        "error_percent_in_fault": 0.0,
+        "error_codes_in_fault": {},
+        "interruption_s": 0,
+        "p95_ok_in_fault_ms": 36.262900000110676,
+        "instances_serving_in_fault": [
+          "a-1",
+          "a-2",
+          "b-1",
+          "c-1",
+          "c-2"
+        ],
+        "recovery_after_restore_s": 0.03389080000033573
+      }
+    ]
+  },
+  {
+    "fault": "backend-stop",
+    "mode": "static",
+    "verdict": "\u0111\u1ea1t",
+    "runs": [
+      {
+        "trace": "backend-stop-static-r1",
+        "fault": "backend-stop",
+        "mode": "static",
+        "expect": "continue",
+        "scheduled_in_fault": 800,
+        "errors_in_fault": 0,
+        "error_percent_in_fault": 0.0,
+        "error_codes_in_fault": {},
+        "interruption_s": 0,
+        "p95_ok_in_fault_ms": 39.07019999951444,
+        "instances_serving_in_fault": [
+          "a-1",
+          "a-2",
+          "b-1",
+          "c-1",
+          "c-2"
+        ],
+        "recovery_after_restore_s": 0.036366000000086274
+      }
+    ]
+  },
+  {
+    "fault": "node1-down",
+    "mode": "static",
+    "verdict": "\u0111\u1ea1t",
+    "runs": [
+      {
+        "trace": "node1-down-static-r1",
+        "fault": "node1-down",
+        "mode": "static",
+        "expect": "continue",
+        "scheduled_in_fault": 799,
+        "errors_in_fault": 28,
+        "error_percent_in_fault": 3.504380475594493,
+        "error_codes_in_fault": {
+          "UNAVAILABLE": 28
+        },
+        "interruption_s": 2.75,
+        "p95_ok_in_fault_ms": 42.38679999980377,
+        "instances_serving_in_fault": [
+          "a-2",
+          "b-2",
+          "c-1",
+          "c-2"
+        ],
+        "recovery_after_restore_s": 0.004144100000303297
+      }
+    ]
+  },
+  {
+    "fault": "quorum-loss",
+    "mode": "static-lr",
+    "verdict": "quan s\u00e1t",
+    "runs": [
+      {
+        "trace": "quorum-loss-static-lr-r1",
+        "fault": "quorum-loss",
+        "mode": "static-lr",
+        "expect": "fail-closed",
+        "scheduled_in_fault": 800,
+        "errors_in_fault": 0,
+        "error_percent_in_fault": 0.0,
+        "error_codes_in_fault": {},
+        "interruption_s": 0,
+        "p95_ok_in_fault_ms": 42.26659999949334,
+        "instances_serving_in_fault": [
+          "a-1",
+          "a-2",
+          "b-1",
+          "b-2",
+          "c-1",
+          "c-2"
+        ],
+        "recovery_after_restore_s": 0.009094600000025821
+      }
+    ]
+  },
+  {
+    "fault": "quorum-loss",
+    "mode": "static",
+    "verdict": "quan s\u00e1t",
+    "runs": [
+      {
+        "trace": "quorum-loss-static-r1",
+        "fault": "quorum-loss",
+        "mode": "static",
+        "expect": "fail-closed",
+        "scheduled_in_fault": 800,
+        "errors_in_fault": 0,
+        "error_percent_in_fault": 0.0,
+        "error_codes_in_fault": {},
+        "interruption_s": 0,
+        "p95_ok_in_fault_ms": 39.762299999893,
+        "instances_serving_in_fault": [
+          "a-1",
+          "a-2",
+          "b-1",
+          "b-2",
+          "c-1",
+          "c-2"
+        ],
+        "recovery_after_restore_s": 0.010226299999885669
+      }
+    ]
+  }
+]

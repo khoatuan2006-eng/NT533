@@ -1,0 +1,50 @@
+{
+  "schema_version": 2,
+  "run_id": "3cf889c3f3004712a5e1581dc0ff7154",
+  "started_unix_s": 1794367897.3000906,
+  "python": "3.12.10",
+  "grpc": "1.84.0",
+  "parameters": {
+    "address": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+    "output": "results\\lab-load\\smoke\\slow-node3-static-lr-rps50-r1.json",
+    "mode": "lab",
+    "entry": "service-a",
+    "workload": "light",
+    "rate": 50.0,
+    "duration": 15.0,
+    "timeout": 3,
+    "ready_timeout": 30,
+    "max_inflight": 512,
+    "warmup": 100,
+    "fault_at": null,
+    "stable_window": 5
+  },
+  "completion_elapsed_s": 15.072394799999984,
+  "raw": "results\\lab-load\\smoke\\slow-node3-static-lr-rps50-r1.jsonl",
+  "summary": {
+    "scheduled": 750,
+    "attempted": 750,
+    "successful": 750,
+    "codes": {
+      "OK": 750
+    },
+    "successful_rps_offered_window": 50.0,
+    "successful_rps_elapsed": 49.76237834019115,
+    "failure_fraction_including_generator_drops": 0.0,
+    "rpc_error_fraction": 0.0,
+    "valid_load": true,
+    "success_latency_ms": {
+      "p50": 91.41880000004221,
+      "p95": 142.0739999999796,
+      "p99": 154.05780000003233
+    },
+    "all_rpc_latency_ms": {
+      "p50": 91.41880000004221,
+      "p95": 142.0739999999796,
+      "p99": 154.05780000003233
+    },
+    "schedule_lag_ms_p99": 19.23609999995257,
+    "observed_recovery_s": null,
+    "recovery_stable_window_s": 5
+  }
+}

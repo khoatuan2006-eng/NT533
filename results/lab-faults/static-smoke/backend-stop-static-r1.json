@@ -1,0 +1,50 @@
+{
+  "schema_version": 2,
+  "run_id": "058e5e967d91479da64b9bfb7a037e17",
+  "started_unix_s": 1794359270.2981005,
+  "python": "3.12.10",
+  "grpc": "1.84.0",
+  "parameters": {
+    "address": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+    "output": "results\\lab-faults\\static-smoke\\backend-stop-static-r1.json",
+    "mode": "static",
+    "entry": "service-a",
+    "workload": "light",
+    "rate": 20,
+    "duration": 80,
+    "timeout": 3,
+    "ready_timeout": 30,
+    "max_inflight": 256,
+    "warmup": 40,
+    "fault_at": 10.005232999999862,
+    "stable_window": 5
+  },
+  "completion_elapsed_s": 79.99053559999993,
+  "raw": "results\\lab-faults\\static-smoke\\backend-stop-static-r1.jsonl",
+  "summary": {
+    "scheduled": 1600,
+    "attempted": 1600,
+    "successful": 1600,
+    "codes": {
+      "OK": 1600
+    },
+    "successful_rps_offered_window": 20.0,
+    "successful_rps_elapsed": 20.0,
+    "failure_fraction_including_generator_drops": 0.0,
+    "rpc_error_fraction": 0.0,
+    "valid_load": true,
+    "success_latency_ms": {
+      "p50": 33.26809999998659,
+      "p95": 39.63339999972959,
+      "p99": 55.42650000006688
+    },
+    "all_rpc_latency_ms": {
+      "p50": 33.26809999998659,
+      "p95": 39.63339999972959,
+      "p99": 55.42650000006688
+    },
+    "schedule_lag_ms_p99": 21.711000000141922,
+    "observed_recovery_s": 0.04476700000013878,
+    "recovery_stable_window_s": 5
+  }
+}

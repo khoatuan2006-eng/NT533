@@ -1,5 +1,7 @@
 # Thực nghiệm đối chứng và demo tái lập
 
+> **Cập nhật 11/11/2026.** Phần "Kế hoạch đợt đánh giá tiếp theo" (k3s, ma trận E1–E8, phân công E-số) ở cuối tài liệu này **đã được thay thế**: phạm vi mới là lab ba node trên một máy, xem [README](../README.md) và [hướng dẫn chạy](running.md). Các protocol, tiêu chí và số liệu của đợt cloud ngày 28/10 phía trên vẫn có hiệu lực.
+
 Các protocol và số liệu bên dưới mô tả đợt thử nghiệm đã thực hiện. [Kế hoạch đợt đánh giá tiếp theo](#ke-hoach-tiep-theo) ở cuối tài liệu bổ sung kịch bản, cách đo và các phần runner cần hoàn thiện; chưa phải kết quả đã chạy.
 
 ## Câu hỏi và giả thuyết

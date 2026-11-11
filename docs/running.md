@@ -36,10 +36,22 @@ Bộ phát tải chạy ngoài ba node và gọi hai Envoy qua `localhost:50050`
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/labenv.py check              # công cụ cần có trên máy Docker
-.\.venv\Scripts\python.exe scripts/labenv.py up --mode xds --build
+.\.venv\Scripts\python.exe scripts/labenv.py up --variant xds --build
 .\.venv\Scripts\python.exe scripts/labenv.py status
 .\.venv\Scripts\python.exe scripts/labenv.py down
 ```
+
+Phương án (`--variant`) gồm cách caller khám phá endpoint, chính sách cân bằng của caller và chính sách của Envoy ingress:
+
+| Phương án | Caller A → B/C | Envoy → A |
+|---|---|---|
+| `xds` (mặc định) | xDS, Round Robin | Round Robin |
+| `static` | Danh sách cố định có health Watch, Round Robin | Round Robin |
+| `static-lr` | Danh sách cố định, Least Request | Round Robin |
+| `xds-lr-ingress` | xDS, Round Robin | Least Request |
+| `static-lr-ingress` | Danh sách cố định, Least Request | Least Request |
+
+**Giới hạn đã kiểm chứng:** gRPC Python 1.84 không có chính sách Least Request cho caller xDS (control plane gửi cluster Least Request bị caller từ chối, kể cả khi bọc trong `wrr_locality`), nên Least Request ở tầng trong chỉ có với caller static. Envoy hỗ trợ Least Request bình thường. Đổi phương án chỉ tạo lại container cần thiết; `--build` cũng nên dùng sau khi sửa mã.
 
 `check` phải báo `true` cho `docker`, `compose`, `nsenter`, `iptables`, `tc`. Nếu `netem` là `false`, hai bài `delay-node3` và `loss-node3` không chạy được trên máy đó; các bài còn lại không bị ảnh hưởng.
 
@@ -59,7 +71,7 @@ Gây lỗi thủ công khi cần demo:
 .\.venv\Scripts\python.exe scripts/run_faults.py --repetitions 5
 ```
 
-Lệnh chạy 10 tình huống × 5 lần, mỗi lần 80 giây ở 20 RPS (10 giây bình thường, 40 giây giữ lỗi, 30 giây sau khôi phục): khoảng 70 phút. Chạy một phần bằng `--scenarios`, thêm đối chứng static bằng `--modes static xds`.
+Lệnh chạy 10 tình huống × 5 lần, mỗi lần 110 giây ở 20 RPS (10 giây bình thường, 40 giây giữ lỗi, 60 giây sau khôi phục): khoảng 2 giờ. Chạy một phần bằng `--scenarios`, thêm đối chứng bằng `--variants xds static` (xem bảng phương án). `partition-node1` tự quan sát 150 giây sau khôi phục vì lần chạy thử đầu cho thấy phục hồi mất vài phút.
 
 | Tình huống | Điều kiểm tra | Tiêu chí |
 |---|---|---|
@@ -86,16 +98,22 @@ Kết quả nằm ở `results/lab-faults/<thời điểm>/`: `report.md` (bản
 
 ## Việc 3 — tải ổn định và bão hòa (Lầu)
 
-Với lab đang chạy ở chế độ cần đo:
-
 ```powershell
-.\.venv\Scripts\python.exe scripts/labenv.py up --mode xds
-.\.venv\Scripts\python.exe scripts/controlled_probe.py --address "ipv4:127.0.0.1:50050,127.0.0.1:50060" --mode xds --rate 150 --duration 180 --output results/lab-load/xds-150-r1.json
+.\.venv\Scripts\python.exe scripts/run_load.py --rates 50 100 200 400 --repetitions 3
 ```
 
-Lặp lại với `--mode static` (sau `labenv.py up --mode static`) và các mức `--rate` tăng dần đến khi goodput không còn tăng. Chưa có bộ chạy tự động nhiều mức và nhiều lần lặp cho lab; `controlled_suite.py` hiện chỉ đổi chế độ được trên cụm cloud.
+Lệnh tự đổi phương án (mặc định `xds`, `static`, `static-lr`), chạy từng mức tải ở hai kịch bản và lặp lại; thứ tự phương án được xáo theo từng lần lặp để trôi hiệu năng của máy không thiên vị phương án nào. Mỗi ô đo 30 giây: mặc định 3 phương án × 2 kịch bản × 4 mức × 3 lần ≈ 75 phút.
 
-Bộ phát tải chạy trên Windows có độ phân giải timer thô, và các node chung CPU. Dùng số liệu này để so sánh tương đối giữa hai chế độ, không làm số tuyệt đối.
+| Kịch bản | Điều kiện |
+|---|---|
+| `even` | Mọi node bình thường |
+| `slow-node3` | Node 3 thêm 50 ms độ trễ (`--slow-ms`): b-2 và c-2 trả lời chậm |
+
+Một ô (phương án, kịch bản, mức tải) **đạt** khi mọi lần lặp có lỗi ≤ 1%, goodput ≥ 98% tải đặt, P99 request thành công < 3 giây và bộ phát tải không bỏ request. `report.md` có bảng từng ô, cột "Phần b-2" (tỷ lệ request B do b-2 ở node chậm xử lý) và mức tải cao nhất còn đạt của mỗi phương án. Nếu mọi mức đều đạt thì chưa thấy điểm bão hòa: tăng `--rates`.
+
+Ba câu hỏi bảng này trả lời: (1) static và xDS khác nhau thế nào ở cùng tải, (2) Least Request có né được backend chậm không (so `static-lr` với `static` ở `slow-node3`, xem "Phần b-2"), (3) điểm bão hòa của hệ thống. Thêm `--variants xds-lr-ingress` để so Least Request ở Envoy. Dựng lại bảng từ trace: `run_load.py --report results/lab-load/<thời điểm>`.
+
+Bộ phát tải cũng chạy trên máy này (Windows có timer thô) và các node chung CPU. Dùng số liệu để so sánh tương đối giữa các phương án, không làm số tuyệt đối; cần ghi rõ điều đó trong báo cáo.
 
 ## Việc 4 — RL nhiều seed (Khoa)
 
@@ -112,7 +130,7 @@ Bốn kịch bản × ba policy × năm seed, khoảng 15 phút. `report.md` có
 Lab chưa từng chạy với Docker thật, nên lần đầu chạy theo thứ tự này và dừng ở bước đầu tiên lỗi:
 
 1. `labenv.py check` — đủ công cụ.
-2. `labenv.py up --mode xds --build` rồi `labenv.py status` — đủ 13 container `running`.
+2. `labenv.py up --variant xds --build` rồi `labenv.py status` — đủ 13 container `running`.
 3. `run_faults.py --scenarios backend-stop --repetitions 1` — bài đơn giản nhất, xác nhận bộ phát tải tới được Envoy và báo cáo sinh ra.
 4. `run_faults.py --scenarios partition-node3 --repetitions 1` — xác nhận `nsenter`/`iptables` hoạt động.
 5. Toàn bộ bộ thử lỗi.

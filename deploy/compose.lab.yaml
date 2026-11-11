@@ -27,6 +27,9 @@ x-env: &env
 x-caller: &caller
   # static = health-checked fixed endpoints; xds = lookaside through the control planes.
   DISCOVERY_MODE: ${LAB_DISCOVERY_MODE:-xds}
+  # Only the static pool can use least_request: gRPC Python 1.84 has no least_request policy,
+  # so a cluster delivered through xDS can only be round_robin.
+  STATIC_LB_POLICY: ${LAB_STATIC_POLICY:-round_robin}
   GRPC_XDS_BOOTSTRAP: /app/configs/xds-bootstrap.json
 
 x-consul: &consul
@@ -53,7 +56,7 @@ x-envoy: &envoy
   image: envoyproxy/envoy:v1.35.5
   command: ["-c", "/etc/envoy/envoy.yaml", "--log-level", "info", "--concurrency", "2"]
   volumes:
-    - ./envoy.microservices.yaml:/etc/envoy/envoy.yaml:ro
+    - ./.lab/envoy.yaml:/etc/envoy/envoy.yaml:ro
   restart: unless-stopped
 
 services:

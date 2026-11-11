@@ -34,9 +34,12 @@ class ServiceSettings:
     drain_file: str = ""
     rl_telemetry_service: str = ""
     rl_telemetry_output: str = ""
+    static_lb_policy: str = "round_robin"
 
     def __post_init__(self) -> None:
         validate(self.topology)
+        if self.static_lb_policy not in ("round_robin", "least_request"):
+            raise ValueError("STATIC_LB_POLICY must be round_robin or least_request")
         if bool(self.rl_telemetry_service) != bool(self.rl_telemetry_output):
             raise ValueError(
                 "EXPERIMENTAL_RL_SERVICE and EXPERIMENTAL_RL_TELEMETRY_OUTPUT must be set together"
@@ -101,6 +104,7 @@ class ServiceSettings:
             env.get("DRAIN_FILE", ""),
             env.get("EXPERIMENTAL_RL_SERVICE", ""),
             env.get("EXPERIMENTAL_RL_TELEMETRY_OUTPUT", ""),
+            env.get("STATIC_LB_POLICY") or "round_robin",
         )
 
 
@@ -143,6 +147,7 @@ class ServiceApplication:
                 discovery_mode=settings.discovery_mode,
                 telemetry_service=settings.rl_telemetry_service,
                 telemetry_path=settings.rl_telemetry_output,
+                static_policy=settings.static_lb_policy,
             )
             if settings.drain_file:
                 self._tasks.append(asyncio.create_task(watch_drain(self.runtime, settings.drain_file)))

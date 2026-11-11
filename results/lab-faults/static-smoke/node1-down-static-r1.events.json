@@ -1,0 +1,10 @@
+{
+  "fault": "node1-down",
+  "mode": "static",
+  "endpoint": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+  "expect": "continue",
+  "fault_dispatch_s": 10.007980599999428,
+  "fault_confirmed_s": 13.486642099999699,
+  "restore_dispatch_s": 49.9958558999997,
+  "restore_confirmed_s": 53.15843020000011
+}
