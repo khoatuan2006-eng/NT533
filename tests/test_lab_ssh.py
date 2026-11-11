@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import labenv  # noqa: E402
 import labenv_ssh  # noqa: E402
 
-DESCRIPTION = json.loads((ROOT / "configs/lab.cloud.example.json").read_text(encoding="utf-8"))
+DESCRIPTION = json.loads((ROOT / "configs/lab.cloud.json").read_text(encoding="utf-8"))
 
 
 class FakeSsh(labenv_ssh.SshLab):
@@ -109,8 +109,61 @@ def test_containers_and_leader_are_read_from_compose_output():
 
 def test_make_lab_selects_driver(tmp_path):
     assert isinstance(labenv.make_lab(), labenv.ComposeLab)
-    assert isinstance(labenv.make_lab(env=ROOT / "configs/lab.cloud.example.json"), labenv_ssh.SshLab)
+    assert isinstance(labenv.make_lab(env=ROOT / "configs/lab.cloud.json"), labenv_ssh.SshLab)
     bad = tmp_path / "bad.json"
     bad.write_text('{"driver": "k8s"}', encoding="utf-8")
     with pytest.raises(ValueError):
         labenv.make_lab(env=bad)
+
+
+class LockingSsh(labenv_ssh.SshLab):
+    """Fake VM shell that keeps the lock directory's state like the real one."""
+
+    def __init__(self):
+        super().__init__(DESCRIPTION)
+        self.owner = None
+        self.sent = []
+
+    def ssh(self, node, script, *, check=True):
+        self.sent.append((node, script))
+        out = ""
+        if script.startswith("if mkdir"):
+            if self.owner is None:
+                self.owner = script.split("printf %s ", 1)[1].split(" > ", 1)[0].strip("'")
+                out = "ACQUIRED"
+            else:
+                out = self.owner
+        elif script.startswith("cat "):
+            out = self.owner or ""
+        elif script.startswith('[ "$(cat'):
+            if self.owner and self.owner in script:
+                self.owner = None
+        elif script.startswith("rm -rf"):
+            self.owner = None
+        return SimpleNamespace(returncode=0, stdout=out, stderr="")
+
+
+def test_lock_is_exclusive_and_released_by_its_owner():
+    first, second = LockingSsh(), LockingSsh()
+    with first.lock("run_faults"):
+        assert first.lock_holder() and "run_faults" in first.lock_holder()
+        second.owner = first.owner  # same VM, as seen by a teammate
+        with pytest.raises(labenv_ssh.LabBusy, match="run_faults"):
+            with second.lock("run_load"):
+                pass
+        with pytest.raises(labenv_ssh.LabBusy):
+            second.ensure_free()
+    assert first.lock_holder() is None
+    # Every lock command goes to the jump node, the one always reachable.
+    assert {node for node, _ in first.sent} == {"node1"}
+
+
+def test_lock_is_released_when_the_run_fails_and_unlock_clears_a_stale_lock():
+    lab = LockingSsh()
+    with pytest.raises(RuntimeError):
+        with lab.lock("run_load"):
+            raise RuntimeError("boom")
+    assert lab.lock_holder() is None
+    lab.owner = "someone@pc stale"
+    lab.unlock()
+    assert lab.lock_holder() is None

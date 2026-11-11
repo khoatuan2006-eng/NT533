@@ -263,6 +263,12 @@ def main():
         for host in inventory.values():
             ipaddress.IPv4Address(host)
         ssh = SshDeployment(args.key, ROOT / "results/cloud-known-hosts", args.ssh_config)
+        # Deploying restarts every container: never do it under a teammate's running experiment.
+        holder = ssh.run(
+            inventory["node1"], "cat /var/tmp/loadbalance-lab.lock/owner 2>/dev/null || true"
+        ).strip()
+        if holder:
+            raise SystemExit(f"Cụm đang được dùng bởi {holder}; chờ xong rồi mới triển khai.")
         digest = hashlib.sha256(args.archive.read_bytes()).hexdigest()
         for node, host in inventory.items():
             ssh.upload(host, args.archive, digest, node, prebuilt=args.prebuilt)

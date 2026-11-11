@@ -1,7 +1,7 @@
 {
   "driver": "ssh",
   "address": "192.168.120.109:80",
-  "ssh_config": "results/k3s-ssh-config",
+  "ssh_config": "configs/ssh-config",
   "project": "lb-cloud",
   "remote_dir": "/opt/loadbalance/cluster",
   "jump_node": "node1",

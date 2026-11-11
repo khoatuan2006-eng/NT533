@@ -52,21 +52,26 @@ Kết quả và giới hạn: [báo cáo nghiệm thu](docs/history/cloud-valida
 
 Tài liệu các giai đoạn trước (Go, k3s, AIOps, các đợt nghiệm thu cũ) nằm trong [`docs/history/`](docs/history/README.md); chúng giữ bằng chứng, không mô tả cách làm hiện tại.
 
-## Kế hoạch một tuần (11–18/11/2026)
+## Cách nhóm làm việc (11–18/11/2026)
 
-Các việc xếp theo thứ tự ưu tiên; dừng ở đâu cũng phải có kết quả báo cáo được. Phân công dưới đây là đề xuất, chờ cả nhóm xác nhận.
+Mọi thành viên đều tự chạy, kiểm tra, đánh giá và sửa; không ai chỉ nhận kết quả của người khác. Mỗi người làm theo [hướng dẫn cho nhóm](docs/team-guide.md):
 
-| # | Việc | Người phụ trách | Kết quả bàn giao |
-|---|---|---|---|
-| 1 | Lặp lại các bài thử lỗi: dừng backend, tắt VM1, mất control plane, mất Consul leader/quorum — mỗi bài 5 lần | Đạt | Bảng thời gian gián đoạn/phục hồi có min, median, max; trace gốc |
-| 2 | Bài phân mảnh mạng: cô lập một Consul voter, rồi một control plane, trong lúc có traffic | Đạt | Hành vi của caller cũ và caller mới; kết luận fail closed hay tiếp tục phục vụ |
-| 3 | Tải ổn định và backend không đồng đều: quét RPS đến bão hòa, 6 lượt mỗi phương án, phát tải từ Linux | Lầu | Điểm bão hòa, goodput, p95/p99; môi trường "một backend chậm" dùng chung cho RL |
-| 4 | RL: đối chứng Round Robin, policy theo quy tắc và RL với ít nhất 5 seed, có đổi backend chậm giữa lượt | Khoa | Bảng so sánh có biến thiên giữa các seed; kết luận trung thực kể cả khi RL không hơn |
-| 5 | RL trong cụm nhân bản: replica giữ khóa Consul ra quyết định, ghi trọng số vào Consul KV; replica còn lại đọc và phát cùng trọng số | Khoa | Hai control plane phát cùng trọng số; mất replica giữ khóa thì replica kia tiếp quản |
-| 6 | Gom telemetry từ cả hai caller A thay vì chỉ A-1 | Khoa | Quyết định dựa trên dữ liệu toàn bộ caller |
-| 7 | Dọn dẹp: sửa test phụ thuộc thời gian, điền hoặc xóa tài liệu rỗng, ghép báo cáo | Cả nhóm | Bộ test xanh, báo cáo cuối |
+1. **Chạy**: thử lỗi (`run_faults.py`) và đo tải (`run_load.py`) trên ba VM.
+2. **Kiểm tra**: đọc bảng kết quả, đối chiếu với trace gốc, tự giải thích từng con số.
+3. **Đánh giá**: kết luận đạt / không đạt theo tiêu chí, nêu nguyên nhân cho ô không đạt.
+4. **Sửa để cải thiện**: đặt giả thuyết, sửa trên nhánh riêng, triển khai, chạy lại đúng ô đó, ghi cặp trước / sau.
 
-Môi trường chạy là ba VM trên cloud UIT-IoT; làm theo [hướng dẫn từng bước cho nhóm](docs/team-guide.md), tham số chi tiết ở [hướng dẫn chạy](docs/running.md).
+Cả nhóm dùng chung một cụm ba VM nên **mỗi lúc chỉ một người chạy**; các script tự giữ khóa cụm và từ chối nếu người khác đang chạy. Báo trong nhóm trước khi triển khai code mới, vì triển khai khởi động lại toàn bộ cụm.
+
+Để báo cáo không trùng lặp, mỗi người đứng tên một phần (vẫn tự chạy cả phần còn lại để hiểu):
+
+| Người | Đứng tên trong báo cáo |
+|---|---|
+| Đạt | Thử lỗi và phân mảnh mạng: gián đoạn, phục hồi, fail closed |
+| Lầu | Tải và cân bằng: điểm bão hòa, Round Robin so với Least Request, backend chậm |
+| Khoa | RL (phần mở rộng) và ghép báo cáo |
+
+Ô đã biết là "không đạt" để cả nhóm luyện quy trình sửa: phục hồi chậm sau khi gỡ phân mảnh node 1 (xem [tham chiếu thí nghiệm](docs/running.md#vấn-đề-đã-biết)).
 
 ### Tiêu chí cho phần RL
 
@@ -82,7 +87,7 @@ Chỉ số: số request theo instance, goodput, p50/p95/p99, tỷ lệ lỗi/ti
 
 Ghi vào mục hướng phát triển của báo cáo, không làm trong tuần này:
 
-- Chuyển ứng dụng sang workload k3s, HPA.
+- Chạy ứng dụng bằng Kubernetes (k3s) và HPA. Ba VM có cài sẵn k3s từ trước, nhưng đồ án không dùng; ứng dụng chạy bằng Docker Compose.
 - Observability đầy đủ (Prometheus, tracing) và AIOps.
 - RL cho số backend bất kỳ.
 - TLS/mTLS, nhiều zone/region.

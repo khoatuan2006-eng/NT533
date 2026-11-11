@@ -14,7 +14,7 @@ Mọi lệnh chạy trên máy Windows của bạn, từ thư mục gốc của 
 | node2 | 192.168.1.172 | consul-2, envoy-2, controlplane-2, a-2, c-1 |
 | node3 | 192.168.1.217 | consul-3, b-2, c-2 |
 
-Bộ phát tải gửi request tới LB cloud (`192.168.120.109:80`), LB chia cho hai Envoy. SSH tới node2 và node3 đi qua node1. Mô tả môi trường nằm trong `configs/lab.cloud.json` (sao từ `configs/lab.cloud.example.json`): địa chỉ LB, file SSH, và với từng node là địa chỉ SSH, IP nội bộ, bảng tên service của lab → tên service Compose trên VM (ví dụ `envoy-1` → `ingress`).
+Bộ phát tải gửi request tới LB cloud (`192.168.120.109:80`), LB chia cho hai Envoy. SSH tới node2 và node3 đi qua node1. Mô tả môi trường nằm trong `configs/lab.cloud.json`, SSH trong `configs/ssh-config`; cả hai dùng chung cho nhóm, mỗi người chỉ cần đặt file khóa ở `~/.ssh/uitiot-lab.pem`. File mô tả ghi địa chỉ LB, file SSH, và với từng node là địa chỉ SSH, IP nội bộ, bảng tên service của lab → tên service Compose trên VM (ví dụ `envoy-1` → `ingress`).
 
 Lệnh quản lý:
 
@@ -52,6 +52,7 @@ An toàn:
 - **Luật phân mảnh luôn đặt ở phía còn SSH tới được**: khi cô lập node3, luật nằm trên node1 và node2.
 - **Độ trễ không ảnh hưởng SSH**, vì chỉ áp cho gói đi tới IP nội bộ của các node khác.
 - **`down` bị chặn**, vì cụm dùng chung.
+- **Khóa cụm:** mỗi lúc chỉ một người chạy. Hai bộ chạy tự giữ khóa trên node1; các lệnh gây lỗi bằng tay và lệnh triển khai bị từ chối khi người khác đang giữ. Xem bằng `lock-status`, gỡ khóa bị bỏ lại bằng `unlock` (hỏi người giữ trước).
 
 ## Phương án (`--variant`)
 
@@ -109,7 +110,7 @@ Một ô (phương án, kịch bản, mức tải) **đạt** khi mọi lần l�
 
 Bảng trả lời ba câu hỏi: (1) static và xDS khác nhau thế nào ở cùng tải; (2) Least Request có né backend chậm không (so `static-lr` với `static` ở `slow-node3`, cột "Phần b-2"; Round Robin ≈ 50%); (3) điểm bão hòa. Dựng lại bảng: `run_load.py --report results/lab-load/<thời điểm>`.
 
-Bộ phát tải đi qua VPN, và ba VM còn chạy chung k3s; cần ghi hai điều này khi diễn giải độ trễ.
+Bộ phát tải đi qua VPN, và ba VM còn cài sẵn k3s (đồ án không dùng nhưng nó vẫn chiếm một phần CPU, RAM); cần ghi hai điều này khi diễn giải độ trễ.
 
 ## RL nhiều seed — `compare_rl_scenarios.py`
 
@@ -134,7 +135,7 @@ Bốn kịch bản × ba policy × năm seed, khoảng 15 phút. `report.md` có
 
 ## Sự cố thường gặp
 
-- **`check` báo `false` cho một node**: đọc dòng lý do in bên dưới. Hay gặp: VPN tắt, sai đường dẫn file khóa trong `results/k3s-ssh-config`, thiếu `sudo` không mật khẩu.
+- **`check` báo `false` cho một node**: đọc dòng lý do in bên dưới. Hay gặp: VPN tắt, file khóa không nằm ở `~/.ssh/uitiot-lab.pem`, thiếu `sudo` không mật khẩu.
 - **`lab not ready`**: chưa đủ sáu instance trả lời. Xem `status`; instance dừng thì `start <tên>`.
 - **Lượt chạy bị ngắt giữa chừng**: chạy `heal`, rồi `status` để kiểm tra trước khi chạy tiếp.
 - **Build lỗi khi triển khai**: VM lỗi DNS, xem bước triển khai trong [hướng dẫn cho nhóm](team-guide.md).

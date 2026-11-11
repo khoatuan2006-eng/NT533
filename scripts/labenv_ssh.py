@@ -9,14 +9,16 @@ scripts/multihost.py. This driver implements the LabEnvironment interface from l
   degrade         tc netem on traffic towards the other lab nodes only
   heal            flush the rules; every rule also expires on its own (see FAULT_TTL_S)
 
-The environment is described by a JSON file, see configs/lab.cloud.example.json.
+The environment is described by a JSON file, see configs/lab.cloud.json.
 """
 
 from __future__ import annotations
 
 import contextlib
+import getpass
 import json
 import shlex
+import socket
 import subprocess
 import sys
 import time
@@ -27,6 +29,12 @@ ROOT = Path(__file__).resolve().parents[1]
 # the VMs cut off from each other.
 FAULT_TTL_S = 900
 CHAIN = "LABFAULT"
+# One person at a time: the whole team shares these three VMs.
+LOCK_PATH = "/var/tmp/loadbalance-lab.lock"
+
+
+class LabBusy(RuntimeError):
+    """Another team member holds the cluster."""
 
 
 class SshLab:
@@ -101,6 +109,48 @@ class SshLab:
     @contextlib.contextmanager
     def keepalive(self):
         yield
+
+    # ---- shared-cluster lock -------------------------------------------------
+    def _lock_node(self) -> str:
+        return self.jump_node or next(iter(self.nodes))
+
+    def lock_holder(self) -> str | None:
+        """Who holds the cluster right now, or None."""
+        result = self.ssh(self._lock_node(), f"cat {LOCK_PATH}/owner 2>/dev/null || true")
+        return result.stdout.strip() or None
+
+    @contextlib.contextmanager
+    def lock(self, purpose: str):
+        """Hold the cluster for one run; refuse if someone else holds it."""
+        owner = f"{getpass.getuser()}@{socket.gethostname()} từ {time.strftime('%Y-%m-%d %H:%M')}: {purpose}"
+        script = (
+            f"if mkdir {LOCK_PATH} 2>/dev/null; then printf %s {shlex.quote(owner)} > {LOCK_PATH}/owner; "
+            f"echo ACQUIRED; else cat {LOCK_PATH}/owner 2>/dev/null; fi"
+        )
+        result = self.ssh(self._lock_node(), script)
+        if "ACQUIRED" not in result.stdout:
+            holder = result.stdout.strip() or "không rõ"
+            raise LabBusy(
+                f"Cụm đang được dùng bởi {holder}. Chờ người đó chạy xong; nếu chắc chắn khóa bị bỏ lại "
+                "(máy người đó đã tắt), xem `labenv.py --env configs/lab.cloud.json lock-status` rồi `unlock`."
+            )
+        try:
+            yield
+        finally:
+            # Release only our own lock, never one someone else took after a forced unlock.
+            self.ssh(
+                self._lock_node(),
+                f'[ "$(cat {LOCK_PATH}/owner 2>/dev/null)" = {shlex.quote(owner)} ] && rm -rf {LOCK_PATH}; true',
+                check=False,
+            )
+
+    def unlock(self) -> None:
+        self.ssh(self._lock_node(), f"rm -rf {LOCK_PATH}")
+
+    def ensure_free(self) -> None:
+        holder = self.lock_holder()
+        if holder:
+            raise LabBusy(f"Cụm đang được dùng bởi {holder}; không thao tác tay lúc này.")
 
     # ---- lifecycle -----------------------------------------------------------
     def up(

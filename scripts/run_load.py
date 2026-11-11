@@ -226,7 +226,7 @@ def main():
         encoding="utf-8",
     )
     try:
-        with lab.keepalive():
+        with lab.keepalive(), lab.lock(f"run_load -> {directory.name}"):
             asyncio.run(suite(args, lab, directory))
     finally:
         if any(directory.glob("*.meta.json")):

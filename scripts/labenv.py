@@ -59,6 +59,7 @@ class LabEnvironment(Protocol):
     def heal(self) -> None: ...
     def consul_leader(self) -> str: ...
     def provenance(self) -> dict: ...
+    def lock(self, purpose: str): ...
 
 
 def posix_path(path: Path | str) -> str:
@@ -134,6 +135,11 @@ class ComposeLab:
         return self.sh(shlex.join(command)).stdout
 
     # ---- lifecycle -----------------------------------------------------------
+    @contextlib.contextmanager
+    def lock(self, purpose: str):
+        """A lab on this machine belongs to one person; nothing to coordinate."""
+        yield
+
     @contextlib.contextmanager
     def keepalive(self):
         """Hold one WSL session open while the lab is in use.
@@ -397,6 +403,8 @@ def main():
     commands.add_parser("status")
     commands.add_parser("heal")
     commands.add_parser("hold")
+    commands.add_parser("lock-status", help="Ai đang dùng cụm cloud")
+    commands.add_parser("unlock", help="Gỡ khóa bị bỏ lại (chỉ khi chắc chắn không ai đang chạy)")
     for name in ("stop", "start"):
         commands.add_parser(name).add_argument("services", nargs="+")
     for name in ("stop-node", "start-node"):
@@ -410,7 +418,18 @@ def main():
     slow.add_argument("--loss-percent", type=float, default=0)
     args = parser.parse_args()
     lab = make_lab(wsl=args.wsl, compose=args.compose, env=args.env)
-    if args.command == "check":
+    mutating = {"up", "heal", "stop", "start", "stop-node", "start-node", "partition", "degrade"}
+    if args.command in mutating and hasattr(lab, "ensure_free"):
+        # Do not disturb a teammate's run on the shared cluster.
+        lab.ensure_free()
+    if args.command == "lock-status":
+        holder = lab.lock_holder() if hasattr(lab, "lock_holder") else None
+        print(holder or "Cụm đang rảnh.")
+    elif args.command == "unlock":
+        if hasattr(lab, "unlock"):
+            lab.unlock()
+            print("Đã gỡ khóa.")
+    elif args.command == "check":
         tools = lab.check()
         print(json.dumps(tools, indent=2))
         for name, reason in getattr(lab, "check_errors", {}).items():

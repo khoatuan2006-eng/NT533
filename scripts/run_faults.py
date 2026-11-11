@@ -368,7 +368,7 @@ def main():
         encoding="utf-8",
     )
     try:
-        with lab.keepalive():
+        with lab.keepalive(), lab.lock(f"run_faults -> {directory.name}"):
             asyncio.run(suite(args, lab, directory))
     finally:
         # Report whatever finished, even if a later repetition failed.
