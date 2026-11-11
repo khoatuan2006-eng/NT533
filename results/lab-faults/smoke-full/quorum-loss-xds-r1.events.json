@@ -1,0 +1,10 @@
+{
+  "fault": "quorum-loss",
+  "mode": "xds",
+  "endpoint": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+  "expect": "fail-closed",
+  "fault_dispatch_s": 9.988878199999817,
+  "fault_confirmed_s": 15.301024599999437,
+  "restore_dispatch_s": 50.01703449999968,
+  "restore_confirmed_s": 53.695131199999196
+}

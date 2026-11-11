@@ -1,0 +1,10 @@
+{
+  "fault": "delay-node3",
+  "mode": "xds",
+  "endpoint": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+  "expect": "continue",
+  "fault_dispatch_s": 10.006225699999959,
+  "fault_confirmed_s": 11.895642399999815,
+  "restore_dispatch_s": 49.99819060000027,
+  "restore_confirmed_s": 52.989634900000055
+}

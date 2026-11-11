@@ -6,6 +6,7 @@ import asyncio
 import json
 import logging
 import time
+from urllib.parse import quote
 
 import grpc
 
@@ -78,6 +79,10 @@ class Service(rpc.ProcessingServiceServicer):
         end = time.monotonic() + budget
         queued_ms = 0.0
         budget_at_entry = budget
+        # abort() sends trailers immediately, so identify this instance before any
+        # failure path; callers use it to attribute errors to an endpoint.
+        identity = ("x-instance-id", quote(self.instance_id, safe=""))
+        context.set_trailing_metadata((identity,))
         try:
             await self._validate_request(request, context)
             if self.admitted >= self.config.concurrency * 2:
@@ -124,6 +129,7 @@ class Service(rpc.ProcessingServiceServicer):
             # Custom diagnostic trailers; these are not a cross-host clock comparison.
             context.set_trailing_metadata(
                 (
+                    identity,
                     ("x-server-duration-ms", f"{duration_ms:.3f}"),
                     ("x-server-budget-ms", f"{budget_at_entry * 1000:.3f}"),
                     ("x-server-queue-ms", f"{queued_ms:.3f}"),

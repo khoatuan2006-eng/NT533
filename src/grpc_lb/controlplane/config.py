@@ -2,40 +2,18 @@
 
 from __future__ import annotations
 
-import asyncio
-import ipaddress
 import json
 import os
 import re
-import socket
 from collections.abc import Mapping
 from dataclasses import dataclass
 from urllib.parse import urlsplit
 
+from ..endpoints import EndpointResolver, Membership, join_address, split_address  # noqa: F401
+
 REGISTRY_LEASE = 15.0
 FETCH_TIMEOUT = 4.0
 REFRESH_INTERVAL = 1.0
-Membership = dict[str, list[str]]
-
-
-def split_address(value: str, *, allow_empty_host: bool = False) -> tuple[str, int]:
-    if not isinstance(value, str) or value.strip() != value:
-        raise ValueError("address must be a host:port string")
-    host, separator, port = value.rpartition(":")
-    if host.startswith("[") and host.endswith("]"):
-        host = host[1:-1]
-        ipaddress.IPv6Address(host)
-    elif ":" in host:
-        raise ValueError("IPv6 addresses require brackets")
-    if not separator or not port.isascii() or not port.isdecimal() or not 1 <= int(port) <= 65535:
-        raise ValueError("address port must be 1..65535")
-    if not host and not allow_empty_host:
-        raise ValueError("endpoint host is required")
-    return host, int(port)
-
-
-def join_address(host: str, port: int) -> str:
-    return f"[{host}]:{port}" if ":" in host else f"{host}:{port}"
 
 
 def _unique_object(pairs):
@@ -66,41 +44,21 @@ def decode_config(data: str | bytes) -> Membership:
     return document["services"]
 
 
-class EndpointResolver:
-    """Health probes and EDS share the same canonical IP:port membership."""
-
-    async def resolve(self, members: Membership) -> Membership:
-        resolved = {}
-        for name, addresses in sorted(members.items()):
-            endpoints = set()
-            for address in sorted(addresses):
-                host, port = split_address(address)
-                try:
-                    ips = [str(ipaddress.ip_address(host))]
-                except ValueError:
-                    rows = await asyncio.get_running_loop().getaddrinfo(host, port, type=socket.SOCK_STREAM)
-                    ips = sorted({row[4][0] for row in rows})
-                if not ips:
-                    raise ValueError(f"no IP for {host}")
-                for ip in ips:
-                    if ipaddress.ip_address(ip).is_unspecified:
-                        raise ValueError("wildcard endpoint cannot be advertised")
-                    endpoint = join_address(ip, port)
-                    if endpoint in endpoints:
-                        raise ValueError(f"duplicate endpoint: {endpoint}")
-                    endpoints.add(endpoint)
-            resolved[name] = sorted(endpoints)
-        return resolved
-
-
 @dataclass(frozen=True, slots=True)
 class RuntimeSettings:
     discovery_path: str = "/config/discovery.json"
     listen_address: str = "[::]:18000"
     consul_address: str = ""
     active_health: bool = False
+    rl_telemetry: str = ""
+    rl_service: str = ""
+    rl_model: str = ""
 
     def __post_init__(self):
+        if bool(self.rl_telemetry) != bool(self.rl_service):
+            raise ValueError("EXPERIMENTAL_RL_TELEMETRY and EXPERIMENTAL_RL_SERVICE must be set together")
+        if self.rl_model and not self.rl_service:
+            raise ValueError("EXPERIMENTAL_RL_MODEL requires the RL telemetry settings")
         if not self.discovery_path or self.discovery_path.strip() != self.discovery_path:
             raise ValueError("DISCOVERY_CONFIG must be a nonempty path without surrounding whitespace")
         split_address(self.listen_address, allow_empty_host=True)
@@ -130,4 +88,7 @@ class RuntimeSettings:
             values.get("XDS_LISTEN_ADDRESS") or "[::]:18000",
             values.get("CONSUL_HTTP_ADDR", ""),
             active in {"1", "true"},
+            values.get("EXPERIMENTAL_RL_TELEMETRY", ""),
+            values.get("EXPERIMENTAL_RL_SERVICE", ""),
+            values.get("EXPERIMENTAL_RL_MODEL", ""),
         )

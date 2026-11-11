@@ -1,0 +1,10 @@
+{
+  "fault": "loss-node3",
+  "mode": "xds",
+  "endpoint": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+  "expect": "observe",
+  "fault_dispatch_s": 10.007846999999856,
+  "fault_confirmed_s": 11.06761700000061,
+  "restore_dispatch_s": 49.98973070000011,
+  "restore_confirmed_s": 52.856530699999894
+}

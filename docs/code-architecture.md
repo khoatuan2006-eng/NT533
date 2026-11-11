@@ -7,6 +7,7 @@
 | Module | Trách nhiệm |
 |---|---|
 | `topology.py` | Đọc và kiểm tra DAG, ID, endpoint, workload và giới hạn hop |
+| `endpoints.py` | Địa chỉ `host:port` chuẩn hóa và `EndpointResolver`, dùng chung cho control plane và caller |
 | `service_identity.py` | Tên RPC/health dùng chung cho handler, registry và probe |
 | `dependencies.py` | Hợp đồng `DependencyClient`, static/xDS client và factory chọn transport |
 | `processing.py` | Handler `Service`: validation request, admission, budget và orchestration |

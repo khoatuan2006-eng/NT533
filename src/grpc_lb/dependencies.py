@@ -10,7 +10,7 @@ import random
 import re
 import time
 from typing import Protocol
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 import grpc
 from grpc_health.v1 import health_pb2, health_pb2_grpc
@@ -127,9 +127,16 @@ class XdsDependencyPool:
                 request, timeout=timeout, metadata=(("x-request-id", quote(request.request_id, safe="")),)
             )
             result = await call
-        except grpc.RpcError:
+        except grpc.RpcError as error:
             if self.telemetry:
-                self.telemetry.observe(None, (time.monotonic() - start) * 1000)
+                # Only a server that answered can be blamed; transport failures stay unattributed.
+                instance = None
+                trailers = error.trailing_metadata() if isinstance(error, grpc.aio.AioRpcError) else None
+                for key, value in trailers or ():
+                    if key == "x-instance-id":
+                        instance = unquote(value)
+                        break
+                self.telemetry.observe(instance, (time.monotonic() - start) * 1000, ok=False)
             raise
         if self.telemetry:
             duration = (time.monotonic() - start) * 1000
@@ -167,19 +174,28 @@ Pool = DependencyClient
 class DependencyPoolFactory:
     """Select a transport once at startup; request handling stays transport-neutral."""
 
-    def __init__(self, mode: str = "static", health_interval: float = 1) -> None:
+    def __init__(
+        self,
+        mode: str = "static",
+        health_interval: float = 1,
+        *,
+        telemetry_service: str = "",
+        telemetry_path: str = "",
+    ) -> None:
         if mode not in ("static", "xds"):
             raise ValueError("DISCOVERY_MODE must be static or xds")
+        if bool(telemetry_service) != bool(telemetry_path):
+            raise ValueError("RL telemetry service and output path must be set together")
         self.mode = mode
         self.health_interval = health_interval
+        self.telemetry_service = telemetry_service
+        self.telemetry_path = telemetry_path
 
     def create(self, service_id: str, config: ServiceConfig) -> DependencyClient:
         if self.mode == "xds":
-            path = os.environ.get("EXPERIMENTAL_RL_TELEMETRY_OUTPUT")
-            target = os.environ.get("EXPERIMENTAL_RL_SERVICE")
             telemetry = (
-                TelemetryCollector(service_id, config.instances, path)
-                if path and target == service_id
+                TelemetryCollector(service_id, config.instances, self.telemetry_path)
+                if self.telemetry_service == service_id
                 else None
             )
             return XdsDependencyPool(service_id, telemetry)

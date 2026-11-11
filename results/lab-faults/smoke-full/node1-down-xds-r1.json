@@ -1,0 +1,51 @@
+{
+  "schema_version": 2,
+  "run_id": "5aae4a6e38ae416eb922af1bc0cd6548",
+  "started_unix_s": 1794356460.820252,
+  "python": "3.12.10",
+  "grpc": "1.84.0",
+  "parameters": {
+    "address": "ipv4:127.0.0.1:50050,127.0.0.1:50060",
+    "output": "results\\lab-faults\\smoke-full\\node1-down-xds-r1.json",
+    "mode": "xds",
+    "entry": "service-a",
+    "workload": "light",
+    "rate": 20,
+    "duration": 80,
+    "timeout": 3,
+    "ready_timeout": 30,
+    "max_inflight": 256,
+    "warmup": 40,
+    "fault_at": 9.986552500000471,
+    "stable_window": 5
+  },
+  "completion_elapsed_s": 79.98181850000037,
+  "raw": "results\\lab-faults\\smoke-full\\node1-down-xds-r1.jsonl",
+  "summary": {
+    "scheduled": 1600,
+    "attempted": 1600,
+    "successful": 1580,
+    "codes": {
+      "OK": 1580,
+      "UNAVAILABLE": 20
+    },
+    "successful_rps_offered_window": 19.75,
+    "successful_rps_elapsed": 19.75,
+    "failure_fraction_including_generator_drops": 0.012499999999999956,
+    "rpc_error_fraction": 0.012499999999999956,
+    "valid_load": true,
+    "success_latency_ms": {
+      "p50": 31.148899999607238,
+      "p95": 35.87040000002162,
+      "p99": 41.32410000056552
+    },
+    "all_rpc_latency_ms": {
+      "p50": 31.1639000001378,
+      "p95": 36.35560000020632,
+      "p99": 48.47590000008495
+    },
+    "schedule_lag_ms_p99": 21.77190000020346,
+    "observed_recovery_s": 5.1634474999995295,
+    "recovery_stable_window_s": 5
+  }
+}

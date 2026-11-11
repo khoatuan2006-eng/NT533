@@ -87,6 +87,15 @@ class RLController:
         metrics = data["endpoints"]
         if set(metrics) != set(members):
             raise ValueError("telemetry does not match membership")
+        endpoint_errors = data.get("endpoint_errors", {})
+        if (
+            not isinstance(endpoint_errors, dict)
+            or not set(endpoint_errors) <= set(members)
+            or any(type(v) is not int or v < 0 for v in endpoint_errors.values())
+            or type(data["errors"]) is not int
+            or sum(endpoint_errors.values()) > data["errors"]
+        ):
+            raise ValueError("invalid endpoint error counts")
         medians = []
         for address in members:
             values = metrics[address]
@@ -96,7 +105,10 @@ class RLController:
                 or any(type(v) not in (int, float) or not math.isfinite(v) or v < 0 for v in values)
             ):
                 raise ValueError("invalid endpoint latency samples")
-            medians.append(statistics.median(values))
+            # Effective latency = median / success rate, so an endpoint that
+            # answers quickly but fails often does not look like the better one.
+            failed = endpoint_errors.get(address, 0)
+            medians.append(statistics.median(values) * (len(values) + failed) / len(values))
         if members != self.members:
             self.members, self.weight, self.pending, self.sequence = members, 5, None, -1
             self.last_category, self.category_count = None, 0

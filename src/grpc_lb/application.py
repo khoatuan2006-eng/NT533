@@ -32,9 +32,15 @@ class ServiceSettings:
     consul_address: str = ""
     consul_token: str = field(default="", repr=False)
     drain_file: str = ""
+    rl_telemetry_service: str = ""
+    rl_telemetry_output: str = ""
 
     def __post_init__(self) -> None:
         validate(self.topology)
+        if bool(self.rl_telemetry_service) != bool(self.rl_telemetry_output):
+            raise ValueError(
+                "EXPERIMENTAL_RL_SERVICE and EXPERIMENTAL_RL_TELEMETRY_OUTPUT must be set together"
+            )
         if self.service_id not in self.topology:
             raise ValueError("Service is not in topology")
         if self.instance_id not in self.service.instances:
@@ -93,6 +99,8 @@ class ServiceSettings:
             consul,
             env.get("CONSUL_HTTP_TOKEN", ""),
             env.get("DRAIN_FILE", ""),
+            env.get("EXPERIMENTAL_RL_SERVICE", ""),
+            env.get("EXPERIMENTAL_RL_TELEMETRY_OUTPUT", ""),
         )
 
 
@@ -133,6 +141,8 @@ class ServiceApplication:
                 settings.topology,
                 settings.listen_address,
                 discovery_mode=settings.discovery_mode,
+                telemetry_service=settings.rl_telemetry_service,
+                telemetry_path=settings.rl_telemetry_output,
             )
             if settings.drain_file:
                 self._tasks.append(asyncio.create_task(watch_drain(self.runtime, settings.drain_file)))
