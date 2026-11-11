@@ -2,6 +2,8 @@
 
 Các tài liệu trong thư mục này ghi lại những giai đoạn **đã qua** của dự án. Chúng giữ bằng chứng và quyết định thiết kế để trích dẫn trong báo cáo, nhưng **không mô tả cách làm hiện tại**: nhiều chỗ nói về Go, k3s, AIOps, một host, hay ba VM đã bị xóa. Cách làm hiện tại nằm ở [README](../../README.md), [hướng dẫn cho nhóm](../team-guide.md) và [tham chiếu thí nghiệm](../running.md).
 
+Các lệnh trong những tài liệu này dùng `scripts/...` và `deploy/...` theo vị trí cũ; phần lớn file đó nay nằm trong [`legacy/`](../../legacy/README.md). Muốn chạy lại, lấy bản repo trước khi dọn theo hướng dẫn trong `legacy/README.md`.
+
 | Tài liệu | Giai đoạn | Còn dùng để |
 |---|---|---|
 | [M1.md](M1.md) | 09/2026: client gRPC, Round Robin / Least Request, phân công ban đầu | Nguồn gốc `balancer.py`, `loadgen.py`, `summarize.py` |
