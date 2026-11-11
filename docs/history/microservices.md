@@ -140,6 +140,6 @@ Entrypoint: `python -m grpc_lb.microservices`.
 
 Integration tests dùng tên service tùy ý, gRPC thật và topology nhiều tầng; kiểm tra tuần tự/song song, phân phối replica, health phục hồi, dependency chết, deadline, hủy nhánh song song, hop/cycle, profile nặng và lỗi mô phỏng.
 
-Đã chạy launcher 6 process, toàn bộ **81 test đạt** và đã kiểm thử toàn tuyến với Envoy/Docker trong WSL. Đã thử load shedding, dừng/khôi phục instance, mất toàn bộ dependency hoặc instance đầu vào và deadline. Xem [báo cáo nghiệm thu](acceptance.md) để biết số liệu và giới hạn; sau nâng runtime, bài deadline đã đạt trong phạm vi đã kiểm chứng; xem [điều tra deadline](deadline-investigation.md). Chưa nghiệm thu nhiều máy hoặc production.
+Đã chạy launcher 6 process, toàn bộ **81 test đạt** và đã kiểm thử toàn tuyến với Envoy/Docker trong WSL. Đã thử load shedding, dừng/khôi phục instance, mất toàn bộ dependency hoặc instance đầu vào và deadline. Xem báo cáo nghiệm thu (đã xóa khỏi cây thư mục, còn trong lịch sử git) để biết số liệu và giới hạn; sau nâng runtime, bài deadline đã đạt trong phạm vi đã kiểm chứng; xem [điều tra deadline](deadline-investigation.md). Chưa nghiệm thu nhiều máy hoặc production.
 
 Cập nhật theo tham khảo: xem [reference-design.md](reference-design.md) cho cơ chế timeout gRPC tại Envoy, circuit breaker, health Watch và bằng chứng đo đạc; nguồn chính thức và các lựa chọn riêng của sample được phân biệt trong tài liệu đó.
