@@ -11,17 +11,9 @@ Máy của bạn                                Cloud UIT-IoT
 └───────────────────────┘   SSH    └──────────────────────────────┘
 ```
 
+Tài liệu này trả lời: **làm từng việc như thế nào**. Ai làm việc nào và hạn khi nào nằm ở [1-viec-cua-toi.md](1-viec-cua-toi.md); danh sách tình huống, tiêu chí và sự cố thường gặp nằm ở [3-tra-cuu.md](3-tra-cuu.md).
+
 Mỗi thành viên tự làm đủ bốn việc: **chạy → kiểm tra → đánh giá → sửa để cải thiện**. Cả nhóm dùng chung một cụm, nên đọc kỹ mục 3 trước khi chạy.
-
-Đồ án có một câu hỏi chính (hệ thống tiếp tục phục vụ thế nào khi thành phần bị lỗi), chia hai nhánh. Mỗi người đứng tên một phần nhưng vẫn tự chạy phần còn lại để hiểu:
-
-| Nhánh | Người | Phần đứng tên | Lệnh chính |
-|---|---|---|---|
-| **Lỗi cứng**: thành phần chết, mạng phân mảnh | Đạt | Gián đoạn, phục hồi, fail closed | `run_faults.py` |
-| **Lỗi mềm**: backend vẫn trả lời nhưng chậm | Lầu | Round Robin so với Least Request trên cụm; điểm bão hòa làm mốc tải | `run_load.py` |
-| **Lỗi mềm** (mở rộng) | Khoa | RL so với Round Robin và quy tắc trong lab cục bộ; ghép báo cáo | `compare_rl_scenarios.py` |
-
-Với lỗi mềm, health probe không rút backend chậm ra, nên chiến lược cân bằng tải là cơ chế chịu lỗi duy nhất. Đó là lý do phần tải và RL thuộc cùng câu hỏi với phần thử lỗi.
 
 Mọi lệnh chạy từ thư mục gốc của repo trong PowerShell. Kết quả mỗi lượt nằm trong một thư mục mới dưới `results/`; **không xóa hay sửa** thư mục kết quả, kể cả lần không đạt.
 
@@ -54,7 +46,7 @@ node2 và node3 không có IP trong mạng VPN; SSH tới chúng tự đi qua no
 
 ## 2. Hiểu hệ thống trước khi đo
 
-Đọc phần kiến trúc trong [README](../README.md), rồi thử tay. Mỗi bước, quan sát rồi mới chuyển bước sau:
+Đọc phần kiến trúc trong [README](../../README.md), rồi thử tay. Mỗi bước, quan sát rồi mới chuyển bước sau:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/labenv.py --env configs/lab.cloud.json stop b-2
@@ -73,7 +65,7 @@ Câu hỏi nên tự trả lời được: khi b-2 dừng, ai phát hiện, sau 
 
 ### Ghi dự đoán trước khi đo
 
-Trước khi chạy bài đầy đủ, mỗi người viết dự đoán cho từng tình huống của phần mình vào một file riêng (ví dụ `results/predictions-<tên>.md`), rồi commit **trước** khi có kết quả:
+Trước khi chạy bài đầy đủ, mỗi người viết dự đoán cho từng tình huống của phần mình vào mục "Dự đoán" trong [file báo cáo của mình](../3-bao-cao/README.md), rồi commit **trước** khi có kết quả:
 
 | Tình huống | Ai phát hiện | Theo cơ chế / timeout nào | Dự đoán gián đoạn | Request lỗi sẽ mang mã gì |
 |---|---|---|---|---|
@@ -81,7 +73,7 @@ Trước khi chạy bài đầy đủ, mỗi người viết dự đoán cho t�
 
 Với phần lỗi mềm, dự đoán là: Round Robin dồn bao nhiêu phần tải vào b-2, Least Request (hoặc RL) giảm xuống còn bao nhiêu, và P99 thay đổi thế nào.
 
-Các timeout cần tra nằm trong code và cấu hình (chu kỳ health probe của control plane, lease 15 giây khi mất quorum, deadline của request); bắt đầu từ [kiến trúc code](code-architecture.md). Dự đoán sai không sao: chỗ lệch giữa dự đoán và số đo là phần đáng viết nhất trong báo cáo.
+Các timeout cần tra nằm trong code và cấu hình (chu kỳ health probe của control plane, lease 15 giây khi mất quorum, deadline của request); bắt đầu từ [kiến trúc code](../1-do-an/kien-truc-code.md). Dự đoán sai không sao: chỗ lệch giữa dự đoán và số đo là phần đáng viết nhất trong báo cáo.
 
 ## 3. Dùng chung cụm
 
@@ -109,7 +101,7 @@ Sau đó chạy đầy đủ **trên bản baseline** (xem [Baseline chung](#bas
 .\.venv\Scripts\python.exe scripts/run_load.py --env configs/lab.cloud.json --rates 50 100 200 400 --repetitions 3
 ```
 
-Bài lỗi mất khoảng 2 giờ, bài tải khoảng 75 phút. Nếu mọi mức tải đều đạt thì chưa thấy điểm bão hòa: chạy thêm `--rates 600 800 1200`. Danh sách tình huống, phương án và tiêu chí: [tham chiếu thí nghiệm](running.md).
+Bài lỗi mất khoảng 2 giờ, bài tải khoảng 75 phút. Nếu mọi mức tải đều đạt thì chưa thấy điểm bão hòa: chạy thêm `--rates 600 800 1200`. Danh sách tình huống, phương án và tiêu chí: [tham chiếu thí nghiệm](3-tra-cuu.md).
 
 RL nhiều seed chạy trên máy của bạn, không dùng cụm:
 
@@ -155,7 +147,7 @@ Mỗi lượt tạo một thư mục, ví dụ `results/lab-faults/20261112-2100
 
 ### Đánh giá
 
-Với mỗi ô trong bảng, viết ra: đạt hay không theo tiêu chí; con số chính (gián đoạn, điểm bão hòa, phần b-2); và **vì sao** hệ thống hành xử như vậy, dựa vào kiến trúc. Đặt số đo cạnh dự đoán đã ghi ở mục 2; ô nào lệch thì giải thích vì sao lệch. Với ô không đạt, phân loại trước khi sửa: lỗi hệ thống, lỗi công cụ đo, hay tiêu chí chưa hợp lý. Khi so các chiến lược cân bằng tải, chỉ so trong cùng một đường dữ liệu ([quy tắc so sánh](running.md#quy-tắc-so-sánh-chiến-lược)). Bảng bài lỗi: **gián đoạn** là thời gian từ request lỗi đầu tiên tới khi ổn định lại; **instance còn phục vụ** cho biết tải đã chuyển sang đâu. Bảng bài tải: **mức tải cao nhất còn đạt** là điểm bão hòa; **phần b-2** cho biết có né backend chậm không (Round Robin ≈ 50%).
+Với mỗi ô trong bảng, viết ra: đạt hay không theo tiêu chí; con số chính (gián đoạn, điểm bão hòa, phần b-2); và **vì sao** hệ thống hành xử như vậy, dựa vào kiến trúc. Đặt số đo cạnh dự đoán đã ghi ở mục 2; ô nào lệch thì giải thích vì sao lệch. Với ô không đạt, phân loại trước khi sửa: lỗi hệ thống, lỗi công cụ đo, hay tiêu chí chưa hợp lý. Khi so các chiến lược cân bằng tải, chỉ so trong cùng một đường dữ liệu ([quy tắc so sánh](3-tra-cuu.md#quy-tắc-so-sánh-chiến-lược)). Bảng bài lỗi: **gián đoạn** là thời gian từ request lỗi đầu tiên tới khi ổn định lại; **instance còn phục vụ** cho biết tải đã chuyển sang đâu. Bảng bài tải: **mức tải cao nhất còn đạt** là điểm bão hòa; **phần b-2** cho biết có né backend chậm không (Round Robin ≈ 50%).
 
 ## 5. Sửa để cải thiện
 
@@ -174,7 +166,7 @@ Với mỗi ô trong bảng, viết ra: đạt hay không theo tiêu chí; con s
 Lệnh `deploy` build image trên từng VM nên mất vài phút. Nếu lỗi vì không tải được gói Python, VM đó đang lỗi DNS: `ssh -F configs/ssh-config <IP> "sudo resolvectl dns ens3 1.1.1.1"` rồi chạy lại.
 
 6. **Chạy lại riêng tình huống đó** (`--scenarios <tên>`) với cùng số lần lặp. So với kết quả trước khi sửa.
-7. **Ghi cặp trước / sau** vào báo cáo, giữ cả hai thư mục kết quả. Nếu bản sửa tốt hơn, mở pull request vào `main`; nếu không, triển khai lại bản `main` để cụm trở về trạng thái chung. Trong cả hai trường hợp, báo nhóm bản nào đang chạy trên cụm (giá trị `release` mới), vì từ lúc đó kết quả của mọi người đo trên bản ấy.
+7. **Ghi cặp trước / sau** vào mục "Cặp trước / sau" trong file báo cáo của mình, giữ cả hai thư mục kết quả. Nếu bản sửa tốt hơn, mở pull request vào `main`; nếu không, triển khai lại bản `main` để cụm trở về trạng thái chung. Trong cả hai trường hợp, báo nhóm bản nào đang chạy trên cụm (giá trị `release` mới), vì từ lúc đó kết quả của mọi người đo trên bản ấy.
 
 ### Khi nào ngừng sửa và chuyển hướng
 
@@ -186,7 +178,7 @@ Nguyên tắc chung: làm hết sức; gặp bug thì sửa; sửa không đư�
 - **Trả cụm về baseline** trước khi chuyển hướng (bước 7), để người sau không đo trên bản sửa dở.
 - Bug nào ảnh hưởng tới phần của người khác (ví dụ công cụ đo sai) thì báo nhóm ngay, không đợi hết giới hạn.
 
-Ô nghi không đạt để luyện: sau khi gỡ phân mảnh node1, a-1 mất khoảng 2 phút mới phục vụ lại. Hiện tượng này mới thấy trên bản dựng một máy; chạy `--scenarios partition-node1 --repetitions 5` trên baseline để xem có tái hiện trên cụm không trước khi bắt tay sửa. Manh mối ở mục "Vấn đề đã biết" của [tham chiếu thí nghiệm](running.md#vấn-đề-đã-biết).
+Ô nghi không đạt để luyện: sau khi gỡ phân mảnh node1, a-1 mất khoảng 2 phút mới phục vụ lại. Hiện tượng này mới thấy trên bản dựng một máy; chạy `--scenarios partition-node1 --repetitions 5` trên baseline để xem có tái hiện trên cụm không trước khi bắt tay sửa. Manh mối ở mục "Vấn đề đã biết" của [tham chiếu thí nghiệm](3-tra-cuu.md#vấn-đề-đã-biết).
 
 **Lưu ý lần triển khai đầu tiên:** cụm đang chạy bản ngày 28/10, chưa có phương án Least Request cho caller và việc gán lỗi theo endpoint. Một người cần triển khai bản `main` hiện tại (bước 5) và gắn tag `lab-baseline` (mục 4, [Baseline chung](#baseline-chung)) trước khi cả nhóm bắt đầu đo. Phần điều khiển cụm qua SSH chưa từng chạy trên VM thật, nên dành riêng một buổi cho việc này và chỉ hẹn lịch chạy chính thức sau khi hai bài ngắn ở mục 4 chạy xong.
 
@@ -199,4 +191,4 @@ Nguyên tắc chung: làm hết sức; gặp bug thì sửa; sửa không đư�
 
 ## Phụ lục: thử code trên máy cá nhân
 
-Khi muốn thử một thay đổi mà chưa muốn chiếm cụm, có thể dựng cùng 13 thành phần trên một máy Windows bằng Docker trong WSL: thay `--env configs/lab.cloud.json` bằng `--wsl Ubuntu-22.04` (chi tiết ở [tham chiếu thí nghiệm](running.md#phụ-lục-chạy-thử-trên-một-máy)). Số liệu từ cách này **không dùng cho báo cáo**.
+Khi muốn thử một thay đổi mà chưa muốn chiếm cụm, có thể dựng cùng 13 thành phần trên một máy Windows bằng Docker trong WSL: thay `--env configs/lab.cloud.json` bằng `--wsl Ubuntu-22.04` (chi tiết ở [tham chiếu thí nghiệm](3-tra-cuu.md#phụ-lục-chạy-thử-trên-một-máy)). Số liệu từ cách này **không dùng cho báo cáo**.

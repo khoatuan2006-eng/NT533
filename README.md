@@ -2,6 +2,17 @@
 
 Đồ án môn Hệ tính toán phân bố. Hệ thống cân bằng tải hai tầng: **Envoy cân bằng request vào service điều phối** và **lookaside (gRPC xDS) cân bằng lời gọi từ service điều phối tới các service xử lý**.
 
+## Tài liệu nằm ở đâu
+
+| Bạn cần | Mở | Trong đó có |
+|---|---|---|
+| **Hiểu đồ án** | README này | Câu hỏi, kiến trúc, khái niệm hệ phân tán, phạm vi |
+| | [`docs/1-do-an/`](docs/1-do-an/) | Chi tiết: kiến trúc code, thử nghiệm RL |
+| **Biết việc phải làm** | [`docs/2-cong-viec/`](docs/2-cong-viec/1-viec-cua-toi.md) | Ba file đọc theo số thứ tự: việc của tôi, hướng dẫn từng bước, tra cứu |
+| **Viết báo cáo** | [`docs/3-bao-cao/`](docs/3-bao-cao/README.md) | Dàn ý, quy tắc viết, mỗi người một file để điền |
+
+`docs/history/` giữ tài liệu các giai đoạn trước, chỉ dùng để trích dẫn bằng chứng.
+
 ## Câu hỏi của đồ án
 
 **Câu hỏi chính:** hệ thống cân bằng tải hai tầng này tiếp tục phục vụ thế nào khi từng thành phần phân tán bị lỗi — backend, máy chủ, control plane, registry, hoặc khi mạng bị phân mảnh?
@@ -13,7 +24,7 @@ Câu hỏi này chia thành hai nhánh theo loại lỗi; mọi phần của đ�
 | **Lỗi cứng** | Thành phần ngừng trả lời: backend, node, control plane, Consul chết; mạng phân mảnh | Phát hiện lỗi (health probe, timeout), nhân bản, quorum, fail closed | Ai phát hiện, sau bao lâu; hệ thống gián đoạn bao lâu và tự phục hồi thế nào? |
 | **Lỗi mềm** | Thành phần vẫn trả lời nhưng chậm: backend chậm, mạng trễ hoặc rớt gói | Health probe không bắt được, nên **chiến lược cân bằng tải** là cơ chế chịu lỗi duy nhất | Round Robin, Least Request hay RL né backend chậm tốt hơn, và vì sao? |
 
-**RL là phần mở rộng trong nhánh lỗi mềm**, không phải câu hỏi riêng. Nó phải trả lời thêm một điều: bộ điều khiển học được có an toàn khi chính nó lỗi hoặc thiếu dữ liệu không (xem [tiêu chí cho phần RL](#tiêu-chí-cho-phần-rl)).
+**RL là phần mở rộng trong nhánh lỗi mềm**, không phải câu hỏi riêng. Nó phải trả lời thêm một điều: bộ điều khiển học được có an toàn khi chính nó lỗi hoặc thiếu dữ liệu không (xem [thử nghiệm RL](docs/1-do-an/thu-nghiem-rl.md)).
 
 ## Kiến trúc
 
@@ -55,48 +66,13 @@ Mỗi node là một VM trên cloud UIT-IoT; các thành phần trên mỗi VM c
 - Triển khai trên ba VM; có công cụ tạo tải, đo đạc và thử lỗi/phục hồi.
 - Nguyên mẫu Q-learning điều chỉnh trọng số qua xDS, chạy trong lab với một caller và hai instance.
 
-Kết quả và giới hạn: [báo cáo nghiệm thu](docs/history/cloud-validation-report.md), [thử nghiệm RL](docs/rl-lookaside-experiment.md).
+Kết quả và giới hạn: [báo cáo nghiệm thu](docs/history/cloud-validation-report.md), [thử nghiệm RL](docs/1-do-an/thu-nghiem-rl.md).
 
 Tài liệu các giai đoạn trước (Go, k3s, AIOps, các đợt nghiệm thu cũ) nằm trong [`docs/history/`](docs/history/README.md); chúng giữ bằng chứng, không mô tả cách làm hiện tại.
 
-## Cách nhóm làm việc (11–18/11/2026)
-
-Mọi thành viên đều tự chạy, kiểm tra, đánh giá và sửa; không ai chỉ nhận kết quả của người khác. Mỗi người làm theo [hướng dẫn cho nhóm](docs/team-guide.md):
-
-1. **Chạy**: thử lỗi (`run_faults.py`) và đo tải (`run_load.py`) trên ba VM.
-2. **Kiểm tra**: đọc bảng kết quả, đối chiếu với trace gốc, tự giải thích từng con số.
-3. **Đánh giá**: kết luận đạt / không đạt theo tiêu chí, nêu nguyên nhân cho ô không đạt.
-4. **Sửa để cải thiện**: đặt giả thuyết, sửa trên nhánh riêng, triển khai, chạy lại đúng ô đó, ghi cặp trước / sau.
-
-Hai quy ước chung: **ghi dự đoán trước khi đo** (ai phát hiện, theo timeout nào, gián đoạn bao lâu) để so với số đo; và mọi bảng "trước" đều đo trên **một bản baseline chung** đã gắn tag, trước khi ai triển khai bản sửa.
-
-Cả nhóm dùng chung một cụm ba VM nên **mỗi lúc chỉ một người chạy**; các script tự giữ khóa cụm và từ chối nếu người khác đang chạy. Báo trong nhóm trước khi triển khai code mới, vì triển khai khởi động lại toàn bộ cụm.
-
-Để báo cáo không trùng lặp, mỗi người đứng tên một phần (vẫn tự chạy cả phần còn lại để hiểu):
-
-| Người | Nhánh | Đứng tên trong báo cáo |
-|---|---|---|
-| Đạt | Lỗi cứng | Thử lỗi và phân mảnh mạng: gián đoạn, phục hồi, fail closed |
-| Lầu | Lỗi mềm | Backend chậm trên cụm: Round Robin so với Least Request; điểm bão hòa làm mốc tải |
-| Khoa | Lỗi mềm (mở rộng) | RL so với Round Robin và quy tắc khi có backend chậm; ghép báo cáo |
-
-Ba chiến lược không chạy trên cùng một đường dữ liệu (Least Request chỉ có ở caller static, RL chỉ có ở caller xDS trong lab cục bộ), nên chỉ so sánh trong cùng một đường; xem [quy tắc so sánh](docs/running.md#quy-tắc-so-sánh-chiến-lược).
-
-Ô nghi là "không đạt" để cả nhóm luyện quy trình sửa: phục hồi chậm sau khi gỡ phân mảnh node 1. Hiện tượng này mới thấy trên bản dựng một máy, cần tái hiện trên cụm trước (xem [tham chiếu thí nghiệm](docs/running.md#vấn-đề-đã-biết)).
-
-### Tiêu chí cho phần RL
-
-- RL không nằm trên đường xử lý request; khi telemetry cũ, sai hoặc thiếu mẫu thì quay về Round Robin.
-- Trọng số mỗi endpoint giới hạn 30–70%; không chạy exploration trên cấu hình mặc định.
-- Chỉ kết luận RL tốt hơn khi vượt policy theo quy tắc trên nhiều seed. Kết quả hiện tại chưa cho thấy điều đó.
-
-### Cách đo và báo cáo
-
-Chỉ số: số request theo instance, goodput, p50/p95/p99, tỷ lệ lỗi/timeout, thời gian cập nhật endpoint và thời gian phục hồi. Giữ trace cả thành công lẫn lỗi; không kết luận tốt hơn chỉ từ latency của request thành công. Phương pháp và định nghĩa chỉ số: [thực nghiệm đối chứng](docs/history/controlled-experiments.md). Phần kế hoạch k3s và ma trận E1–E8 trong tài liệu đó được thay bằng bảng trên.
-
 ## Ngoài phạm vi
 
-Ghi vào mục hướng phát triển của báo cáo, không làm trong tuần này:
+Ghi vào mục hướng phát triển của báo cáo, không làm trong đồ án:
 
 - Chạy ứng dụng bằng Kubernetes (k3s) và HPA. Ba VM có cài sẵn k3s từ trước, nhưng đồ án không dùng; ứng dụng chạy bằng Docker Compose.
 - Observability đầy đủ (Prometheus, tracing) và AIOps.

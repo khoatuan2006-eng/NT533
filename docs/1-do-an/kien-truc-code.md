@@ -75,7 +75,7 @@ $env:DISCOVERY_CONFIG = "configs/discovery.registry.json"
 .\.venv\Scripts\python.exe -m pytest -q tests/test_controlplane.py tests/test_controlplane_ads.py tests/test_controlplane_sources.py
 ```
 
-Dockerfile control plane chạy bộ test Python trước khi hoàn tất image runtime không có dev dependencies. Hai stack triển khai giữ lệnh Compose trong [lookaside](history/lookaside.md) và [lookaside HA](history/lookaside-ha.md). Bản Python phục vụ SotW ADS v3 LDS/CDS/EDS cho các caller hiện tại; Delta ADS chưa hỗ trợ.
+Dockerfile control plane chạy bộ test Python trước khi hoàn tất image runtime không có dev dependencies. Hai stack triển khai giữ lệnh Compose trong [lookaside](../history/lookaside.md) và [lookaside HA](../history/lookaside-ha.md). Bản Python phục vụ SotW ADS v3 LDS/CDS/EDS cho các caller hiện tại; Delta ADS chưa hỗ trợ.
 
 ## Những lỗi logic đã sửa trong đợt rà soát
 

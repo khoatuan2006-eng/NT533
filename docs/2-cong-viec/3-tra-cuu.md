@@ -1,6 +1,6 @@
 # Tham chiếu thí nghiệm
 
-Tài liệu tra cứu: tình huống lỗi, phương án, tiêu chí đạt, tham số và các vấn đề đã biết. Thứ tự làm việc từng bước nằm ở [hướng dẫn cho nhóm](team-guide.md); đọc tài liệu đó trước.
+Tài liệu này để **tra cứu, không đọc từ đầu đến cuối**: tình huống lỗi, phương án, tiêu chí đạt, tham số, vấn đề đã biết và sự cố thường gặp. Thứ tự làm việc từng bước nằm ở [2-huong-dan.md](2-huong-dan.md).
 
 Mọi lệnh chạy trên máy Windows của bạn, từ thư mục gốc của repo, và điều khiển ba VM trên cloud UIT-IoT qua tùy chọn `--env configs/lab.cloud.json`.
 
@@ -66,7 +66,7 @@ An toàn:
 
 **Giới hạn đã kiểm chứng:** gRPC Python 1.84 không có chính sách Least Request cho caller xDS. Control plane gửi cluster Least Request thì caller từ chối, kể cả khi bọc trong `wrr_locality`. Vì vậy Least Request ở tầng trong chỉ có với caller static; Envoy thì hỗ trợ bình thường. Hệ quả khi đọc kết quả: so `static-lr` với `static` cho thấy tác dụng của chính sách; so với `xds` thì lẫn thêm khác biệt về cách khám phá endpoint.
 
-Phương án có Least Request ở tầng trong cần code triển khai sau ngày 28/10 (xem bước triển khai trong [hướng dẫn cho nhóm](team-guide.md)).
+Phương án có Least Request ở tầng trong cần code triển khai sau ngày 28/10 (xem bước triển khai trong [hướng dẫn cho nhóm](2-huong-dan.md)).
 
 ### Quy tắc so sánh chiến lược
 
@@ -137,7 +137,7 @@ Chạy trên máy cục bộ, không dùng cloud: script tự dựng hai service
 .\.venv\Scripts\python.exe scripts/compare_rl_scenarios.py --model results/rl-convergence-balanced-20261101/model-7.json --output-dir results/rl-multiseed --seeds 41 42 43 44 45
 ```
 
-Bốn kịch bản × ba policy × năm seed, khoảng 15 phút. `report.md` có median [min–max] giữa các seed và cột hiệu RL − policy theo từng seed. Chỉ kết luận RL tốt hơn khi nó nhanh hơn ở hầu hết seed và khoảng hiệu không chứa 0. Kết quả này chỉ so với Round Robin và quy tắc trong cùng lượt, không so với số Least Request đo trên cụm ([quy tắc so sánh chiến lược](#quy-tắc-so-sánh-chiến-lược)). Bối cảnh và các lượt trước: [thử nghiệm RL](rl-lookaside-experiment.md).
+Bốn kịch bản × ba policy × năm seed, khoảng 15 phút. `report.md` có median [min–max] giữa các seed và cột hiệu RL − policy theo từng seed. Chỉ kết luận RL tốt hơn khi nó nhanh hơn ở hầu hết seed và khoảng hiệu không chứa 0. Kết quả này chỉ so với Round Robin và quy tắc trong cùng lượt, không so với số Least Request đo trên cụm ([quy tắc so sánh chiến lược](#quy-tắc-so-sánh-chiến-lược)). Bối cảnh và các lượt trước: [thử nghiệm RL](../1-do-an/thu-nghiem-rl.md).
 
 ## Vấn đề đã biết
 
@@ -157,7 +157,7 @@ Nếu tái hiện được trên cụm, đây là ô "không đạt" để nhóm
 - **`check` báo `false` cho một node**: đọc dòng lý do in bên dưới. Hay gặp: VPN tắt, file khóa không nằm ở `~/.ssh/uitiot-lab.pem`, thiếu `sudo` không mật khẩu.
 - **`lab not ready`**: chưa đủ sáu instance trả lời. Xem `status`; instance dừng thì `start <tên>`.
 - **Lượt chạy bị ngắt giữa chừng**: chạy `heal`, rồi `status` để kiểm tra trước khi chạy tiếp.
-- **Build lỗi khi triển khai**: VM lỗi DNS, xem bước triển khai trong [hướng dẫn cho nhóm](team-guide.md).
+- **Build lỗi khi triển khai**: VM lỗi DNS, xem bước triển khai trong [hướng dẫn cho nhóm](2-huong-dan.md).
 
 ## Phụ lục: chạy thử trên một máy
 

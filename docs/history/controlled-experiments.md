@@ -1,6 +1,6 @@
 # Thực nghiệm đối chứng và demo tái lập
 
-> **Tài liệu lịch sử (28/10/2026).** Protocol và số liệu đợt cloud ngày 28/10 bên dưới vẫn đúng cho đợt đó. Phần "Kế hoạch đợt đánh giá tiếp theo" ở cuối (k3s, ma trận E1–E8) **đã bị thay thế**; cách làm hiện tại xem [hướng dẫn cho nhóm](../team-guide.md) và [tham chiếu thí nghiệm](../running.md).
+> **Tài liệu lịch sử (28/10/2026).** Protocol và số liệu đợt cloud ngày 28/10 bên dưới vẫn đúng cho đợt đó. Phần "Kế hoạch đợt đánh giá tiếp theo" ở cuối (k3s, ma trận E1–E8) **đã bị thay thế**; cách làm hiện tại xem [hướng dẫn cho nhóm](../2-cong-viec/2-huong-dan.md) và [tham chiếu thí nghiệm](../2-cong-viec/3-tra-cuu.md).
 
 Các protocol và số liệu bên dưới mô tả đợt thử nghiệm đã thực hiện. [Kế hoạch đợt đánh giá tiếp theo](#ke-hoach-tiep-theo) ở cuối tài liệu bổ sung kịch bản, cách đo và các phần runner cần hoàn thiện; chưa phải kết quả đã chạy.
 
