@@ -32,12 +32,12 @@ Mỗi node là một VM trên cloud UIT-IoT; các thành phần trên mỗi VM c
 
 | Khái niệm | Thể hiện trong đồ án | Bằng chứng |
 |---|---|---|
-| Đồng thuận, quorum | Ba Consul voter (Raft); mất leader vẫn cập nhật endpoint | [HA lookaside](docs/lookaside-ha.md) |
-| Nhất quán so với sẵn sàng | Mất quorum quá lease 15 giây thì fail closed, trả `UNAVAILABLE` thay vì dùng endpoint cũ | [Cải thiện HA](docs/ha-improvement.md) |
-| Phát hiện lỗi | Control plane probe health trực tiếp, độc lập với catalog; hội tụ khi mất leader từ ~34 giây xuống 2–3 giây | [Cải thiện HA](docs/ha-improvement.md) |
-| Nhân bản, chịu lỗi | Hai control plane, hai Envoy; tắt VM1 gián đoạn 1,75–3,95 giây | [Báo cáo nghiệm thu](docs/cloud-validation-report.md) |
-| Khám phá dịch vụ | Registry + xDS; caller giữ cấu hình hợp lệ gần nhất | [Lookaside](docs/lookaside.md) |
-| Deadline xuyên chuỗi gọi | Một budget cho hàng đợi, xử lý cục bộ và lời gọi phụ thuộc | [Điều tra deadline](docs/deadline-investigation.md) |
+| Đồng thuận, quorum | Ba Consul voter (Raft); mất leader vẫn cập nhật endpoint | [HA lookaside](docs/history/lookaside-ha.md) |
+| Nhất quán so với sẵn sàng | Mất quorum quá lease 15 giây thì fail closed, trả `UNAVAILABLE` thay vì dùng endpoint cũ | [Cải thiện HA](docs/history/ha-improvement.md) |
+| Phát hiện lỗi | Control plane probe health trực tiếp, độc lập với catalog; hội tụ khi mất leader từ ~34 giây xuống 2–3 giây | [Cải thiện HA](docs/history/ha-improvement.md) |
+| Nhân bản, chịu lỗi | Hai control plane, hai Envoy; tắt VM1 gián đoạn 1,75–3,95 giây | [Báo cáo nghiệm thu](docs/history/cloud-validation-report.md) |
+| Khám phá dịch vụ | Registry + xDS; caller giữ cấu hình hợp lệ gần nhất | [Lookaside](docs/history/lookaside.md) |
+| Deadline xuyên chuỗi gọi | Một budget cho hàng đợi, xử lý cục bộ và lời gọi phụ thuộc | [Điều tra deadline](docs/history/deadline-investigation.md) |
 
 ## Đã hoàn thành
 
@@ -48,7 +48,9 @@ Mỗi node là một VM trên cloud UIT-IoT; các thành phần trên mỗi VM c
 - Triển khai trên ba VM; có công cụ tạo tải, đo đạc và thử lỗi/phục hồi.
 - Nguyên mẫu Q-learning điều chỉnh trọng số qua xDS, chạy trong lab với một caller và hai instance.
 
-Kết quả và giới hạn: [báo cáo nghiệm thu](docs/cloud-validation-report.md), [thử nghiệm RL](docs/rl-lookaside-experiment.md).
+Kết quả và giới hạn: [báo cáo nghiệm thu](docs/history/cloud-validation-report.md), [thử nghiệm RL](docs/rl-lookaside-experiment.md).
+
+Tài liệu các giai đoạn trước (Go, k3s, AIOps, các đợt nghiệm thu cũ) nằm trong [`docs/history/`](docs/history/README.md); chúng giữ bằng chứng, không mô tả cách làm hiện tại.
 
 ## Kế hoạch một tuần (11–18/11/2026)
 
@@ -74,7 +76,7 @@ Môi trường chạy là ba VM trên cloud UIT-IoT; làm theo [hướng dẫn t
 
 ### Cách đo và báo cáo
 
-Chỉ số: số request theo instance, goodput, p50/p95/p99, tỷ lệ lỗi/timeout, thời gian cập nhật endpoint và thời gian phục hồi. Giữ trace cả thành công lẫn lỗi; không kết luận tốt hơn chỉ từ latency của request thành công. Phương pháp và định nghĩa chỉ số: [thực nghiệm đối chứng](docs/controlled-experiments.md). Phần kế hoạch k3s và ma trận E1–E8 trong tài liệu đó được thay bằng bảng trên.
+Chỉ số: số request theo instance, goodput, p50/p95/p99, tỷ lệ lỗi/timeout, thời gian cập nhật endpoint và thời gian phục hồi. Giữ trace cả thành công lẫn lỗi; không kết luận tốt hơn chỉ từ latency của request thành công. Phương pháp và định nghĩa chỉ số: [thực nghiệm đối chứng](docs/history/controlled-experiments.md). Phần kế hoạch k3s và ma trận E1–E8 trong tài liệu đó được thay bằng bảng trên.
 
 ## Ngoài phạm vi
 

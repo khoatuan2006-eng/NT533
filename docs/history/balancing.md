@@ -1,6 +1,6 @@
 # Tài liệu Thiết kế Thuật toán Cân bằng tải (Load Balancing) — M1
 
-Tài liệu này giải thích chi tiết nguyên lý hoạt động, cấu trúc mã nguồn và các quyết định thiết kế cho bộ cân bằng tải phía client trong file [`src/grpc_lb/balancer.py`](../src/grpc_lb/balancer.py) và [`src/grpc_lb/client.py`](../src/grpc_lb/client.py).
+Tài liệu này giải thích chi tiết nguyên lý hoạt động, cấu trúc mã nguồn và các quyết định thiết kế cho bộ cân bằng tải phía client trong file [`src/grpc_lb/balancer.py`](../../src/grpc_lb/balancer.py) và [`src/grpc_lb/client.py`](../../src/grpc_lb/client.py).
 
 ---
 

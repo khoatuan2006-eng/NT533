@@ -9,7 +9,7 @@ Chức năng:
    - Pha 3 (Phục hồi): Cho replica-2 sống lại / SERVING trở lại.
      Kiểm chứng: Client tự động nhận lại replica-2, lưu lượng chia đều trở lại.
 2. Đo lường định lượng và phân tích số request của từng replica qua 3 pha.
-3. Xuất Báo Cáo Phục Hồi định dạng Markdown và console để nghiệm thu M1.md#L224.
+3. Xuất Báo Cáo Phục Hồi định dạng Markdown và console để nghiệm thu M1 (docs/history/M1.md).
 """
 
 from __future__ import annotations
@@ -158,7 +158,7 @@ def format_recovery_report(
     target_replica: str,
     total_duration_s: float,
 ) -> str:
-    """Tạo báo cáo Markdown kiểm chứng tiêu chí phục hồi M1.md#L224."""
+    """Tạo báo cáo Markdown kiểm chứng tiêu chí phục hồi M1 (docs/history/M1.md)."""
     lines = [
         "# BÁO CÁO KIỂM THỬ KHẢ NĂNG TỰ PHỤC HỒI (RECOVERY TEST)",
         f"**Chính sách cân bằng tải:** `{policy}` | **Replica giả lập sự cố:** `{target_replica}`",
@@ -182,7 +182,7 @@ def format_recovery_report(
     lines.extend(
         [
             "",
-            "### ĐÁNH GIÁ ĐIỀU KIỆN NGHIỆM THU (M1.md mục 224):",
+            "### ĐÁNH GIÁ ĐIỀU KIỆN NGHIỆM THU (docs/history/M1.md):",
             f"- [x] **Pha 1:** `{target_replica}` hoạt động bình thường, nhận `{p1_target}` requests.",
             f"- [x] **Pha 2 (Khi bị dừng):** Client phát hiện và loại `{target_replica}` khỏi vòng quay (Số request lọt vào: `{p2_target}`).",
             f"- [x] **Pha 3 (Sau khi sống lại):** Client tự động nhận lại `{target_replica}` (Nhận `{p3_target}` requests).",

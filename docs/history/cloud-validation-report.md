@@ -33,7 +33,7 @@ Bộ xác nhận cuối chạy trực tiếp qua LB, light/heavy ở cùng 150 R
 
 Ở đây goodput gần nhau; xDS có P99 cao hơn ở light và thấp hơn ở heavy. Không có bằng chứng xDS luôn nhanh hơn static. Mỗi cặp chỉ hai lượt và latency có nhiễu VPN/Windows, nên chưa đủ kết luận ý nghĩa thống kê. Mọi tiêu chí tải ổn định định trước đều đạt: lỗi ≤1%, goodput offered-window ≥98% tải đặt, P99 <3 giây và không generator drop.
 
-Bằng chứng: [bảng tổng hợp cuối](../results/k3s-controlled-final-report.md), [JSON có từng lần lặp](../results/k3s-controlled-final-report.json), [metadata và JSONL gốc](../results/k3s-controlled-final). Pilot 16 lượt, 32.000 RPC qua SSH tunnel được giữ riêng ở [bảng pilot](../results/k3s-controlled-report.md); không trộn vào median cuối. Pilot có hoạt động kiểm tra kết nối song song trong lúc hoàn thiện hạ tầng nên dùng để khảo sát, không làm kết luận hiệu năng chính.
+Bằng chứng: [bảng tổng hợp cuối](../../results/k3s-controlled-final-report.md), [JSON có từng lần lặp](../../results/k3s-controlled-final-report.json), [metadata và JSONL gốc](../../results/k3s-controlled-final). Pilot 16 lượt, 32.000 RPC qua SSH tunnel được giữ riêng ở [bảng pilot](../../results/k3s-controlled-report.md); không trộn vào median cuối. Pilot có hoạt động kiểm tra kết nối song song trong lúc hoàn thiện hạ tầng nên dùng để khảo sát, không làm kết luận hiệu năng chính.
 
 ## Thử lỗi và phục hồi
 
@@ -50,15 +50,15 @@ Trong bài buộc kết nối qua VM1, lỗi là **3,25% trên toàn bộ 120 gi
 
 Khi VM1 dừng, LB báo DEGRADED, member VM1 ERROR và member VM2 ONLINE; các instance trả kết quả chỉ là A2/B2/C1/C2. Cold client trong cùng khoảng SHUTOFF cũng nhận kết quả từ A2/B2. Sau đó đã start lại VM1. Hai bài VM không phải hai lần lặp đồng nhất: một bài thường và một bài prime; không dùng để suy ra phân bố RTO.
 
-Bằng chứng đầy đủ: [bảng thử lỗi](../results/k3s-fault-report.md), [JSON tổng hợp từ trace](../results/k3s-fault-report.json), [trace gốc](../results/k3s-faults), [quan sát Nova SHUTOFF](../results/k3s-vm1-power-proof.json). Các kết quả này không chứng minh HA của hypervisor/router hạ tầng cloud.
+Bằng chứng đầy đủ: [bảng thử lỗi](../../results/k3s-fault-report.md), [JSON tổng hợp từ trace](../../results/k3s-fault-report.json), [trace gốc](../../results/k3s-faults), [quan sát Nova SHUTOFF](../../results/k3s-vm1-power-proof.json). Các kết quả này không chứng minh HA của hypervisor/router hạ tầng cloud.
 
 ## Nghiệm thu chức năng và lỗi đã vá
 
-[Lượt nghiệm thu sau reboot qua Floating IP](../results/k3s-post-reboot-acceptance.json) có `passed: true`, `operator_state: completed`, không có lỗi restore. Các tình huống gồm graph đủ sáu instance; 1.000 RPC baseline, 300 heavy và 5.000 stress đều OK; không nhận OK sau client timeout; NOT_SERVING và SERVING recovery; mất từng control plane với caller mới; mất Consul leader; mất quorum quá lease phải trả UNAVAILABLE; deadline 1 ms phải trả DEADLINE_EXCEEDED; graph phục hồi sau các lỗi. Thời gian hội tụ từng giai đoạn nằm trong JSON, không gọi đó là RTO của toàn VM.
+[Lượt nghiệm thu sau reboot qua Floating IP](../../results/k3s-post-reboot-acceptance.json) có `passed: true`, `operator_state: completed`, không có lỗi restore. Các tình huống gồm graph đủ sáu instance; 1.000 RPC baseline, 300 heavy và 5.000 stress đều OK; không nhận OK sau client timeout; NOT_SERVING và SERVING recovery; mất từng control plane với caller mới; mất Consul leader; mất quorum quá lease phải trả UNAVAILABLE; deadline 1 ms phải trả DEADLINE_EXCEEDED; graph phục hồi sau các lỗi. Thời gian hội tụ từng giai đoạn nằm trong JSON, không gọi đó là RTO của toàn VM.
 
-Lần nghiệm thu đầu có reset SSH ở cleanup dù các bài chức năng đã đi hết; giữ nguyên [kết quả thất bại ban đầu](../results/k3s-acceptance.json). Đã thêm retry chỉ cho cleanup idempotent và thao tác đặt mode idempotent, không retry tùy tiện lệnh gây lỗi. Lượt đối chứng pilot từng dừng trước hai lượt cuối do SSH reset; lưu `suite.interrupted.json` và tiếp tục đúng lượt thiếu sau khi kiểm tra tham số.
+Lần nghiệm thu đầu có reset SSH ở cleanup dù các bài chức năng đã đi hết; giữ nguyên [kết quả thất bại ban đầu](../../results/k3s-acceptance.json). Đã thêm retry chỉ cho cleanup idempotent và thao tác đặt mode idempotent, không retry tùy tiện lệnh gây lỗi. Lượt đối chứng pilot từng dừng trước hai lượt cuối do SSH reset; lưu `suite.interrupted.json` và tiếp tục đúng lượt thiếu sau khi kiểm tra tham số.
 
-Sau reboot, công cụ xác minh còn phát hiện archive ở `/tmp` bị dọn. Đã vá deployment để lưu `/opt/loadbalance/release.tar.gz` và đọc checksum từ đường dẫn bền vững này. Giữ [lần thất bại do file tạm](../results/k3s-final-acceptance.json), rồi triển khai lại và chạy lượt nghiệm thu sau reboot thành công. Không sửa report thất bại thành pass.
+Sau reboot, công cụ xác minh còn phát hiện archive ở `/tmp` bị dọn. Đã vá deployment để lưu `/opt/loadbalance/release.tar.gz` và đọc checksum từ đường dẫn bền vững này. Giữ [lần thất bại do file tạm](../../results/k3s-final-acceptance.json), rồi triển khai lại và chạy lượt nghiệm thu sau reboot thành công. Không sửa report thất bại thành pass.
 
 ## Tái lập, giả thuyết và giới hạn
 

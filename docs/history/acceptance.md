@@ -31,7 +31,7 @@ Trường chọn codec có trong [API Envoy 1.35.5](https://github.com/envoyprox
 
 Toàn bộ pytest: **78 test đạt**, gồm 20 test hồi quy bổ sung trong `tests/test_acceptance.py`. Launcher native 6 process vẫn chạy thành công sau các bản vá.
 
-Kết quả xuyên proxy ở [results/before-reference-acceptance.json](../results/before-reference-acceptance.json) có `passed: true` cho các bài chức năng và `cleanup: passed`. Verdict bổ sung ở [results/before-reference-acceptance-verdict.json](../results/before-reference-acceptance-verdict.json) có `functional_checks_passed: true`, nhưng `client_wall_deadline_accepted: false` và **`overall_accepted: false`**. Không dùng riêng cờ `passed` trong báo cáo chức năng để kết luận nghiệm thu toàn bộ.
+Kết quả xuyên proxy ở [results/before-reference-acceptance.json](../../results/before-reference-acceptance.json) có `passed: true` cho các bài chức năng và `cleanup: passed`. Verdict bổ sung ở [results/before-reference-acceptance-verdict.json](../../results/before-reference-acceptance-verdict.json) có `functional_checks_passed: true`, nhưng `client_wall_deadline_accepted: false` và **`overall_accepted: false`**. Không dùng riêng cờ `passed` trong báo cáo chức năng để kết luận nghiệm thu toàn bộ.
 
 | Kịch bản | Kết quả quan sát |
 |---|---|

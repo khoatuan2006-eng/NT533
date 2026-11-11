@@ -64,7 +64,7 @@ def main():
         "",
         "Dữ liệu thô và metadata từng lượt ở thư mục `" + str(args.directory) + "`.",
         "",
-        "Xem `docs/controlled-experiments.md` về phương pháp, tiêu chí, nhiễu VPN/SSH và giới hạn thống kê.",
+        "Xem `docs/history/controlled-experiments.md` về phương pháp, tiêu chí, nhiễu VPN/SSH và giới hạn thống kê.",
         "Không suy ra lookaside nhanh hơn trong mọi trường hợp từ bảng này.",
         "",
     ]

@@ -8,7 +8,7 @@ from .contracts import CallResult
 
 
 def result_to_dict(result: CallResult) -> dict[str, Any]:
-    """Chuyển đổi đối tượng CallResult thành dictionary chuẩn hóa 10 trường theo M1.md.
+    """Chuyển đổi đối tượng CallResult thành dictionary chuẩn hóa 10 trường theo docs/history/M1.md.
 
     Đảm bảo định dạng nhất quán, không tự suy đoán lại trạng thái và tương thích với JSON.
     """
