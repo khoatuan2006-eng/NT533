@@ -201,3 +201,57 @@ def test_load_report_skips_unreadable_cell(tmp_path):
     write_load_cell(tmp_path, "even-xds-rps50-r1", 50)
     (tmp_path / "even-xds-rps50-r1.jsonl").write_text("not json\n", encoding="utf-8")
     assert "không hoàn tất" in run_load.report(tmp_path)
+
+
+def test_rl_variants_fill_caller_and_controlplane_settings(tmp_path, monkeypatch):
+    monkeypatch.setattr(labenv, "ENVOY_GENERATED", tmp_path / "envoy.yaml")
+    calls = []
+
+    class Recording(FakeLab):
+        def compose(self, *args, env=None):
+            calls.append((args, env or {}))
+            return ""
+
+    lab = Recording()
+    lab.up_variant("xds-rl")
+    env = calls[-1][1]
+    assert env["LAB_CALLER_EXPERIMENTAL_RL_SERVICE"] == "service-b"
+    assert env["LAB_CALLER_EXPERIMENTAL_RL_LATENCY"] == "rpc"
+    assert env["LAB_CP_EXPERIMENTAL_RL_POLICY"] == "shape-q"
+    assert env["LAB_CP_EXPERIMENTAL_RL_MODEL"] == labenv.RL_MODEL
+    assert env["LAB_CP_EXPERIMENTAL_RL_BETA"] == ""
+    lab.up_variant("xds-beta")
+    env = calls[-1][1]
+    assert env["LAB_CP_EXPERIMENTAL_RL_POLICY"] == "shape-fixed" and env["LAB_CP_EXPERIMENTAL_RL_MODEL"] == ""
+    assert env["LAB_CP_EXPERIMENTAL_RL_BETA"] == labenv.FIXED_BETA
+    lab.up_variant("xds")
+    assert all(value == "" for key, value in calls[-1][1].items() if "_RL_" in key)
+    with pytest.raises(ValueError):
+        lab.up("static", rl="shape-q")
+
+
+def test_compose_file_wires_each_controlplane_to_the_caller_on_its_node():
+    text = (SCRIPTS.parent / "deploy/compose.lab.yaml").read_text(encoding="utf-8")
+    for node, caller, plane in (("node1", "a-1", "controlplane-1"), ("node2", "a-2", "controlplane-2")):
+        caller_block = text.split(f"\n  {caller}:\n", 1)[1].split("depends_on", 1)[0]
+        plane_block = text.split(f"\n  {plane}:\n", 1)[1].split("depends_on", 1)[0]
+        assert f"- rl-{node}:/rl\n" in caller_block
+        assert f"- rl-{node}:/rl:ro" in plane_block and "*cp-rl" in plane_block
+    assert (SCRIPTS.parent / "configs/shape-model.json").is_file()
+    assert "../configs/shape-model.json:/config/shape-model.json:ro" in text
+
+
+def test_every_instance_of_the_shared_topology_runs_in_the_compose_lab():
+    import yaml
+
+    compose = yaml.safe_load((SCRIPTS.parent / "deploy/compose.lab.yaml").read_text(encoding="utf-8"))
+    topology = json.loads((SCRIPTS.parent / "configs/topology.compose.json").read_text(encoding="utf-8"))
+    for service in topology["services"].values():
+        for instance in service["instances"]:
+            assert instance in compose["services"], instance
+    nodes = {}
+    for name, service in compose["services"].items():
+        nodes.setdefault(service["labels"]["lab.node"], []).append(name)
+    b_nodes = [node for node, names in nodes.items() if any(n.startswith("b-") for n in names)]
+    assert sorted(b_nodes) == ["node1", "node2", "node3"]  # one B instance per node
+    assert run_faults.INSTANCES == 7

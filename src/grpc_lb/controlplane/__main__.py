@@ -8,7 +8,7 @@ from pathlib import Path
 
 from .application import ControlPlane
 from .config import EndpointResolver, RuntimeSettings, decode_config
-from .rl_controller import RLController
+from .rl_controller import SHAPE_POLICIES, RLController, ShapeController
 from .sources import create_source
 
 
@@ -19,11 +19,22 @@ async def serve(settings: RuntimeSettings):
     try:
         for signum in (signal.SIGINT, signal.SIGTERM):
             previous[signum] = signal.signal(signum, lambda *_: loop.call_soon_threadsafe(stop.set))
-        policy = (
-            RLController(settings.rl_telemetry, settings.rl_service, model_path=settings.rl_model or None)
-            if settings.rl_service
-            else None
-        )
+        policy = None
+        if settings.rl_service and settings.rl_policy in SHAPE_POLICIES:
+            policy = ShapeController(
+                settings.rl_telemetry,
+                settings.rl_service,
+                policy=settings.rl_policy,
+                model_path=settings.rl_model or None,
+                beta=float(settings.rl_beta) if settings.rl_beta else None,
+            )
+        elif settings.rl_service:
+            policy = RLController(
+                settings.rl_telemetry,
+                settings.rl_service,
+                model_path=settings.rl_model or None,
+                policy=settings.rl_policy,
+            )
         source = await create_source(settings)
         await ControlPlane(settings.listen_address, source, policy).run(stop)
     finally:

@@ -62,6 +62,11 @@ async def run_cell(lab: LabEnvironment, directory: Path, variant: str, scenario:
     await asyncio.to_thread(prepare, lab, scenario, args.slow_ms)
     try:
         await wait_ready(lab.address)
+        if args.settle:
+            # Weight controllers act on 10 s windows: give them load and time to react, unmeasured.
+            settle = SimpleNamespace(**vars(parameters(lab, output, rate, args)))
+            settle.output, settle.duration = directory / "settle" / f"{stem}.json", args.settle
+            await Probe(settle).run()
         await Probe(parameters(lab, output, rate, args)).run()
     finally:
         await asyncio.to_thread(lab.heal)
@@ -76,7 +81,7 @@ def analyse(trace: Path) -> dict:
     duration = report["parameters"]["duration"]
     summary = summarize(rows, duration)
     served = [i for row in rows if row["code"] == "OK" for i in row["instances"]]
-    b_total = served.count("b-1") + served.count("b-2")
+    b_total = sum(name.startswith("b-") for name in served)
     goodput_fraction = summary["successful_rps_offered_window"] / meta["rate"]
     error_fraction = summary["rpc_error_fraction"] or 0
     p99 = summary["success_latency_ms"]["p99"]
@@ -159,7 +164,7 @@ def report(directory: Path) -> str:
     lines += [
         "",
         "Nếu mọi mức đều đạt thì chưa tìm thấy điểm bão hòa: tăng `--rates` rồi chạy lại.",
-        "“Phần b-2” là tỷ lệ request B do b-2 (node 3) xử lý; Round Robin cho khoảng 50%, "
+        "“Phần b-2” là tỷ lệ request B do b-2 (node 3) xử lý; Round Robin cho khoảng 33% (ba instance B), "
         "phương án né backend chậm cho số thấp hơn ở kịch bản slow-node3.",
         "Lab chạy trên một máy, bộ phát tải cũng chung máy: so sánh tương đối giữa các phương án, "
         "không dùng làm số tuyệt đối.",
@@ -196,6 +201,12 @@ def main():
     parser.add_argument("--rates", nargs="+", type=float, default=[50, 100, 200, 400])
     parser.add_argument("--repetitions", type=int, default=3)
     parser.add_argument("--duration", type=float, default=30, help="Seconds of measured load per cell")
+    parser.add_argument(
+        "--settle",
+        type=float,
+        default=0,
+        help="Seconds of unmeasured load before each cell, same for every variant (use 90 with xds-rl/xds-beta)",
+    )
     parser.add_argument("--workload", choices=["light", "heavy"], default="light")
     parser.add_argument("--slow-ms", type=int, default=50, help="Delay added to node3 in slow-node3")
     parser.add_argument("--max-inflight", type=int, default=512)

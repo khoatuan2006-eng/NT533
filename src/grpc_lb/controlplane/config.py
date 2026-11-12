@@ -53,12 +53,31 @@ class RuntimeSettings:
     rl_telemetry: str = ""
     rl_service: str = ""
     rl_model: str = ""
+    rl_policy: str = "q"
+    rl_beta: str = ""
 
     def __post_init__(self):
         if bool(self.rl_telemetry) != bool(self.rl_service):
             raise ValueError("EXPERIMENTAL_RL_TELEMETRY and EXPERIMENTAL_RL_SERVICE must be set together")
         if self.rl_model and not self.rl_service:
             raise ValueError("EXPERIMENTAL_RL_MODEL requires the RL telemetry settings")
+        if self.rl_policy not in ("q", "rule", "shape-q", "shape-fixed"):
+            raise ValueError("EXPERIMENTAL_RL_POLICY must be q, rule, shape-q or shape-fixed")
+        if self.rl_policy in ("rule", "shape-fixed") and self.rl_model:
+            raise ValueError(f"EXPERIMENTAL_RL_POLICY={self.rl_policy} takes no EXPERIMENTAL_RL_MODEL")
+        if self.rl_policy == "shape-q" and self.rl_service and not self.rl_model:
+            raise ValueError("EXPERIMENTAL_RL_POLICY=shape-q needs EXPERIMENTAL_RL_MODEL")
+        if (self.rl_policy == "shape-fixed") != bool(self.rl_beta):
+            raise ValueError(
+                "EXPERIMENTAL_RL_BETA is set with, and only with, EXPERIMENTAL_RL_POLICY=shape-fixed"
+            )
+        if self.rl_beta:
+            try:
+                beta = float(self.rl_beta)
+            except ValueError:
+                beta = -1.0
+            if not 0 <= beta <= 50:
+                raise ValueError("EXPERIMENTAL_RL_BETA must be a number in 0..50")
         if not self.discovery_path or self.discovery_path.strip() != self.discovery_path:
             raise ValueError("DISCOVERY_CONFIG must be a nonempty path without surrounding whitespace")
         split_address(self.listen_address, allow_empty_host=True)
@@ -91,4 +110,6 @@ class RuntimeSettings:
             values.get("EXPERIMENTAL_RL_TELEMETRY", ""),
             values.get("EXPERIMENTAL_RL_SERVICE", ""),
             values.get("EXPERIMENTAL_RL_MODEL", ""),
+            values.get("EXPERIMENTAL_RL_POLICY") or "q",
+            values.get("EXPERIMENTAL_RL_BETA", ""),
         )

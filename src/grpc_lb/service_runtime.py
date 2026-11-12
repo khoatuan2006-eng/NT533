@@ -44,6 +44,7 @@ async def start_service(
     workload: Workload | None = None,
     telemetry_service: str = "",
     telemetry_path: str = "",
+    telemetry_latency: str = "server",
     static_policy: str = "round_robin",
 ) -> RunningService:
     validate(topology)
@@ -54,6 +55,7 @@ async def start_service(
         health_interval,
         telemetry_service=telemetry_service,
         telemetry_path=telemetry_path,
+        telemetry_latency=telemetry_latency,
         static_policy=static_policy,
     )
     pools: dict[str, Pool] = {}

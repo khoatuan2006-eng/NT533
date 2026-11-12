@@ -66,9 +66,11 @@ def test_unknown_policy_is_rejected_at_startup():
 
 
 def test_lab_variants_are_consistent():
-    for mode, static_policy, ingress_policy in labenv.VARIANTS.values():
+    for mode, static_policy, ingress_policy, rl in labenv.VARIANTS.values():
         assert mode in ("static", "xds")
         assert static_policy in ("round_robin", "least_request")
         assert ingress_policy in ("round_robin", "least_request")
         # gRPC Python cannot apply least_request received over xDS.
         assert mode == "static" or static_policy == "round_robin"
+        # Weights travel over xDS, so only xDS callers can follow a weight controller.
+        assert rl in ("", "shape-q", "shape-fixed") and (not rl or mode == "xds")

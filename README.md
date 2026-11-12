@@ -38,7 +38,7 @@ Câu hỏi này chia thành hai nhánh theo loại lỗi; mọi phần của đ�
 
 ### Bố trí trên ba node: một node chết thì mất gì
 
-![Bố trí trên ba node: node1 và node2 mỗi node có Consul, control plane, Envoy, một bản A và một backend; node3 có Consul và hai backend; bộ phát tải nằm ngoài cụm](docs/images/architecture-nodes.svg)
+![Bố trí trên ba node: node1 có Consul, control plane, Envoy, a-1, b-1; node2 có Consul, control plane, Envoy, a-2, c-1, b-3; node3 có Consul, b-2, c-2; bộ phát tải nằm ngoài cụm](docs/images/architecture-nodes.svg)
 
 - **Hai bản của cùng một thành phần không bao giờ nằm chung node.** Chết một node bất kỳ thì thành phần nào cũng còn ít nhất một bản, và Consul còn 2/3, vẫn đủ quorum.
 - **Node 1 gánh nặng nhất** (có cả Envoy lẫn control plane), nên "node 1 chết" là bài thử khó nhất.
@@ -64,7 +64,7 @@ Mỗi node là một VM trên cloud UIT-IoT; các thành phần trên mỗi VM c
 - Lookaside bằng gRPC xDS: cập nhật endpoint động, baseline Round Robin.
 - Đăng ký service với Consul, health checking và HA cho control plane.
 - Triển khai trên ba VM; có công cụ tạo tải, đo đạc và thử lỗi/phục hồi.
-- Nguyên mẫu Q-learning điều chỉnh trọng số qua xDS, chạy trong lab với một caller và hai instance.
+- RL điều chỉnh trọng số qua xDS cho chặng A → B (bandit chọn mức mạnh tay β của một công thức chia theo latency), kèm đối chứng β cố định; chạy được trên cụm qua phương án `xds-rl` và `xds-beta`.
 
 Kết quả và giới hạn: [báo cáo nghiệm thu](docs/history/cloud-validation-report.md), [thử nghiệm RL](docs/1-do-an/thu-nghiem-rl.md).
 
@@ -74,7 +74,7 @@ Tài liệu các giai đoạn trước (Go, k3s, AIOps, các đợt nghiệm thu
 
 Ghi vào mục hướng phát triển của báo cáo, không làm trong đồ án:
 
-- Chạy ứng dụng bằng Kubernetes (k3s) và HPA. Ba VM có cài sẵn k3s từ trước, nhưng đồ án không dùng; ứng dụng chạy bằng Docker Compose.
+- Chạy ứng dụng bằng Kubernetes (k3s) và HPA. k3s đã được gỡ khỏi ba VM; ứng dụng chạy bằng Docker Compose.
 - Observability đầy đủ (Prometheus, tracing) và AIOps.
-- RL cho số backend bất kỳ.
+- RL với nhiều instance B hơn (cụm có ba; mô phỏng và lab localhost thử tới 10).
 - TLS/mTLS, nhiều zone/region.
