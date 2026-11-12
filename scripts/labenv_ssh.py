@@ -160,7 +160,10 @@ class SshLab:
         build: bool = False,
         static_policy: str = "round_robin",
         ingress_policy: str = "round_robin",
+        rl: str = "",
     ) -> None:
+        from labenv import rl_environment
+
         if build:
             raise ValueError("deploy new code to the VMs with scripts/multihost.py, not --build")
         if mode not in ("static", "xds") or {static_policy, ingress_policy} - {
@@ -168,11 +171,13 @@ class SshLab:
             "least_request",
         }:
             raise ValueError("invalid mode or policy")
+        if rl and mode != "xds":
+            raise ValueError("the weight controller needs xds callers")
+        caller_rl, controlplane_rl = rl_environment(rl)
         for node, info in self.nodes.items():
             directory = f"{self.remote_dir}/{node}"
-            callers = [remote for lab, remote in info["services"].items() if lab.startswith("a-")]
-            environment = {"DISCOVERY_MODE": mode, "STATIC_LB_POLICY": static_policy}
-            override = json.dumps({"services": {name: {"environment": environment} for name in callers}})
+            override = self._mode_override(info, mode, static_policy, rl, caller_rl, controlplane_rl)
+            override = json.dumps(override)
             script = [
                 "set -e",
                 f"printf %s {shlex.quote(override)} | sudo tee {directory}/mode.json >/dev/null",
@@ -189,13 +194,47 @@ class SshLab:
                 ]
             self.ssh(node, "\n".join(script))
 
+    @staticmethod
+    def _mode_override(info, mode, static_policy, rl, caller_rl, controlplane_rl) -> dict:
+        """Compose override for one VM: caller mode, plus the weight controller when asked.
+
+        The controller runs only where a caller and a control plane share the VM; that caller
+        writes the telemetry window into a named volume the control plane reads.
+        """
+        callers = [remote for lab, remote in info["services"].items() if lab.startswith("a-")]
+        planes = [remote for lab, remote in info["services"].items() if lab.startswith("controlplane-")]
+        wired = bool(rl and callers and planes)
+        services = {}
+        for name in callers:
+            environment = {"DISCOVERY_MODE": mode, "STATIC_LB_POLICY": static_policy}
+            if wired:
+                services[name] = {
+                    "environment": {**environment, **caller_rl},
+                    "volumes": ["rl-telemetry:/rl"],
+                }
+            else:
+                services[name] = {"environment": environment}
+        if wired:
+            for name in planes:
+                services[name] = {
+                    "environment": controlplane_rl,
+                    "volumes": [
+                        "rl-telemetry:/rl:ro",
+                        "../../configs/shape-model.json:/config/shape-model.json:ro",
+                    ],
+                }
+        override = {"services": services}
+        if wired:
+            override["volumes"] = {"rl-telemetry": {}}
+        return override
+
     def up_variant(self, variant: str, *, build: bool = False) -> None:
         from labenv import VARIANTS
 
         if variant not in VARIANTS:
             raise ValueError(f"variant must be one of: {', '.join(VARIANTS)}")
-        mode, static_policy, ingress_policy = VARIANTS[variant]
-        self.up(mode, build=build, static_policy=static_policy, ingress_policy=ingress_policy)
+        mode, static_policy, ingress_policy, rl = VARIANTS[variant]
+        self.up(mode, build=build, static_policy=static_policy, ingress_policy=ingress_policy, rl=rl)
 
     def down(self) -> None:
         raise RuntimeError("the cloud lab is shared; stop it deliberately on the VMs, not from this tool")

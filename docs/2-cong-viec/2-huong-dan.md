@@ -40,7 +40,7 @@ ssh -F configs/ssh-config lb-node1 hostname
 .\.venv\Scripts\python.exe scripts/labenv.py --env configs/lab.cloud.json status
 ```
 
-Kết quả mong đợi: `check` báo `true` cho cả ba node; `status` liệt kê 13 thành phần đều `running`. Nếu một node `false`, lý do được in ngay bên dưới (hay gặp: VPN tắt, file khóa sai chỗ).
+Kết quả mong đợi: `check` báo `true` cho cả ba node; `status` liệt kê 14 thành phần đều `running`. Nếu một node `false`, lý do được in ngay bên dưới (hay gặp: VPN tắt, file khóa sai chỗ).
 
 node2 và node3 không có IP trong mạng VPN; SSH tới chúng tự đi qua node1.
 
@@ -191,4 +191,4 @@ Nguyên tắc chung: làm hết sức; gặp bug thì sửa; sửa không đư�
 
 ## Phụ lục: thử code trên máy cá nhân
 
-Khi muốn thử một thay đổi mà chưa muốn chiếm cụm, có thể dựng cùng 13 thành phần trên một máy Windows bằng Docker trong WSL: thay `--env configs/lab.cloud.json` bằng `--wsl Ubuntu-22.04` (chi tiết ở [tham chiếu thí nghiệm](3-tra-cuu.md#phụ-lục-chạy-thử-trên-một-máy)). Số liệu từ cách này **không dùng cho báo cáo**.
+Khi muốn thử một thay đổi mà chưa muốn chiếm cụm, có thể dựng cùng 14 thành phần trên một máy Windows bằng Docker trong WSL: thay `--env configs/lab.cloud.json` bằng `--wsl Ubuntu-22.04` (chi tiết ở [tham chiếu thí nghiệm](3-tra-cuu.md#phụ-lục-chạy-thử-trên-một-máy)). Số liệu từ cách này **không dùng cho báo cáo**.

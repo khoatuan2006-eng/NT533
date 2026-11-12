@@ -29,7 +29,14 @@ from grpc_lb.generated import processing_pb2 as pb
 from grpc_lb.generated import processing_pb2_grpc as rpc
 
 ROOT = Path(__file__).resolve().parents[1]
-INSTANCES = 6  # a-1, a-2, b-1, b-2, c-1, c-2
+# Every instance of the shared topology (a-1, a-2, b-1, b-2, b-3, c-1, c-2): the lab is ready
+# only when requests have reached all of them.
+INSTANCES = sum(
+    len(service["instances"])
+    for service in json.loads((ROOT / "configs/topology.compose.json").read_text(encoding="utf-8"))[
+        "services"
+    ].values()
+)
 MAX_INTERRUPTION_S = 30  # project target for faults the system must ride through
 
 

@@ -146,18 +146,19 @@ class XdsDependencyPool:
             raise
         if self.telemetry:
             duration = (time.monotonic() - start) * 1000
+            reported = {}
             if hasattr(call, "trailing_metadata"):
-                metadata = await call.trailing_metadata()
-                for key, value in metadata or ():
-                    if key == "x-server-duration-ms":
+                for key, value in await call.trailing_metadata() or ():
+                    if key in ("x-server-duration-ms", "x-server-queue-ms"):
                         try:
-                            server_duration = float(value)
-                            if math.isfinite(server_duration) and server_duration >= 0:
-                                duration = server_duration
+                            number = float(value)
                         except ValueError:
-                            pass
-                        break
-            self.telemetry.observe(result.instance_id, duration)
+                            continue
+                        if math.isfinite(number) and number >= 0:
+                            reported[key] = number
+            if getattr(self.telemetry, "latency", "server") == "server":
+                duration = reported.get("x-server-duration-ms", duration)
+            self.telemetry.observe(result.instance_id, duration, queue_ms=reported.get("x-server-queue-ms"))
         return result
 
     async def close(self) -> None:
@@ -187,12 +188,16 @@ class DependencyPoolFactory:
         *,
         telemetry_service: str = "",
         telemetry_path: str = "",
+        telemetry_latency: str = "server",
         static_policy: str = "round_robin",
     ) -> None:
         if mode not in ("static", "xds"):
             raise ValueError("DISCOVERY_MODE must be static or xds")
         create_balancer(static_policy)  # rejects unknown policy names at startup
         self.static_policy = static_policy
+        if telemetry_latency not in ("server", "rpc"):
+            raise ValueError("EXPERIMENTAL_RL_LATENCY must be server or rpc")
+        self.telemetry_latency = telemetry_latency
         if bool(telemetry_service) != bool(telemetry_path):
             raise ValueError("RL telemetry service and output path must be set together")
         self.mode = mode
@@ -203,7 +208,9 @@ class DependencyPoolFactory:
     def create(self, service_id: str, config: ServiceConfig) -> DependencyClient:
         if self.mode == "xds":
             telemetry = (
-                TelemetryCollector(service_id, config.instances, self.telemetry_path)
+                TelemetryCollector(
+                    service_id, config.instances, self.telemetry_path, latency=self.telemetry_latency
+                )
                 if self.telemetry_service == service_id
                 else None
             )

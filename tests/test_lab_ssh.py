@@ -167,3 +167,29 @@ def test_lock_is_released_when_the_run_fails_and_unlock_clears_a_stale_lock():
     lab.owner = "someone@pc stale"
     lab.unlock()
     assert lab.lock_holder() is None
+
+
+def test_rl_variant_runs_the_controller_only_where_caller_and_controlplane_share_a_vm():
+    lab = FakeSsh()
+    caller, plane = labenv.rl_environment("shape-q")
+    for node in ("node1", "node2"):
+        override = lab._mode_override(lab.nodes[node], "xds", "round_robin", "shape-q", caller, plane)
+        services = override["services"]
+        caller_name = next(name for name in services if name.startswith("a-"))
+        assert services[caller_name]["environment"]["EXPERIMENTAL_RL_LATENCY"] == "rpc"
+        assert services[caller_name]["volumes"] == ["rl-telemetry:/rl"]
+        assert services["controlplane"]["environment"]["EXPERIMENTAL_RL_MODEL"] == labenv.RL_MODEL
+        assert "rl-telemetry:/rl:ro" in services["controlplane"]["volumes"]
+        assert override["volumes"] == {"rl-telemetry": {}}
+    # node3 has neither caller nor control plane: nothing to wire.
+    assert lab._mode_override(lab.nodes["node3"], "xds", "round_robin", "shape-q", caller, plane) == {
+        "services": {}
+    }
+    # Back to plain xds: the override carries no controller, so Compose recreates without it.
+    plain = lab._mode_override(lab.nodes["node1"], "xds", "round_robin", "", *labenv.rl_environment(""))
+    assert set(plain["services"]) == {"a-1"} and "volumes" not in plain
+    lab.up_variant("xds-beta")
+    node1 = dict(lab.sent)["node1"]
+    assert '"EXPERIMENTAL_RL_POLICY": "shape-fixed"' in node1 and '"EXPERIMENTAL_RL_BETA": "2"' in node1
+    with pytest.raises(ValueError):
+        lab.up("static", rl="shape-fixed")

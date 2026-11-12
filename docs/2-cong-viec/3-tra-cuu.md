@@ -11,7 +11,7 @@ Mọi lệnh chạy trên máy Windows của bạn, từ thư mục gốc của 
 | Node | VM (IP nội bộ) | Thành phần |
 |---|---|---|
 | node1 | 192.168.1.238 | consul-1, envoy-1, controlplane-1, a-1, b-1 |
-| node2 | 192.168.1.172 | consul-2, envoy-2, controlplane-2, a-2, c-1 |
+| node2 | 192.168.1.172 | consul-2, envoy-2, controlplane-2, a-2, c-1, b-3 |
 | node3 | 192.168.1.217 | consul-3, b-2, c-2 |
 
 Bộ phát tải gửi request tới LB cloud (`192.168.120.109:80`), LB chia cho hai Envoy. SSH tới node2 và node3 đi qua node1. Mô tả môi trường nằm trong `configs/lab.cloud.json`, SSH trong `configs/ssh-config`; cả hai dùng chung cho nhóm, mỗi người chỉ cần đặt file khóa ở `~/.ssh/uitiot-lab.pem`. File mô tả ghi địa chỉ LB, file SSH, và với từng node là địa chỉ SSH, IP nội bộ, bảng tên service của lab → tên service Compose trên VM (ví dụ `envoy-1` → `ingress`).
@@ -63,6 +63,10 @@ An toàn:
 | `static-lr` | Danh sách cố định, Least Request | Round Robin |
 | `xds-lr-ingress` | xDS, Round Robin | Least Request |
 | `static-lr-ingress` | Danh sách cố định, Least Request | Least Request |
+| `xds-rl` | xDS; trọng số A → B chia theo latency, bandit đóng băng (`configs/shape-model.json`) chọn mức mạnh tay β | Round Robin |
+| `xds-beta` | xDS; cùng công thức và khung an toàn, β cố định (`FIXED_BETA` trong `labenv.py`, chọn bằng mô phỏng) | Round Robin |
+
+Ở `xds-rl` và `xds-beta`, a-1 ghi telemetry cho controlplane-1, a-2 cho controlplane-2 (cùng node, qua một volume); hai control plane tự quyết độc lập. Mỗi quyết định in một dòng `rl_window` trong log control plane, mỗi lần quay về Round Robin in `rl_fallback`. C vẫn Round Robin, làm đối chứng ngay trong cùng lượt. Thiết kế: [thử nghiệm RL](../1-do-an/thu-nghiem-rl.md#thiết-kế).
 
 **Giới hạn đã kiểm chứng:** gRPC Python 1.84 không có chính sách Least Request cho caller xDS. Control plane gửi cluster Least Request thì caller từ chối, kể cả khi bọc trong `wrr_locality`. Vì vậy Least Request ở tầng trong chỉ có với caller static; Envoy thì hỗ trợ bình thường. Hệ quả khi đọc kết quả: so `static-lr` với `static` cho thấy tác dụng của chính sách; so với `xds` thì lẫn thêm khác biệt về cách khám phá endpoint.
 
@@ -70,17 +74,19 @@ Phương án có Least Request ở tầng trong cần code triển khai sau ngà
 
 ### Quy tắc so sánh chiến lược
 
-Ba chiến lược của nhánh lỗi mềm không chạy trên cùng một đường dữ liệu, cũng không cùng môi trường:
+Các chiến lược của nhánh lỗi mềm chạy chung cụm và chung lượt `run_load.py`, nhưng không chung đường dữ liệu:
 
-| Chiến lược | Đường A → B/C | Môi trường | Công cụ | Mốc Round Robin cùng đường |
-|---|---|---|---|---|
-| Round Robin | static và xDS | Cụm ba VM | `run_load.py` | — |
-| Least Request | static | Cụm ba VM | `run_load.py`, phương án `static-lr` | `static` |
-| RL, quy tắc | xDS (trọng số locality) | Lab cục bộ, một caller, hai backend | `compare_rl_scenarios.py` | Round Robin trong cùng lượt chạy |
+| Chiến lược | Đường A → B/C | Phương án | Mốc Round Robin cùng đường |
+|---|---|---|---|
+| Round Robin | static và xDS | `static`, `xds` | — |
+| Least Request | static | `static-lr` | `static` |
+| RL, β cố định | xDS (trọng số locality) | `xds-rl`, `xds-beta` | `xds` |
 
-- **Chỉ kết luận hơn / kém trong cùng một dòng mốc**: Least Request so với `static`; RL và quy tắc so với Round Robin của chính lượt đó.
-- **Không đặt số của Least Request và RL vào chung một bảng xếp hạng.** Khác đường dữ liệu, khác môi trường, khác mức tải; số tuyệt đối không so được.
-- Thứ so được giữa hai bên là **mức cải thiện tương đối so với Round Robin cùng đường** và **cơ chế**: Least Request phản ứng theo từng request bằng số request đang chờ; RL phản ứng theo cửa sổ 10 giây bằng latency đo được, qua control plane.
+- **Chỉ kết luận hơn / kém trong cùng một dòng mốc**: Least Request so với `static`; RL và β cố định so với `xds`, và RL so với β cố định (đối thủ chính của RL: nếu RL không hơn nó thì phần học không đóng góp).
+- **So Least Request với RL bằng mức cải thiện tương đối** so với mốc của từng bên, không bằng số tuyệt đối: khác đường dữ liệu nên chi phí khám phá endpoint khác nhau.
+- So được **cơ chế**: Least Request phản ứng theo từng request bằng số request đang chờ; RL và β cố định phản ứng theo cửa sổ 10 giây bằng latency đo được, qua control plane.
+- Có `xds-rl` hoặc `xds-beta` trong lượt thì thêm `--settle 90` (áp cho mọi phương án): mỗi cửa sổ trọng số dịch tối đa 10 điểm và bandit chờ hai cửa sổ cùng ngữ cảnh mới đổi β, nên ô đo 30 giây không đủ để chúng kịp phản ứng.
+- `compare_rl_scenarios.py` (lab localhost, bên dưới) dùng để thử nhanh trước khi lên cụm; số của nó không đặt chung bảng với `run_load.py`.
 - `xds` so với `static` (cùng Round Robin) cho biết chi phí của cách khám phá endpoint, không nói gì về chiến lược.
 
 ## Bài lỗi và phân mảnh — `run_faults.py`
@@ -118,6 +124,12 @@ Kết quả ở `results/lab-faults/<thời điểm>/`. Dựng lại bảng từ
 
 Tự đổi phương án (mặc định `xds`, `static`, `static-lr`), chạy từng mức tải ở hai kịch bản, lặp lại; thứ tự phương án được xáo theo từng lần lặp. Mỗi ô đo 30 giây: mặc định ≈ 75 phút. Thêm `--variants xds-lr-ingress` để so Least Request ở Envoy.
 
+Lượt cho RL: mỗi ô thêm 90 giây chạy tải không đo, khoảng 3 giờ. Cụm phải chạy code có hai phương án này và instance b-3 (triển khai lại nếu bản trên VM cũ hơn). Thử trước trên một máy bằng cách thay `--env configs/lab.cloud.json` bằng `--wsl Ubuntu-22.04` ([phụ lục](#phụ-lục-chạy-thử-trên-một-máy)).
+
+```powershell
+.\.venv\Scripts\python.exe scripts/run_load.py --env configs/lab.cloud.json --variants xds xds-beta xds-rl static-lr --rates 50 100 200 --repetitions 3 --settle 90
+```
+
 | Kịch bản | Điều kiện |
 |---|---|
 | `even` | Mọi node bình thường |
@@ -125,7 +137,7 @@ Tự đổi phương án (mặc định `xds`, `static`, `static-lr`), chạy t�
 
 Một ô (phương án, kịch bản, mức tải) **đạt** khi mọi lần lặp có lỗi ≤ 1%, goodput ≥ 98% tải đặt, P99 request thành công < 3 giây và bộ phát tải không bỏ request. Nếu mọi mức đều đạt thì chưa thấy điểm bão hòa: tăng `--rates`.
 
-Bảng trả lời ba câu hỏi, theo thứ tự quan trọng với đồ án: (1) Least Request có né backend chậm không, tức câu hỏi của nhánh lỗi mềm (so `static-lr` với `static` ở `slow-node3`, cột "Phần b-2"; Round Robin ≈ 50%); (2) điểm bão hòa, dùng làm mốc để biết kết quả (1) đo ở mức tải nhẹ hay gần bão hòa; (3) static và xDS khác nhau thế nào ở cùng tải. Khi so sánh, theo [quy tắc so sánh chiến lược](#quy-tắc-so-sánh-chiến-lược). Dựng lại bảng: `run_load.py --report results/lab-load/<thời điểm>`.
+Bảng trả lời ba câu hỏi, theo thứ tự quan trọng với đồ án: (1) Least Request có né backend chậm không, tức câu hỏi của nhánh lỗi mềm (so `static-lr` với `static` ở `slow-node3`, cột "Phần b-2"; Round Robin ≈ 33% vì B có ba instance); (2) điểm bão hòa, dùng làm mốc để biết kết quả (1) đo ở mức tải nhẹ hay gần bão hòa; (3) static và xDS khác nhau thế nào ở cùng tải. Khi so sánh, theo [quy tắc so sánh chiến lược](#quy-tắc-so-sánh-chiến-lược). Dựng lại bảng: `run_load.py --report results/lab-load/<thời điểm>`.
 
 Bộ phát tải đi qua VPN; cần ghi điều này khi diễn giải độ trễ.
 
@@ -138,6 +150,40 @@ Chạy trên máy cục bộ, không dùng cloud: script tự dựng hai service
 ```
 
 Bốn kịch bản × ba policy × năm seed, khoảng 15 phút. `report.md` có median [min–max] giữa các seed và cột hiệu RL − policy theo từng seed. Chỉ kết luận RL tốt hơn khi nó nhanh hơn ở hầu hết seed và khoảng hiệu không chứa 0. Kết quả này chỉ so với Round Robin và quy tắc trong cùng lượt, không so với số Least Request đo trên cụm ([quy tắc so sánh chiến lược](#quy-tắc-so-sánh-chiến-lược)). Bối cảnh và các lượt trước: [thử nghiệm RL](../1-do-an/thu-nghiem-rl.md).
+
+## RL phiên bản 2 — `train_shape_rl.py`, `compare_shape_rl.py`
+
+Chạy trên máy cục bộ, không dùng cloud. Thiết kế: [thử nghiệm RL](../1-do-an/thu-nghiem-rl.md#phiên-bản-2-rl-chọn-mức-mạnh-tay).
+
+**Bước 1, huấn luyện trong mô phỏng** (khoảng 35 phút; mặc định bandit có ngữ cảnh với 2–10 instance, thêm `--method q` để thử Q-learning): năm seed huấn luyện, chọn model bằng seed kiểm định, rồi chạy seed kiểm tra một lần cho model đã chọn. Số trong mục "Tập kiểm tra" của `simulation.md` là số dùng cho báo cáo; **đã đọc nó rồi thì không sửa thiết kế nữa**.
+
+```powershell
+.\.venv\Scripts\python.exe scripts/train_shape_rl.py --output-dir results/shape-rl
+```
+
+Mô phỏng tất định: lần chạy thử ngày 12/11 chọn seed 9, ra +0,281 so với Round Robin và +0,016 so với β cố định tốt nhất trên tập kiểm tra 5051. Nhóm chạy lại sẽ ra đúng các số đó. Chỉ cần model thì thêm `--seeds 9` (khoảng 7 phút, cùng model).
+
+**Bước 2, so trên gRPC thật.** Chạy khi máy rảnh, mỗi lúc một lượt (xem lưu ý bên dưới).
+
+Ba backend, năm kịch bản × bảy chính sách × ba lần lặp, khoảng 1 giờ 45 phút:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/compare_shape_rl.py --model results/shape-rl/model.json --output-dir results/shape-compare
+```
+
+Mười backend, ba kịch bản × bảy chính sách × năm lần lặp, khoảng 1 giờ:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/compare_shape_rl.py --model results/shape-rl/model.json --backends 10 --scenarios even uneven-capacity flapping --repetitions 5 --log-decisions --output-dir results/shape-compare-10
+```
+
+Dự đoán từ mô phỏng, để kiểm chứng: ở 3 backend RL gần hòa Round Robin ở `even` và thắng ở các kịch bản còn lại; ở 10 backend RL thắng ở `uneven-capacity` nhưng còn thua Round Robin ở `even` và `flapping`.
+
+`report.md` có bảng mean/P95/P99/lỗi và bảng hiệu "RL − β cố định tốt nhất", "RL − lr", "RL − rr" theo từng lần lặp. Chỉ kết luận RL hơn một đối thủ ở một kịch bản khi hiệu âm ở **mọi** lần lặp. Chạy thử nhanh: thêm `--scenarios uneven-capacity --repetitions 1`.
+
+- `--backends 10` chạy với 10 backend (mặc định 3). Tổng năng lực giữ nguyên, khoảng 30% số backend gặp sự cố, nên so được giữa các quy mô. Bước 1 đã huấn luyện cho 2 đến 10 instance.
+- **Mỗi lúc chỉ chạy một lượt.** Một tiến trình Python chạy cả backend, control plane và bộ phát tải; chạy hai lượt song song làm máy nghẽn và latency tăng giả (đã gặp: 54 giây với timeout 2 giây). Lượt nào có event loop trễ quá 20 ms hoặc request gửi trễ lịch quá 50 ms bị loại khỏi bảng và được ghi tên trong `report.md`.
+- Ở 10 backend, kết quả dao động mạnh giữa các lần chạy, kể cả Round Robin: dùng `--repetitions 5`. Thêm `--log-decisions` để có `decisions.log` (latency, trạng thái, β, trọng số từng cửa sổ), `--policies rl rr` để chạy riêng vài chính sách.
 
 ## Vấn đề đã biết
 
@@ -155,13 +201,13 @@ Nếu tái hiện được trên cụm, đây là ô "không đạt" để nhóm
 ## Sự cố thường gặp
 
 - **`check` báo `false` cho một node**: đọc dòng lý do in bên dưới. Hay gặp: VPN tắt, file khóa không nằm ở `~/.ssh/uitiot-lab.pem`, thiếu `sudo` không mật khẩu.
-- **`lab not ready`**: chưa đủ sáu instance trả lời. Xem `status`; instance dừng thì `start <tên>`.
+- **`lab not ready`**: chưa đủ bảy instance trả lời. Xem `status`; instance dừng thì `start <tên>`.
 - **Lượt chạy bị ngắt giữa chừng**: chạy `heal`, rồi `status` để kiểm tra trước khi chạy tiếp.
 - **Build lỗi khi triển khai**: VM lỗi DNS, xem bước triển khai trong [hướng dẫn cho nhóm](2-huong-dan.md).
 
 ## Phụ lục: chạy thử trên một máy
 
-Để thử thay đổi code mà chưa triển khai lên cloud, cùng 13 thành phần có thể chạy trên một máy Windows bằng Docker trong WSL (`deploy/compose.lab.yaml`). Thay `--env configs/lab.cloud.json` bằng `--wsl Ubuntu-22.04` trong mọi lệnh, và dùng `labenv.py --wsl Ubuntu-22.04 up --variant xds --build` để dựng. Hai lưu ý:
+Để thử thay đổi code mà chưa triển khai lên cloud, cùng 14 thành phần có thể chạy trên một máy Windows bằng Docker trong WSL (`deploy/compose.lab.yaml`). Thay `--env configs/lab.cloud.json` bằng `--wsl Ubuntu-22.04` trong mọi lệnh, và dùng `labenv.py --wsl Ubuntu-22.04 up --variant xds --build` để dựng. Hai lưu ý:
 
 - WSL tự tắt khi rảnh: để `labenv.py --wsl Ubuntu-22.04 hold` chạy ở một terminal riêng; nếu gặp `Wsl/Service/E_UNEXPECTED`, chạy `wsl --shutdown` rồi thử lại.
 - Các node chung CPU và không có độ trễ mạng thật: **số liệu từ cách này không dùng cho báo cáo**.

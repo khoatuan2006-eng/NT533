@@ -28,17 +28,49 @@ from typing import Protocol
 
 ROOT = Path(__file__).resolve().parents[1]
 NODES = ("node1", "node2", "node3")
-# name -> (caller discovery mode, caller policy for the static pool, Envoy ingress policy).
+# name -> (caller discovery mode, caller policy for the static pool, Envoy ingress policy,
+#          weight controller on the control planes for A -> B: "" none, "shape-q" the trained
+#          bandit that tunes beta, "shape-fixed" the same formula with one fixed beta).
 # gRPC Python 1.84 has no least_request policy, so the xDS caller can only be round_robin.
 VARIANTS = {
-    "xds": ("xds", "round_robin", "round_robin"),
-    "static": ("static", "round_robin", "round_robin"),
-    "static-lr": ("static", "least_request", "round_robin"),
-    "xds-lr-ingress": ("xds", "round_robin", "least_request"),
-    "static-lr-ingress": ("static", "least_request", "least_request"),
+    "xds": ("xds", "round_robin", "round_robin", ""),
+    "static": ("static", "round_robin", "round_robin", ""),
+    "static-lr": ("static", "least_request", "round_robin", ""),
+    "xds-lr-ingress": ("xds", "round_robin", "least_request", ""),
+    "static-lr-ingress": ("static", "least_request", "least_request", ""),
+    "xds-rl": ("xds", "round_robin", "round_robin", "shape-q"),
+    "xds-beta": ("xds", "round_robin", "round_robin", "shape-fixed"),
 }
 ENVOY_SOURCE = ROOT / "deploy/envoy.microservices.yaml"
 ENVOY_GENERATED = ROOT / "deploy/.lab/envoy.yaml"
+# Weight controller wiring, shared by both lab drivers. Each control plane reads the window
+# written by the caller on its own node, so the two control planes learn independently.
+RL_SERVICE = "service-b"
+RL_TELEMETRY = "/rl/telemetry.json"
+RL_MODEL = "/config/shape-model.json"
+# Best fixed beta at three endpoints on the simulator's validation seed (train_shape_rl.py):
+# the opponent the trained bandit must beat. Change it only with a new validation result.
+FIXED_BETA = "2"
+
+
+def rl_environment(rl: str) -> tuple[dict[str, str], dict[str, str]]:
+    """(caller env, control plane env) for one weight controller; empty values disable it."""
+    if rl not in ("", "shape-q", "shape-fixed"):
+        raise ValueError("weight controller must be '', shape-q or shape-fixed")
+    caller = {
+        "EXPERIMENTAL_RL_SERVICE": RL_SERVICE if rl else "",
+        "EXPERIMENTAL_RL_TELEMETRY_OUTPUT": RL_TELEMETRY if rl else "",
+        # Caller-measured time: slow-node3 delays packets, which server time does not include.
+        "EXPERIMENTAL_RL_LATENCY": "rpc" if rl else "",
+    }
+    controlplane = {
+        "EXPERIMENTAL_RL_SERVICE": RL_SERVICE if rl else "",
+        "EXPERIMENTAL_RL_TELEMETRY": RL_TELEMETRY if rl else "",
+        "EXPERIMENTAL_RL_POLICY": rl,
+        "EXPERIMENTAL_RL_MODEL": RL_MODEL if rl == "shape-q" else "",
+        "EXPERIMENTAL_RL_BETA": FIXED_BETA if rl == "shape-fixed" else "",
+    }
+    return caller, controlplane
 
 
 class LabEnvironment(Protocol):
@@ -46,7 +78,7 @@ class LabEnvironment(Protocol):
 
     address: str  # gRPC target of the ingress, reachable from the load generator
 
-    def up(self, mode: str = "xds", *, build: bool = False) -> None: ...
+    def up(self, mode: str = "xds", *, build: bool = False, rl: str = "") -> None: ...
     def up_variant(self, variant: str, *, build: bool = False) -> None: ...
     def down(self) -> None: ...
     def containers(self) -> list[dict]: ...
@@ -169,9 +201,13 @@ class ComposeLab:
         build: bool = False,
         static_policy: str = "round_robin",
         ingress_policy: str = "round_robin",
+        rl: str = "",
     ) -> None:
         if mode not in ("static", "xds"):
             raise ValueError("mode must be static or xds")
+        if rl and mode != "xds":
+            raise ValueError("the weight controller needs xds callers")
+        caller_rl, controlplane_rl = rl_environment(rl)
         if static_policy not in ("round_robin", "least_request") or ingress_policy not in (
             "round_robin",
             "least_request",
@@ -184,6 +220,9 @@ class ComposeLab:
         ENVOY_GENERATED.parent.mkdir(exist_ok=True)
         ENVOY_GENERATED.write_bytes(config.encode("utf-8"))
         env = {"LAB_DISCOVERY_MODE": mode, "LAB_STATIC_POLICY": static_policy}
+        # compose.lab.yaml maps LAB_CALLER_<NAME> and LAB_CP_<NAME> onto the containers.
+        env |= {f"LAB_CALLER_{key}": value for key, value in caller_rl.items()}
+        env |= {f"LAB_CP_{key}": value for key, value in controlplane_rl.items()}
         if build:
             # Services share two images; building every service in parallel races on the shared tag.
             self.compose("build", "a-1", "controlplane-1", env=env)
@@ -195,8 +234,8 @@ class ComposeLab:
     def up_variant(self, variant: str, *, build: bool = False) -> None:
         if variant not in VARIANTS:
             raise ValueError(f"variant must be one of: {', '.join(VARIANTS)}")
-        mode, static_policy, ingress_policy = VARIANTS[variant]
-        self.up(mode, build=build, static_policy=static_policy, ingress_policy=ingress_policy)
+        mode, static_policy, ingress_policy, rl = VARIANTS[variant]
+        self.up(mode, build=build, static_policy=static_policy, ingress_policy=ingress_policy, rl=rl)
 
     def down(self) -> None:
         self.compose("down", "-v", "--remove-orphans")

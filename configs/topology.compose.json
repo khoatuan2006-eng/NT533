@@ -19,7 +19,8 @@
     "service-b": {
       "instances": {
         "b-1": "b-1:50051",
-        "b-2": "b-2:50051"
+        "b-2": "b-2:50051",
+        "b-3": "b-3:50051"
       },
       "delay_s": 0.005,
       "heavy_multiplier": 5,

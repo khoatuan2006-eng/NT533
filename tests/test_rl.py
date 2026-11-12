@@ -269,3 +269,109 @@ async def test_rl_controller_penalizes_endpoint_error_rate(tmp_path):
     data.update(sequence=3, endpoint_errors={endpoints[0]: 3})
     path.write_text(json.dumps(data))
     assert controller.apply(base).version == base.version
+
+
+def _window(endpoints, fast_first, sequence):
+    fast, slow = [2, 3, 4], [10, 11, 12]
+    return {
+        "timestamp": time.time(),
+        "service": "worker",
+        "sequence": sequence,
+        "endpoints": dict(zip(endpoints, (fast, slow) if fast_first else (slow, fast), strict=True)),
+        "offered": 6,
+        "errors": 0,
+    }
+
+
+async def test_rule_policy_shares_safety_and_moves_towards_the_faster_endpoint(tmp_path, caplog):
+    endpoints = ["127.0.0.1:1234", "127.0.0.1:1235"]
+    base = await ResourceBuilder().build({"worker": endpoints})
+    path = tmp_path / "telemetry.json"
+    controller = RLController(str(path), "worker", policy="rule")
+    assert not controller.learning
+    caplog.set_level("INFO", logger="grpc_lb.controlplane.rl_controller")
+    for sequence in range(1, 7):
+        path.write_text(json.dumps(_window(endpoints, True, sequence)))
+        controller.apply(base)
+    # Hysteresis holds the first window, then one step per window up to the 70% bound.
+    assert controller.weight == 7
+    windows = [json.loads(r.message) for r in caplog.records if '"rl_window"' in r.message]
+    assert windows[-1]["policy"] == "rule" and windows[-1]["weights"] == {endpoints[0]: 70, endpoints[1]: 30}
+    path.write_text(json.dumps({**_window(endpoints, True, 7), "timestamp": time.time() - 100}))
+    assert controller.apply(base).version == base.version
+    controller.apply(base)
+    fallbacks = [r for r in caplog.records if '"rl_fallback"' in r.message]
+    assert len(fallbacks) == 1  # logged once per reason, not on every publication
+
+
+def test_rule_policy_rejects_a_model_and_unknown_policies(tmp_path):
+    with pytest.raises(ValueError):
+        RLController(str(tmp_path / "t"), "worker", policy="rule", model_path=str(tmp_path / "m"))
+    with pytest.raises(ValueError):
+        RLController(str(tmp_path / "t"), "worker", policy="bandit")
+
+
+def test_controlplane_settings_read_the_policy():
+    from grpc_lb.controlplane.config import RuntimeSettings
+
+    base = {"EXPERIMENTAL_RL_TELEMETRY": "/rl/t.json", "EXPERIMENTAL_RL_SERVICE": "service-b"}
+    assert RuntimeSettings.from_environment(base).rl_policy == "q"
+    assert RuntimeSettings.from_environment({**base, "EXPERIMENTAL_RL_POLICY": "rule"}).rl_policy == "rule"
+    # Empty values, as Compose passes them for the variants without a controller.
+    empty = {"EXPERIMENTAL_RL_TELEMETRY": "", "EXPERIMENTAL_RL_SERVICE": "", "EXPERIMENTAL_RL_POLICY": ""}
+    assert RuntimeSettings.from_environment(empty).rl_service == ""
+    with pytest.raises(ValueError):
+        RuntimeSettings.from_environment(
+            {**base, "EXPERIMENTAL_RL_POLICY": "rule", "EXPERIMENTAL_RL_MODEL": "m"}
+        )
+    with pytest.raises(ValueError):
+        RuntimeSettings.from_environment({**base, "EXPERIMENTAL_RL_POLICY": "x"})
+
+
+def test_shipped_model_loads_in_the_shape_controller():
+    from pathlib import Path
+
+    from grpc_lb.controlplane.rl_controller import ShapeController
+
+    model = Path(__file__).resolve().parents[1] / "configs/shape-model.json"
+    controller = ShapeController("unused", "worker", policy="shape-q", model_path=str(model))
+    assert controller.core.bandit.counts and controller.core.beta == 2.0 and controller.core.dwell == 5
+
+
+async def test_rpc_latency_mode_ignores_the_server_duration_trailer(tmp_path):
+    class Call:
+        def __await__(self):
+            async def result():
+                return pb.TaskResult(instance_id="one")
+
+            return result().__await__()
+
+        async def trailing_metadata(self):
+            return (("x-server-duration-ms", "0.5"),)
+
+    class Stub:
+        def Execute(self, request, **kwargs):
+            return Call()
+
+    collector = TelemetryCollector("worker", {"one": "127.0.0.1:1234"}, str(tmp_path / "w"), latency="rpc")
+    pool = XdsDependencyPool.__new__(XdsDependencyPool)
+    pool.stub = Stub()
+    pool.telemetry = collector
+    await pool.call(pb.TaskRequest(request_id="one"), timeout=1)
+    [sample] = collector.samples["127.0.0.1:1234"]
+    assert sample != 0.5
+    with pytest.raises(ValueError):
+        TelemetryCollector("worker", {}, str(tmp_path / "w"), latency="network")
+
+
+def test_service_settings_validate_the_latency_source():
+    from grpc_lb.application import ServiceSettings
+
+    env = {"TOPOLOGY_PATH": "configs/topology.local.json"}
+    assert ServiceSettings.from_environment(env).rl_telemetry_latency == "server"
+    assert (
+        ServiceSettings.from_environment({**env, "EXPERIMENTAL_RL_LATENCY": "rpc"}).rl_telemetry_latency
+        == "rpc"
+    )
+    with pytest.raises(ValueError):
+        ServiceSettings.from_environment({**env, "EXPERIMENTAL_RL_LATENCY": "wire"})

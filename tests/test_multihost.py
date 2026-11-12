@@ -43,6 +43,7 @@ def test_three_node_placement_and_network_addresses(tmp_path):
     assert topology["service-b"].instances == {
         "b-1": "192.168.1.201:50201",
         "b-2": "192.168.1.203:50202",
+        "b-3": "192.168.1.202:50203",
     }
     bootstrap = json.loads((tmp_path / "bootstrap.json").read_text())
     assert bootstrap["xds_servers"][0]["server_uri"] == "ipv4:192.168.1.201:18000,192.168.1.202:18000"

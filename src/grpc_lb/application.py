@@ -35,11 +35,14 @@ class ServiceSettings:
     rl_telemetry_service: str = ""
     rl_telemetry_output: str = ""
     static_lb_policy: str = "round_robin"
+    rl_telemetry_latency: str = "server"
 
     def __post_init__(self) -> None:
         validate(self.topology)
         if self.static_lb_policy not in ("round_robin", "least_request"):
             raise ValueError("STATIC_LB_POLICY must be round_robin or least_request")
+        if self.rl_telemetry_latency not in ("server", "rpc"):
+            raise ValueError("EXPERIMENTAL_RL_LATENCY must be server or rpc")
         if bool(self.rl_telemetry_service) != bool(self.rl_telemetry_output):
             raise ValueError(
                 "EXPERIMENTAL_RL_SERVICE and EXPERIMENTAL_RL_TELEMETRY_OUTPUT must be set together"
@@ -105,6 +108,7 @@ class ServiceSettings:
             env.get("EXPERIMENTAL_RL_SERVICE", ""),
             env.get("EXPERIMENTAL_RL_TELEMETRY_OUTPUT", ""),
             env.get("STATIC_LB_POLICY") or "round_robin",
+            env.get("EXPERIMENTAL_RL_LATENCY") or "server",
         )
 
 
@@ -147,6 +151,7 @@ class ServiceApplication:
                 discovery_mode=settings.discovery_mode,
                 telemetry_service=settings.rl_telemetry_service,
                 telemetry_path=settings.rl_telemetry_output,
+                telemetry_latency=settings.rl_telemetry_latency,
                 static_policy=settings.static_lb_policy,
             )
             if settings.drain_file:

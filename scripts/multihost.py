@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PLACEMENT = {
     "node1": [("service-a", "a-1", 50101), ("service-b", "b-1", 50201)],
-    "node2": [("service-a", "a-2", 50102), ("service-c", "c-1", 50301)],
+    "node2": [("service-a", "a-2", 50102), ("service-c", "c-1", 50301), ("service-b", "b-3", 50203)],
     "node3": [("service-b", "b-2", 50202), ("service-c", "c-2", 50302)],
 }
 

@@ -2,10 +2,14 @@
 # scripts/labenv.py stops, partitions or degrades a whole node through that label.
 #
 #   node1: consul-1, envoy-1, controlplane-1, a-1, b-1
-#   node2: consul-2, envoy-2, controlplane-2, a-2, c-1
+#   node2: consul-2, envoy-2, controlplane-2, a-2, c-1, b-3
 #   node3: consul-3,                          b-2, c-2
 #
 # The load generator runs outside the three nodes and reaches both Envoys on localhost.
+#
+# Weight controller variants (xds-rl, xds-beta): labenv.py fills the LAB_CALLER_* and LAB_CP_*
+# variables. On each of node1 and node2 the caller writes its telemetry window into that
+# node's rl volume and the control plane on the same node reads it; empty values disable it.
 name: lb-lab
 
 x-service: &service
@@ -31,6 +35,16 @@ x-caller: &caller
   # so a cluster delivered through xDS can only be round_robin.
   STATIC_LB_POLICY: ${LAB_STATIC_POLICY:-round_robin}
   GRPC_XDS_BOOTSTRAP: /app/configs/xds-bootstrap.json
+  EXPERIMENTAL_RL_SERVICE: ${LAB_CALLER_EXPERIMENTAL_RL_SERVICE:-}
+  EXPERIMENTAL_RL_TELEMETRY_OUTPUT: ${LAB_CALLER_EXPERIMENTAL_RL_TELEMETRY_OUTPUT:-}
+  EXPERIMENTAL_RL_LATENCY: ${LAB_CALLER_EXPERIMENTAL_RL_LATENCY:-}
+
+x-cp-rl: &cp-rl
+  EXPERIMENTAL_RL_SERVICE: ${LAB_CP_EXPERIMENTAL_RL_SERVICE:-}
+  EXPERIMENTAL_RL_TELEMETRY: ${LAB_CP_EXPERIMENTAL_RL_TELEMETRY:-}
+  EXPERIMENTAL_RL_POLICY: ${LAB_CP_EXPERIMENTAL_RL_POLICY:-}
+  EXPERIMENTAL_RL_MODEL: ${LAB_CP_EXPERIMENTAL_RL_MODEL:-}
+  EXPERIMENTAL_RL_BETA: ${LAB_CP_EXPERIMENTAL_RL_BETA:-}
 
 x-consul: &consul
   image: hashicorp/consul:2.1.0
@@ -74,12 +88,21 @@ services:
     <<: *controlplane
     labels: {lab.node: node1}
     environment:
+      <<: *cp-rl
       CONSUL_HTTP_ADDR: http://consul-1:8500
       CONSUL_ACTIVE_HEALTH: "1"
+    volumes:
+      - ../configs/discovery.registry.json:/config/discovery.json:ro
+      - ../configs/shape-model.json:/config/shape-model.json:ro
+      - rl-node1:/rl:ro
     depends_on: [consul-1]
   a-1:
     <<: *service
     labels: {lab.node: node1}
+    volumes:
+      - ../configs/topology.compose.json:/app/configs/topology.json:ro
+      - ../configs/xds-bootstrap.ha.json:/app/configs/xds-bootstrap.json:ro
+      - rl-node1:/rl
     environment:
       <<: [*env, *caller]
       SERVICE_ID: service-a
@@ -110,12 +133,21 @@ services:
     <<: *controlplane
     labels: {lab.node: node2}
     environment:
+      <<: *cp-rl
       CONSUL_HTTP_ADDR: http://consul-2:8500
       CONSUL_ACTIVE_HEALTH: "1"
+    volumes:
+      - ../configs/discovery.registry.json:/config/discovery.json:ro
+      - ../configs/shape-model.json:/config/shape-model.json:ro
+      - rl-node2:/rl:ro
     depends_on: [consul-2]
   a-2:
     <<: *service
     labels: {lab.node: node2}
+    volumes:
+      - ../configs/topology.compose.json:/app/configs/topology.json:ro
+      - ../configs/xds-bootstrap.ha.json:/app/configs/xds-bootstrap.json:ro
+      - rl-node2:/rl
     environment:
       <<: [*env, *caller]
       SERVICE_ID: service-a
@@ -129,6 +161,15 @@ services:
       <<: *env
       SERVICE_ID: service-c
       INSTANCE_ID: c-1
+      CONSUL_HTTP_ADDR: http://consul-2:8500
+    depends_on: [consul-2]
+  b-3:
+    <<: *service
+    labels: {lab.node: node2}
+    environment:
+      <<: *env
+      SERVICE_ID: service-b
+      INSTANCE_ID: b-3
       CONSUL_HTTP_ADDR: http://consul-2:8500
     depends_on: [consul-2]
 
@@ -155,3 +196,7 @@ services:
       INSTANCE_ID: c-2
       CONSUL_HTTP_ADDR: http://consul-3:8500
     depends_on: [consul-3]
+
+volumes:
+  rl-node1: {}
+  rl-node2: {}
