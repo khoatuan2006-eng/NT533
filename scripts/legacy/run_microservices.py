@@ -23,7 +23,7 @@ from grpc_health.v1 import health_pb2_grpc as hr
 from grpc_lb.microservices import health_name
 from grpc_lb.topology import load_topology, split_endpoint, validate
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def preflight(topology) -> None:

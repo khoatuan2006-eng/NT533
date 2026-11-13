@@ -141,8 +141,8 @@ def test_duplicate_json_keys_and_excessive_depth_rejected(tmp_path):
 
 
 def test_launcher_refuses_busy_port_before_starting_children(monkeypatch):
-    monkeypatch.syspath_prepend(str(Path("scripts").resolve()))
-    preflight = runpy.run_path("scripts/run_microservices.py")["preflight"]
+    monkeypatch.syspath_prepend(str(Path("scripts/legacy").resolve()))
+    preflight = runpy.run_path("scripts/legacy/run_microservices.py")["preflight"]
     with socket.socket() as listener:
         listener.bind(("127.0.0.1", 0))
         listener.listen()
