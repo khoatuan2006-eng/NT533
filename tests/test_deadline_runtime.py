@@ -27,7 +27,7 @@ async def test_no_expired_ok_under_rejection_pressure_in_separate_processes():
         address = f"127.0.0.1:{reservation.getsockname()[1]}"
     server = await asyncio.create_subprocess_exec(
         sys.executable,
-        str(ROOT / "scripts" / "deadline_probe.py"),
+        str(ROOT / "scripts" / "legacy" / "deadline_probe.py"),
         "--serve",
         "--address",
         address,
@@ -51,7 +51,7 @@ async def test_no_expired_ok_under_rejection_pressure_in_separate_processes():
                     await asyncio.sleep(0.05)
         client = await asyncio.create_subprocess_exec(
             sys.executable,
-            str(ROOT / "scripts" / "deadline_probe.py"),
+            str(ROOT / "scripts" / "legacy" / "deadline_probe.py"),
             "--address",
             address,
             "--api",

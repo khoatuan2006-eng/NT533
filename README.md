@@ -15,11 +15,11 @@ Hệ thống cân bằng tải hai tầng cho các service gRPC, kèm bộ công
 | `src/grpc_lb/` | Service A/B/C: xử lý request, deadline, client phụ thuộc, đăng ký Consul |
 | `src/grpc_lb/controlplane/` | Control plane xDS: đọc Consul, probe health, phát endpoint và trọng số |
 | `api/` | Định nghĩa protobuf |
-| `scripts/` | Điều khiển cụm, gây lỗi, phát tải, triển khai, huấn luyện và so sánh RL |
+| `scripts/` | Điều khiển cụm, gây lỗi, phát tải, triển khai, huấn luyện và so sánh RL; `legacy/` giữ script của các giai đoạn trước |
 | `configs/` | Sơ đồ service, mô tả cụm, cấu hình SSH, model RL |
 | `deploy/` | Dockerfile, Compose và cấu hình Envoy |
 | `tests/` | Kiểm thử |
-| `results/` | Kết quả các lượt chạy; mỗi lượt một thư mục |
+| `results/` | Kết quả các lượt chạy của đợt đo này; mỗi lượt một thư mục. `archive/` giữ kết quả các giai đoạn trước |
 | `docs/` | Tài liệu |
 
 ## Yêu cầu

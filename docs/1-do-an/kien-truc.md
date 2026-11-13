@@ -88,7 +88,7 @@ gRPC Python không có Least Request cho caller xDS, nên Least Request ở tầ
 | `multihost.py` | Sinh cấu hình ba node, đóng gói, triển khai lên VM |
 | `train_shape_rl.py`, `compare_shape_rl.py` | Huấn luyện RL trong mô phỏng; so RL trên gRPC thật ở máy cục bộ |
 
-Các file còn lại trong `src/grpc_lb/` và `scripts/` thuộc các giai đoạn trước và không dùng trong đợt đo này.
+Script của các giai đoạn trước nằm trong `scripts/legacy/` và kết quả cũ nằm trong `results/archive/`; cả hai không dùng trong đợt đo này. Sáu file M1 trong `src/grpc_lb/` (`server`, `client`, `loadgen`, `summarize`, `telemetry`, `contracts`) cũng không dùng trong đợt đo này.
 
 ## Kiểm tra mã
 

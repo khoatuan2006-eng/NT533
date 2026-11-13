@@ -22,7 +22,7 @@ from grpc_health.v1 import health_pb2 as hp
 
 # Avoid importing application code or version-guarded generated gRPC stubs: this
 # reproducer must also run an older isolated SDK after the app has been upgraded.
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src" / "grpc_lb" / "generated"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src" / "grpc_lb" / "generated"))
 import processing_pb2 as pb
 
 METHOD = "/processing.v1.ProcessingService/Execute"

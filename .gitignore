@@ -21,4 +21,12 @@ results/*credential*
 results/*.tar.gz
 results/*.zip
 results/*.png
+
+# Same rules for the archived results
+results/archive/*ssh*
+results/archive/*known-hosts
+results/archive/*credential*
+results/archive/*.tar.gz
+results/archive/*.zip
+results/archive/*.png
 deploy/.lab/
