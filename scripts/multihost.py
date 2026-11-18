@@ -227,8 +227,16 @@ sudo systemctl enable --now docker
         compose = (
             f"sudo docker compose -p lb-cloud -f /opt/loadbalance/cluster/{shlex.quote(node)}/compose.json"
         )
-        startup = "up --no-build --pull never -d" if prebuilt else "up --build -d"
-        print(self.run(host, compose + " config --quiet\n" + compose + " " + startup + "\n"), flush=True)
+        commands = [f"{compose} config --quiet"]
+        if not prebuilt:
+            # All workloads share an image tag. Build it once to avoid concurrent exports to that tag.
+            targets = [PLACEMENT[node][0][1]]
+            if node in ("node1", "node2"):
+                targets.append("controlplane")
+            commands.append(f"{compose} build {shlex.join(targets)}")
+        pull = " --pull never" if prebuilt else ""
+        commands.append(f"{compose} up --no-build{pull} -d")
+        print(self.run(host, "\n".join(commands) + "\n"), flush=True)
 
 
 def main():

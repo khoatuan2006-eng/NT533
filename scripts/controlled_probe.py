@@ -24,6 +24,19 @@ def percentile(values, percent):
     return ordered[max(0, math.ceil(len(ordered) * percent / 100) - 1)] if ordered else None
 
 
+def report_environment(directory: Path, local_note: str) -> str:
+    try:
+        provenance = json.loads((directory / "run.json").read_text(encoding="utf-8"))["provenance"]
+    except (OSError, KeyError, ValueError):
+        return local_note
+    if provenance.get("driver") != "ssh":
+        return local_note
+    return (
+        "Lab chạy trên nhiều VM. Đối chiếu đường vào và vị trí bộ phát tải với thông tin "
+        "trong `run.json` trước khi so sánh độ trễ giữa các lượt."
+    )
+
+
 def interruption(rows, fault_at, restore_at, stable_window=5):
     """RPC-visible interruption, independent of operator/API response latency."""
     phase = [r for r in rows if fault_at <= r["scheduled_s"] < restore_at]

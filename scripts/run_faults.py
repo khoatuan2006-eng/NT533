@@ -22,7 +22,7 @@ from types import SimpleNamespace
 from typing import Callable
 
 import grpc
-from controlled_probe import Probe, interruption, summarize
+from controlled_probe import Probe, interruption, report_environment, summarize
 from labenv import NODES, VARIANTS, LabEnvironment, make_lab
 
 from grpc_lb.generated import processing_pb2 as pb
@@ -313,8 +313,11 @@ def report(directory: Path) -> str:
         f"Tiêu chí: tình huống “tiếp tục phục vụ” đạt khi gián đoạn ≤ {MAX_INTERRUPTION_S} giây ở mọi lần lặp; "
         "tình huống mất quorum đạt khi caller xDS trả UNAVAILABLE thay vì dùng endpoint cũ.",
         "“Instance còn phục vụ” lấy từ các RPC thành công sau 5 giây đầu của lỗi.",
-        "Lab chạy trên một máy: các node chung CPU, không có độ trễ mạng thật; không dùng số liệu này để "
-        "kết luận về hiệu năng.",
+        report_environment(
+            directory,
+            "Lab chạy trên một máy: các node chung CPU, không có độ trễ mạng thật; không dùng số liệu này để "
+            "kết luận về hiệu năng.",
+        ),
         "",
     ]
     if incomplete:

@@ -19,7 +19,7 @@ import time
 from pathlib import Path
 from types import SimpleNamespace
 
-from controlled_probe import Probe, summarize
+from controlled_probe import Probe, report_environment, summarize
 from labenv import VARIANTS, LabEnvironment, make_lab
 from run_faults import wait_ready
 
@@ -166,8 +166,11 @@ def report(directory: Path) -> str:
         "Nếu mọi mức đều đạt thì chưa tìm thấy điểm bão hòa: tăng `--rates` rồi chạy lại.",
         "“Phần b-2” là tỷ lệ request B do b-2 (node 3) xử lý; Round Robin cho khoảng 33% (ba instance B), "
         "phương án né backend chậm cho số thấp hơn ở kịch bản slow-node3.",
-        "Lab chạy trên một máy, bộ phát tải cũng chung máy: so sánh tương đối giữa các phương án, "
-        "không dùng làm số tuyệt đối.",
+        report_environment(
+            directory,
+            "Lab chạy trên một máy, bộ phát tải cũng chung máy: so sánh tương đối giữa các phương án, "
+            "không dùng làm số tuyệt đối.",
+        ),
         "",
     ]
     if incomplete:
