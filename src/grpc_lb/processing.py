@@ -17,6 +17,9 @@ from .topology import ServiceConfig
 from .workload import SimulatedWorkload, Workload, WorkloadUnavailable
 
 LOG = logging.getLogger(__name__)
+# all: one JSON line per request (fault runs). errors: only non-ok requests, for capacity
+# runs where a line per request costs CPU and fills the Docker log. off: none.
+REQUEST_LOG_MODES = ("all", "errors", "off")
 
 
 class Service(rpc.ProcessingServiceServicer):
@@ -26,10 +29,14 @@ class Service(rpc.ProcessingServiceServicer):
         instance_id: str,
         pools: dict[str, Pool],
         workload: Workload | None = None,
+        request_log: str = "all",
     ) -> None:
+        if request_log not in REQUEST_LOG_MODES:
+            raise ValueError(f"REQUEST_LOG must be one of: {', '.join(REQUEST_LOG_MODES)}")
         self.config = config
         self.instance_id = instance_id
         self.pools = pools
+        self.request_log = request_log
         self.workload = workload if workload is not None else SimulatedWorkload(config)
         self.capacity = asyncio.Semaphore(config.concurrency)
         self.admitted = 0
@@ -135,17 +142,21 @@ class Service(rpc.ProcessingServiceServicer):
                     ("x-server-queue-ms", f"{queued_ms:.3f}"),
                 )
             )
-            LOG.info(
-                json.dumps(
-                    {
-                        "service_id": self.config.service_id,
-                        "instance_id": self.instance_id,
-                        "request_id": request.request_id,
-                        "workload": request.workload,
-                        "status": status,
-                        "duration_ms": duration_ms,
-                        "queue_ms": queued_ms,
-                        "budget_ms": budget_at_entry * 1000,
-                    }
-                )
+            if self.request_log == "all" or (self.request_log == "errors" and status != "ok"):
+                self._log(request, status, duration_ms, queued_ms, budget_at_entry)
+
+    def _log(self, request, status, duration_ms, queued_ms, budget_at_entry) -> None:
+        LOG.info(
+            json.dumps(
+                {
+                    "service_id": self.config.service_id,
+                    "instance_id": self.instance_id,
+                    "request_id": request.request_id,
+                    "workload": request.workload,
+                    "status": status,
+                    "duration_ms": duration_ms,
+                    "queue_ms": queued_ms,
+                    "budget_ms": budget_at_entry * 1000,
+                }
             )
+        )

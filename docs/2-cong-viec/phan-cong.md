@@ -42,23 +42,23 @@ Lịch dùng cụm ở trên là đề xuất; đổi được, miễn mỗi lú
 
 ### Bước 0 — cả nhóm chờ bước này để dùng cụm
 
-- [ ] K0.1 Gộp nhánh `Khoa` vào `main`
-- [ ] K0.2 Gửi file khóa SSH cho Đạt và Lầu
-- [ ] K0.3 Triển khai bản `main` lên ba VM ([mục 6](huong-dan-chay.md#6-triển-khai-code-lên-cụm))
-- [ ] K0.4 `check` báo `true` cả ba node, `status` đủ 14 thành phần `running`
-- [ ] K0.5 Chạy hai bài ngắn ([mục 3](huong-dan-chay.md#3-chạy-thử)); lỗi công cụ thì sửa ngay
-- [ ] K0.6 Chạy thử một ô với `xds-rl` để chắc phương án RL lên được trên cụm
-- [ ] K0.7 Gắn tag `lab-baseline`, báo nhóm giá trị `release`
+- [x] K0.1 Gộp nhánh `Khoa` vào `main` (PR #9, `origin/main` tại `201d8fd`)
+- [ ] K0.2 Cấp quyền SSH cho Đạt và Lầu. Trên AWS, cần public key riêng của từng người.
+- [x] K0.3 Triển khai bản `main` lên ba VM. Đã đối chiếu mã chạy và cấu hình model với `201d8fd`. Cả ba EC2 báo release `12389101c90bbb83`.
+- [x] K0.4 `check` báo `true` cả ba node, `status` đủ 14 thành phần `running`
+- [x] K0.5 Chạy hai bài ngắn trên AWS. Cả `backend-stop` và `partition-node3` đạt, gián đoạn lần lượt 0,00 s và 2,45 s. [Kết quả](../../results/lab-faults/aws-k0-20261118/report.md)
+- [x] K0.6 Chạy thử `xds-rl` trên AWS. Ô `even` ở 50 RPS đạt 1.500/1.500 RPC, hai control plane phát quyết định RL. [Kết quả](../../results/lab-load/aws-k0-rl-20261118/report.md)
+- [ ] K0.7 Tag `lab-baseline` đã có trên origin và trỏ tới `201d8fd`. Còn báo nhóm mã release `12389101c90bbb83` và đường truy cập sau khi cấp quyền.
 
 **Dấu hiệu Đạt và Lầu được dùng cụm:** Khoa báo trong nhóm, và `git fetch --tags` rồi `git tag -l lab-baseline` in ra tên tag.
 
 ### Sau bước 0
 
 - [ ] K1 Hỗ trợ lỗi công cụ khi Đạt và Lầu chạy
-- [ ] K2 Chạy lại huấn luyện mô phỏng một lần, xác nhận model trùng `configs/shape-model.json`, ghi số tập kiểm tra vào `khoa-rl.md` mục 1
-- [ ] K3 Viết `phan-chung.md` mục 1–3 (giới thiệu, kiến trúc, phương pháp đo)
+- [x] K2 Chạy lại đủ 5 seed. Model sinh ra trùng SHA-256 với `configs/shape-model.json` và model trên cả ba EC2. Đã ghi tập kiểm tra vào `khoa-rl.md` mục 1.
+- [x] K3 Viết `phan-chung.md` mục 1–3 (giới thiệu, kiến trúc, phương pháp đo)
 - [ ] K4 Viết `khoa-rl.md` từ số của D2 và L3: RL so với Round Robin, β cố định, Least Request
-- [ ] K5 Kiểm tra an toàn: đọc `rl_fallback` trong log control plane của lượt D1 hoặc L3, ghi vào `khoa-rl.md` mục 4
+- [ ] K5 Kiểm tra an toàn: đã ghi log `rl_fallback` từ lượt AWS bổ sung vào `khoa-rl.md` mục 4. Còn đối chiếu với D1 hoặc L3 khi có kết quả của nhóm.
 - [ ] K6 Ngày 18/11: đọc bản ghép, sửa chỗ mô tả sai về hệ thống
 
 ## Đạt — lỗi cứng

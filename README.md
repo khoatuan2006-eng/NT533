@@ -54,7 +54,8 @@ Cụm gồm ba VM, mỗi VM chạy phần của mình bằng Docker Compose. Scr
 | Xem trạng thái các thành phần | `scripts/labenv.py --env configs/lab.cloud.json status` |
 | Chạy tình huống lỗi | `scripts/run_faults.py --env configs/lab.cloud.json` |
 | Quét mức tải theo chiến lược | `scripts/run_load.py --env configs/lab.cloud.json` |
-| Triển khai code lên cụm | `scripts/multihost.py render`, `bundle`, `deploy` |
+| Triển khai code lên cụm | `scripts/multihost.py render`, `bundle`, `deploy`, rồi `verify` |
+| Quét năng lực, mở rộng N node | `scripts/scale_probe.py`, `scripts/multihost.py stats`, `plan` |
 | So RL trên máy cục bộ | `scripts/compare_shape_rl.py --model configs/shape-model.json --output-dir <thư-mục>` |
 
 Mọi lệnh gọi bằng `.\.venv\Scripts\python.exe`. Tham số đầy đủ và thứ tự chạy: [hướng dẫn chạy](docs/2-cong-viec/huong-dan-chay.md).

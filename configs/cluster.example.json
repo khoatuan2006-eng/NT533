@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "comment": "Mẫu cụm 6 node để quét năng lực. Sinh khung theo số đo bằng `multihost.py plan`, điền ip (private) và ssh (public) rồi `render --spec`.",
+  "nodes": {
+    "node1": {"ip": "FILL-PRIVATE-IP", "ssh": "FILL-PUBLIC-IP", "vcpus": 4, "instances": {"service-a": 1}},
+    "node2": {"ip": "FILL-PRIVATE-IP", "ssh": "FILL-PUBLIC-IP", "vcpus": 4, "instances": {"service-a": 1}},
+    "node3": {"ip": "FILL-PRIVATE-IP", "ssh": "FILL-PUBLIC-IP", "vcpus": 4, "instances": {"service-a": 1, "service-b": 1, "service-c": 1}},
+    "node4": {"ip": "FILL-PRIVATE-IP", "ssh": "FILL-PUBLIC-IP", "vcpus": 4, "instances": {"service-a": 1, "service-b": 1, "service-c": 1}},
+    "node5": {"ip": "FILL-PRIVATE-IP", "ssh": "FILL-PUBLIC-IP", "vcpus": 4, "instances": {"service-a": 1, "service-b": 1, "service-c": 1}},
+    "node6": {"ip": "FILL-PRIVATE-IP", "ssh": "FILL-PUBLIC-IP", "vcpus": 4, "instances": {"service-b": 2, "service-c": 1}}
+  },
+  "consul_servers": ["node3", "node4", "node5"],
+  "controlplanes": ["node3", "node4"],
+  "ingress": ["node1", "node2"],
+  "ingress_port": 80,
+  "envoy_concurrency": 2,
+  "request_log": "errors",
+  "envoy_access_log": "errors",
+  "ssh_config": "configs/ssh-config.aws-new"
+}

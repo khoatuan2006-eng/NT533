@@ -180,7 +180,86 @@ git tag lab-baseline
 git push origin lab-baseline
 ```
 
-## 7. Khi gặp lỗi công cụ, báo kèm
+## 7. Quét năng lực và mở rộng nhiều node
+
+Mục tiêu: tìm mức tải cụm chịu được, rồi tính và dựng cụm N node cho mức mong muốn (1 triệu RPM ≈ 16 667 RPS). Cụm được mô tả bằng một file **spec**; mẫu ở `configs/cluster.example.json`, cụm 3 node AWS hiện tại ở `configs/cluster.aws-new.json`. `<KEY>` là file khóa SSH của AWS.
+
+**Ba điều phải biết trước khi tốn tiền.**
+
+- Một instance Python dùng được khoảng **một lõi**. Khi quá tải, nó **sụp hẳn** (request xếp hàng tới hết deadline, goodput còn khoảng 10%) chứ không đứng ở mức trần. Vì thế giới hạn đồng thời ở A và circuit breaker của Envoy được tính theo số instance A. Đừng nới chúng để "chịu thêm tải".
+- Bộ phát tải **không được nằm trong cụm**. Chạy nó trên một EC2 riêng, cùng VPC, cùng security group.
+- Một bước `scale_probe` chỉ **hợp lệ** khi chính bộ phát tải giữ được lịch. Bước không hợp lệ không nói gì về cụm: tăng `--workers` hoặc thêm máy phát tải.
+
+**Security group** (giữa các node trong cụm): TCP 8300, 8301, 8500, 18000, 50101–50399; UDP 8301. Từ máy phát tải tới các node ingress: TCP 80.
+
+### 7.1. Áp dụng bản sửa Consul cho cụm 3 node
+
+```powershell
+.\.venv\Scripts\python.exe scripts/multihost.py render --spec configs/cluster.aws-new.json --output results/aws-new-cluster
+.\.venv\Scripts\python.exe scripts/multihost.py bundle --cluster results/aws-new-cluster --output results/loadbalance-release.tar.gz
+.\.venv\Scripts\python.exe scripts/multihost.py deploy --spec configs/cluster.aws-new.json --ssh-config configs/ssh-config.aws-new --key <KEY> --archive results/loadbalance-release.tar.gz
+.\.venv\Scripts\python.exe scripts/multihost.py verify --spec configs/cluster.aws-new.json --ssh-config configs/ssh-config.aws-new --key <KEY>
+```
+
+`verify` in ra mọi container chưa chạy và mọi cổng giữa các node chưa thông. Chỉ đo khi nó báo "Sẵn sàng". Sau đó chạy lại `consul-leader` 5 lượt, trong đó có lượt dừng consul-2.
+
+### 7.2. Hiệu chỉnh: một instance chịu bao nhiêu
+
+Trên máy phát tải (Linux, đã clone repo và cài `.venv`):
+
+```bash
+.venv/bin/python scripts/scale_probe.py --targets <IP-node1>:80 <IP-node2>:80 --rates 200 400 600 800 1000 1200 --duration 60 --output results/scale/calib-$(date +%Y%m%d-%H%M)
+```
+
+Cùng lúc, trên máy của bạn:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/multihost.py stats --spec configs/cluster.aws-new.json --ssh-config configs/ssh-config.aws-new --key <KEY> --seconds 600 --output results/scale/calib-stats
+```
+
+Đọc `report.md` và `stats.md`. Tầng bão hòa đầu tiên là tầng có container gần 100%. Năng lực của một instance ≈ goodput ở bước đạt cuối cùng ÷ số instance của tầng đó. Ví dụ: B bão hòa ở 1 200 RPS với 3 instance thì b ≈ 400.
+
+### 7.3. Tính cụm và dựng
+
+```powershell
+.\.venv\Scripts\python.exe scripts/multihost.py plan --target-rps 16667 --capacity a=<A> b=<B> c=<C> --vcpus 4 --output configs/cluster.scale.json
+```
+
+`plan` in ra số instance, số node và tổng vCPU, rồi ghi khung spec. Điền `ip` (private) và `ssh` (public) cho từng node, sau đó `render --spec`, `bundle`, `deploy --spec` và `verify` như mục 7.1. Ước lượng tiền trước khi tạo VM: số node × giá mỗi giờ × số giờ đo.
+
+### 7.4. Quét tới mục tiêu
+
+```bash
+.venv/bin/python scripts/scale_probe.py --targets <mọi IP ingress>:80 --rates 2000 4000 8000 12000 16667 --duration 60 --workers 7 --output results/scale/run-$(date +%Y%m%d-%H%M)
+```
+
+Chạy `stats` song song như mục 7.2. Nếu một máy phát tải không giữ được lịch, chạy cùng lệnh trên hai máy. Mỗi máy nhận một nửa `--rates` và dùng cùng một `--start-at` (giờ Unix, sớm nhất là 60 giây nữa). Xong thì gộp:
+
+```bash
+.venv/bin/python scripts/scale_probe.py merge --inputs run-m1 run-m2 --output run-all
+```
+
+### 7.5. Tải thay đổi: tăng dần, đột biến, ít tải
+
+Quét bậc ở trên chỉ tìm mức trần. Để xem hệ thống phản ứng khi tải đổi giữa chừng, dùng hồ sơ tải (bảng hồ sơ ở [tra cứu](tra-cuu.md#bài-tải--run_loadpy)).
+
+So sánh chiến lược trên cụm 3 node, dùng cùng lịch gửi cho mọi phương án:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/run_load.py --env configs/lab.aws-new.json --variants xds xds-beta xds-rl static-lr --scenarios even slow-node3 --profiles low step-up spike --settle 90 --repetitions 3
+```
+
+Đột biến ở quy mô lớn, trên máy phát tải. Đo trần trước, rồi chọn hồ sơ có đoạn cao vượt trần một chút:
+
+```bash
+.venv/bin/python scripts/scale_probe.py --targets <mọi IP ingress>:80 --profile "4000:60,16000:10,4000:90" --workers 7 --output results/scale/spike-$(date +%Y%m%d-%H%M)
+```
+
+Trong `scale_probe`, "ổn định sau" chỉ xét lỗi, vì độ trễ không được lưu theo từng giây. Nếu một đoạn sau đột biến **không bao giờ** ổn định, đó là dấu hiệu sụp vì quá tải. Khi đó, kiểm tra circuit breaker của Envoy trước khi thêm node.
+
+**Tắt các VM ngay khi đo xong.**
+
+## 8. Khi gặp lỗi công cụ, báo kèm
 
 - Lệnh đã chạy, nguyên văn.
 - Phần in ra cuối cùng (traceback hoặc thông báo lỗi).

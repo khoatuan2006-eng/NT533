@@ -46,6 +46,7 @@ async def start_service(
     telemetry_path: str = "",
     telemetry_latency: str = "server",
     static_policy: str = "round_robin",
+    request_log: str = "all",
 ) -> RunningService:
     validate(topology)
     if topology.get(config.service_id) != config or instance_id not in config.instances:
@@ -66,7 +67,7 @@ async def start_service(
     try:
         for dependency in config.dependencies:
             pools[dependency] = factory.create(dependency, topology[dependency])
-        handler = Service(config, instance_id, pools, workload)
+        handler = Service(config, instance_id, pools, workload, request_log)
         rpc.add_ProcessingServiceServicer_to_server(handler, server)
         health_pb2_grpc.add_HealthServicer_to_server(checker, server)
         port = server.add_insecure_port(address or config.instances[instance_id])

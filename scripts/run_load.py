@@ -19,8 +19,18 @@ import time
 from pathlib import Path
 from types import SimpleNamespace
 
-from controlled_probe import Probe, summarize
+from controlled_probe import Probe, report_environment, summarize
 from labenv import VARIANTS, LabEnvironment, make_lab
+from load_profile import (
+    PRESETS,
+    SETTLE_P95_FACTOR,
+    SETTLE_P95_SLACK_MS,
+    SETTLE_WINDOW_S,
+    Profile,
+    phase_summary,
+    timeseries,
+)
+from load_profile import parse as parse_profile
 from run_faults import wait_ready
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,51 +48,71 @@ def prepare(lab: LabEnvironment, scenario: str, slow_ms: int) -> None:
         lab.degrade("node3", delay_ms=slow_ms)
 
 
-def parameters(lab: LabEnvironment, output: Path, rate: float, args) -> SimpleNamespace:
+def parameters(lab: LabEnvironment, output: Path, load: float | Profile, args) -> SimpleNamespace:
+    """Probe settings for one cell; `load` is a constant rate or a changing-load profile."""
+    profile = load if isinstance(load, Profile) else None
     return SimpleNamespace(
         address=lab.address,
         output=output,
         mode="lab",
         entry="service-a",
         workload=args.workload,
-        rate=rate,
-        duration=args.duration,
+        rate=profile.mean_rate if profile else load,
+        duration=profile.duration if profile else args.duration,
         timeout=3,
         ready_timeout=30,
         max_inflight=args.max_inflight,
         warmup=100,
         fault_at=None,
         stable_window=5,
+        profile=profile,
     )
 
 
-async def run_cell(lab: LabEnvironment, directory: Path, variant: str, scenario: str, rate, rep, args):
-    stem = f"{scenario}-{variant}-rps{rate:g}-r{rep}"
+def label(load: float | Profile) -> str:
+    return f"profile-{load.name}" if isinstance(load, Profile) else f"rps{load:g}"
+
+
+async def run_cell(lab: LabEnvironment, directory: Path, variant: str, scenario: str, load, rep, args):
+    stem = f"{scenario}-{variant}-{label(load)}-r{rep}"
     output = directory / f"{stem}.json"
     await asyncio.to_thread(prepare, lab, scenario, args.slow_ms)
     try:
         await wait_ready(lab.address)
         if args.settle:
             # Weight controllers act on 10 s windows: give them load and time to react, unmeasured.
-            settle = SimpleNamespace(**vars(parameters(lab, output, rate, args)))
-            settle.output, settle.duration = directory / "settle" / f"{stem}.json", args.settle
+            # A profile settles at its first phase's rate, so the measured run starts from steady state.
+            first = load.phases[0].start_rate or load.mean_rate if isinstance(load, Profile) else load
+            settle = parameters(lab, directory / "settle" / f"{stem}.json", first, args)
+            settle.duration = args.settle
             await Probe(settle).run()
-        await Probe(parameters(lab, output, rate, args)).run()
+        await Probe(parameters(lab, output, load, args)).run()
     finally:
         await asyncio.to_thread(lab.heal)
-    meta = {"variant": variant, "scenario": scenario, "rate": rate, "repetition": rep}
+    meta = {"variant": variant, "scenario": scenario, "repetition": rep}
+    if isinstance(load, Profile):
+        meta.update(rate=load.mean_rate, profile=load.name, profile_spec=load.spec)
+    else:
+        meta["rate"] = load
     output.with_suffix(".meta.json").write_text(json.dumps(meta), encoding="utf-8")
 
 
 def analyse(trace: Path) -> dict:
     meta = json.loads(trace.with_suffix(".meta.json").read_text(encoding="utf-8"))
     report = json.loads(trace.read_text(encoding="utf-8"))
-    rows = [json.loads(line) for line in trace.with_suffix(".jsonl").read_text(encoding="utf-8").splitlines()]
+    # One trace in memory at a time: a 2 GiB VM cannot hold every row of a long suite.
+    with trace.with_suffix(".jsonl").open(encoding="utf-8") as stream:
+        rows = [json.loads(line) for line in stream if line.strip()]
     duration = report["parameters"]["duration"]
     summary = summarize(rows, duration)
     served = [i for row in rows if row["code"] == "OK" for i in row["instances"]]
     b_total = sum(name.startswith("b-") for name in served)
-    goodput_fraction = summary["successful_rps_offered_window"] / meta["rate"]
+    profile = parse_profile(meta["profile_spec"]) if meta.get("profile_spec") else None
+    if profile is not None:
+        # Changing load: compare with what was scheduled, not with an average rate.
+        goodput_fraction = summary["successful"] / max(1, summary["scheduled"])
+    else:
+        goodput_fraction = summary["successful_rps_offered_window"] / meta["rate"]
     error_fraction = summary["rpc_error_fraction"] or 0
     p99 = summary["success_latency_ms"]["p99"]
     passed = (
@@ -92,7 +122,7 @@ def analyse(trace: Path) -> dict:
         and p99 is not None
         and p99 < MAX_P99_MS
     )
-    return {
+    result = {
         **meta,
         "trace": trace.name,
         "goodput_rps": summary["successful_rps_offered_window"],
@@ -106,7 +136,67 @@ def analyse(trace: Path) -> dict:
         "share_b2_percent": b_total and served.count("b-2") / b_total * 100,
         "valid_load": summary["valid_load"],
         "passed": passed,
+        **({"phases": phase_summary(rows, profile)} if profile is not None else {}),
     }
+    if profile is not None:
+        # Written now, while the rows are loaded, so no row outlives this call.
+        series = timeseries(rows, profile.duration)
+        trace.with_name(trace.name.removesuffix(".json") + ".timeseries.csv").write_text(
+            "second,offered,ok,failed,p95_ms\n"
+            + "".join(
+                f"{s['second']},{s['offered']},{s['ok']},{s['failed']},{s['p95_ms'] or ''}\n" for s in series
+            ),
+            encoding="utf-8",
+        )
+    return result
+
+
+def profile_section(directory: Path, runs: list[dict]) -> list[str]:
+    """Per-phase table of changing-load runs (their per-second CSVs are written by analyse)."""
+    groups: dict[tuple, list[dict]] = {}
+    for run in runs:
+        groups.setdefault((run["profile"], run["scenario"], run["variant"]), []).append(run)
+
+    def spread(values, digits=1):
+        values = [v for v in values if v is not None]
+        if not values:
+            return "—"
+        return f"{statistics.median(values):.{digits}f} [{min(values):.{digits}f}–{max(values):.{digits}f}]"
+
+    lines = [
+        "## Tải thay đổi theo đoạn",
+        "",
+        "Ô là median [min–max] giữa các lần lặp. **Ổn định sau** là số giây từ đầu đoạn đến cửa sổ "
+        f"{SETTLE_WINDOW_S} s đầu tiên không lỗi và có P95 ≤ {SETTLE_P95_FACTOR:g} × P95 của đoạn 1 "
+        f"(tối thiểu +{SETTLE_P95_SLACK_MS} ms); “—” là không ổn định trong đoạn đó. Chuỗi theo giây "
+        "để vẽ đồ thị nằm trong `*.timeseries.csv`.",
+    ]
+    for (profile, scenario, variant), group in sorted(groups.items()):
+        lines += [
+            "",
+            f"### `{profile}` · {scenario} · {variant} ({len(group)} lần, toàn lượt "
+            f"{'đạt' if all(r['passed'] for r in group) else 'KHÔNG ĐẠT'})",
+            "",
+            "| Đoạn | Tải | Goodput (RPS) | Lỗi (%) | P95 (ms) | P99 (ms) | Phần b-2 (%) | Ổn định sau (s) |",
+            "|---:|---|---:|---:|---:|---:|---:|---:|",
+        ]
+        for index, phase in enumerate(group[0]["phases"]):
+            cells = [run["phases"][index] for run in group]
+            settles = [c["settle_s"] for c in cells]
+            settle = (
+                ""
+                if index == 0
+                else "—"
+                if all(s is None for s in settles)
+                else spread(settles) + (" (có lần không ổn định)" if None in settles else "")
+            )
+            lines.append(
+                f"| {index + 1} | {phase['label']} | {spread([c['goodput_rps'] for c in cells], 0)} "
+                f"| {spread([c['error_percent'] for c in cells], 2)} | {spread([c['p95_ms'] for c in cells])} "
+                f"| {spread([c['p99_ms'] for c in cells])} | {spread([c['share_b2_percent'] for c in cells], 0)} "
+                f"| {settle} |"
+            )
+    return lines
 
 
 def report(directory: Path) -> str:
@@ -117,9 +207,12 @@ def report(directory: Path) -> str:
             runs.append(analyse(trace))
         except (KeyError, OSError, ValueError, ZeroDivisionError):
             incomplete.append(trace.name)
+    profiled = [run for run in runs if "phases" in run]
+    profile_lines = profile_section(directory, profiled) if profiled else []
     cells: dict[tuple, list[dict]] = {}
     for run in runs:
-        cells.setdefault((run["scenario"], run["variant"], run["rate"]), []).append(run)
+        if "phases" not in run:
+            cells.setdefault((run["scenario"], run["variant"], run["rate"]), []).append(run)
 
     def spread(values, digits=1):
         values = [value for value in values if value is not None]
@@ -166,10 +259,15 @@ def report(directory: Path) -> str:
         "Nếu mọi mức đều đạt thì chưa tìm thấy điểm bão hòa: tăng `--rates` rồi chạy lại.",
         "“Phần b-2” là tỷ lệ request B do b-2 (node 3) xử lý; Round Robin cho khoảng 33% (ba instance B), "
         "phương án né backend chậm cho số thấp hơn ở kịch bản slow-node3.",
-        "Lab chạy trên một máy, bộ phát tải cũng chung máy: so sánh tương đối giữa các phương án, "
-        "không dùng làm số tuyệt đối.",
+        report_environment(
+            directory,
+            "Lab chạy trên một máy, bộ phát tải cũng chung máy: so sánh tương đối giữa các phương án, "
+            "không dùng làm số tuyệt đối.",
+        ),
         "",
     ]
+    if profile_lines:
+        lines += [*profile_lines, ""]
     if incomplete:
         lines += [f"Lần chạy không hoàn tất, không tính vào bảng: {', '.join(incomplete)}.", ""]
     text = "\n".join(lines)
@@ -185,9 +283,25 @@ async def suite(args, lab: LabEnvironment, directory: Path) -> None:
         for variant in order:
             await asyncio.to_thread(lab.up_variant, variant)
             for scenario in args.scenarios:
-                for rate in args.rates:
-                    print(f"lần {rep}/{args.repetitions} [{variant}] {scenario} {rate:g} RPS", flush=True)
-                    await run_cell(lab, directory, variant, scenario, rate, rep, args)
+                for load in args.loads:
+                    what = f"hồ sơ {load.name}" if isinstance(load, Profile) else f"{load:g} RPS"
+                    print(f"lần {rep}/{args.repetitions} [{variant}] {scenario} {what}", flush=True)
+                    await run_cell(lab, directory, variant, scenario, load, rep, args)
+
+
+def run_parameters(args) -> dict:
+    """Command-line settings as JSON: paths as text, profiles as their phase specs."""
+
+    def plain(value):
+        if isinstance(value, Path):
+            return str(value)
+        if isinstance(value, Profile):
+            return {"name": value.name, "spec": value.spec}
+        if isinstance(value, (list, tuple)):
+            return [plain(item) for item in value]
+        return value
+
+    return {key: plain(value) for key, value in vars(args).items()}
 
 
 def main():
@@ -199,6 +313,13 @@ def main():
     )
     parser.add_argument("--scenarios", nargs="+", choices=SCENARIOS, default=list(SCENARIOS))
     parser.add_argument("--rates", nargs="+", type=float, default=[50, 100, 200, 400])
+    parser.add_argument(
+        "--profiles",
+        nargs="+",
+        help="Changing load instead of --rates: presets "
+        + ", ".join(PRESETS)
+        + " (append xN to scale), or phases like 150:60,600:10,150:90",
+    )
     parser.add_argument("--repetitions", type=int, default=3)
     parser.add_argument("--duration", type=float, default=30, help="Seconds of measured load per cell")
     parser.add_argument(
@@ -222,6 +343,12 @@ def main():
         return
     if args.repetitions < 1 or args.duration < 10 or min(args.rates) <= 0 or args.slow_ms < 1:
         parser.error("repetitions >= 1, duration >= 10, positive rates and slow-ms required")
+    try:
+        args.loads = [parse_profile(text) for text in args.profiles] if args.profiles else list(args.rates)
+    except ValueError as error:
+        parser.error(str(error))
+    if args.profiles and len({p.name for p in args.loads}) != len(args.loads):
+        parser.error("two --profiles have the same name")
     directory = args.output or ROOT / "results/lab-load" / time.strftime("%Y%m%d-%H%M%S")
     directory.mkdir(parents=True, exist_ok=False)
     lab = make_lab(wsl=args.wsl, compose=args.compose, env=args.env)
@@ -230,7 +357,7 @@ def main():
             {
                 "started_unix_s": time.time(),
                 "provenance": lab.provenance(),
-                "parameters": {k: str(v) if isinstance(v, Path) else v for k, v in vars(args).items()},
+                "parameters": run_parameters(args),
             },
             indent=2,
         ),

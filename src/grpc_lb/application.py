@@ -12,6 +12,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from urllib.parse import urlsplit
 
+from .processing import REQUEST_LOG_MODES
 from .registry import Registration, watch_drain
 from .service_runtime import RunningService, start_service
 from .topology import ServiceConfig, load_topology, split_endpoint, validate
@@ -36,9 +37,12 @@ class ServiceSettings:
     rl_telemetry_output: str = ""
     static_lb_policy: str = "round_robin"
     rl_telemetry_latency: str = "server"
+    request_log: str = "all"
 
     def __post_init__(self) -> None:
         validate(self.topology)
+        if self.request_log not in REQUEST_LOG_MODES:
+            raise ValueError(f"REQUEST_LOG must be one of: {', '.join(REQUEST_LOG_MODES)}")
         if self.static_lb_policy not in ("round_robin", "least_request"):
             raise ValueError("STATIC_LB_POLICY must be round_robin or least_request")
         if self.rl_telemetry_latency not in ("server", "rpc"):
@@ -109,6 +113,7 @@ class ServiceSettings:
             env.get("EXPERIMENTAL_RL_TELEMETRY_OUTPUT", ""),
             env.get("STATIC_LB_POLICY") or "round_robin",
             env.get("EXPERIMENTAL_RL_LATENCY") or "server",
+            env.get("REQUEST_LOG") or "all",
         )
 
 
@@ -153,6 +158,7 @@ class ServiceApplication:
                 telemetry_path=settings.rl_telemetry_output,
                 telemetry_latency=settings.rl_telemetry_latency,
                 static_policy=settings.static_lb_policy,
+                request_log=settings.request_log,
             )
             if settings.drain_file:
                 self._tasks.append(asyncio.create_task(watch_drain(self.runtime, settings.drain_file)))
