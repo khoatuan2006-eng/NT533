@@ -102,7 +102,19 @@ Một ô **đạt** khi mọi lần lặp có: lỗi ≤ 1%, goodput ≥ 98% t�
 
 **Phần b-2** là tỷ lệ request B do b-2 (trên node 3) phục vụ. B có ba instance nên Round Robin cho khoảng 33%; chiến lược né được backend chậm cho số thấp hơn ở `slow-node3`.
 
-Tham số: `--variants` (mặc định `xds static static-lr`), `--scenarios`, `--rates` (50 100 200 400), `--repetitions` (3), `--duration` (30), `--settle` (0; dùng 90 khi có RL), `--slow-ms` (50), `--report <thư-mục>`.
+Tham số: `--variants` (mặc định `xds static static-lr`), `--scenarios`, `--rates` (50 100 200 400), `--profiles` (thay cho `--rates`, xem dưới), `--repetitions` (3), `--duration` (30), `--settle` (0; dùng 90 khi có RL), `--slow-ms` (50), `--report <thư-mục>`.
+
+**Tải thay đổi (`--profiles`).** Mỗi hồ sơ là một lượt đo có tải đổi theo từng đoạn. Mọi phương án nhận đúng cùng một lịch gửi.
+
+| Hồ sơ | Các đoạn | Trả lời câu hỏi |
+|---|---|---|
+| `low` | 20 RPS × 120 s | Ít tải: Least Request và RL còn gì để phân biệt không? |
+| `step-up` | 100 → 200 → 400 RPS, mỗi bậc 60 s | Trọng số có bám theo khi tải tăng bậc? Bậc nào bắt đầu lỗi? |
+| `spike` | 150 RPS 60 s, 600 RPS 10 s, 150 RPS 90 s | Đột biến có làm sụp không, và hồi lại sau bao lâu? |
+| `step-down` | 400 RPS 60 s, rồi 100 RPS 90 s | Khi tải giảm, trọng số có trở lại đều? |
+| `ramp` | Tăng đều 50 → 400 RPS trong 120 s, giữ 60 s | Tải tăng dần thì bắt đầu trượt ở mức nào? |
+
+Có thể tự viết đoạn: `150:60,600:10,150:90` (RPS:giây), `50-400:120` (tăng đều). Thêm `xN` để nhân tải, ví dụ `"spike x2"`. Báo cáo có bảng **theo đoạn**: goodput, lỗi, P95, P99, phần b-2 và **ổn định sau**. Ổn định sau là số giây từ đầu đoạn đến cửa sổ 5 giây đầu tiên không lỗi, có P95 ≤ 1,5 × P95 của đoạn 1. Mỗi lượt còn có file `*.timeseries.csv` theo từng giây để vẽ đồ thị.
 
 ## RL trên gRPC thật — `compare_shape_rl.py`
 

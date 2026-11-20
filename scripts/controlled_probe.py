@@ -161,8 +161,14 @@ class Probe:
                     row["completed_s"] = time.perf_counter() - origin
                     record(row)
 
-                for index in range(math.ceil(args.rate * args.duration)):
-                    scheduled = index / args.rate
+                # A profile changes the rate during the run; otherwise one constant rate.
+                profile = getattr(args, "profile", None)
+                schedule = (
+                    profile.arrivals()
+                    if profile is not None
+                    else (i / args.rate for i in range(math.ceil(args.rate * args.duration)))
+                )
+                for index, scheduled in enumerate(schedule):
                     # asyncio timers may fire up to one clock resolution early
                     # on Windows; never dispatch before the intended arrival.
                     while (remaining := origin + scheduled - time.perf_counter()) > 0:
@@ -181,7 +187,9 @@ class Probe:
                 "started_unix_s": epoch,
                 "python": platform.python_version(),
                 "grpc": grpc.__version__,
-                "parameters": {k: str(v) if isinstance(v, Path) else v for k, v in vars(args).items()},
+                "parameters": {
+                    k: str(v) if isinstance(v, Path) else getattr(v, "spec", v) for k, v in vars(args).items()
+                },
                 "completion_elapsed_s": time.perf_counter() - origin,
                 "raw": str(raw_path),
                 "summary": summarize(rows, args.duration, args.fault_at, args.stable_window),

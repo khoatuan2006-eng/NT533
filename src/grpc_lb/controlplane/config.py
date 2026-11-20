@@ -44,6 +44,31 @@ def decode_config(data: str | bytes) -> Membership:
     return document["services"]
 
 
+def split_consul_addresses(value: str) -> list[str]:
+    """CONSUL_HTTP_ADDR: one or more comma-separated HTTP(S) URLs, tried in order."""
+    addresses = [item.strip() for item in value.split(",")]
+    if not addresses or any(not item for item in addresses) or len(set(addresses)) != len(addresses):
+        raise ValueError("CONSUL_HTTP_ADDR must list distinct, nonempty HTTP(S) agent URLs")
+    for item in addresses:
+        try:
+            url = urlsplit(item)
+            port = url.port
+        except ValueError:
+            port = -1
+        if (
+            url.scheme not in {"http", "https"}
+            or not url.hostname
+            or url.username is not None
+            or url.password is not None
+            or url.query
+            or url.fragment
+            or url.path not in ("", "/")
+            or (port is not None and not 1 <= port <= 65535)
+        ):
+            raise ValueError("CONSUL_HTTP_ADDR must be an HTTP(S) agent URL")
+    return addresses
+
+
 @dataclass(frozen=True, slots=True)
 class RuntimeSettings:
     discovery_path: str = "/config/discovery.json"
@@ -82,17 +107,7 @@ class RuntimeSettings:
             raise ValueError("DISCOVERY_CONFIG must be a nonempty path without surrounding whitespace")
         split_address(self.listen_address, allow_empty_host=True)
         if self.consul_address:
-            url = urlsplit(self.consul_address)
-            if (
-                url.scheme not in {"http", "https"}
-                or not url.hostname
-                or url.username is not None
-                or url.password is not None
-                or url.query
-                or url.fragment
-                or (url.port is not None and not 1 <= url.port <= 65535)
-            ):
-                raise ValueError("CONSUL_HTTP_ADDR must be an HTTP(S) agent URL")
+            split_consul_addresses(self.consul_address)
         if self.active_health and not self.consul_address:
             raise ValueError("active registry health requires CONSUL_HTTP_ADDR")
 

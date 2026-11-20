@@ -30,6 +30,11 @@ Các lượt kiểm tra của Khoa dùng ba EC2 Ubuntu chạy Docker Compose, m�
 
 Mã `release` đọc từ cả ba EC2 trong lượt kiểm tra AWS là `12389101c90bbb83`. Bản đóng gói có 45 tệp runtime, cấu hình model và định nghĩa API đã đối chiếu với `origin/main` tại `201d8fd`. Tag `lab-baseline` trên origin trỏ tới commit này. Khi ghép số liệu AWS, đối chiếu mã `release` trong từng `run.json`.
 
+### Giới hạn của phép đo năng lực (bước 4)
+
+- **Năng lực.** Mức tải cao nhất đạt tiêu chí là cận dưới của năng lực cụm trong điều kiện đo. Bộ phát chạy trên máy Windows và gửi RPC qua mạng tới AWS, nên máy phát hoặc đường truyền có thể nghẽn trước cụm. Cột **Hợp lệ** cho biết bộ phát có giữ được lịch gửi. Ở lượt 100 RPC/s, bộ phát giữ được lịch nhưng tunnel SSH bị reset giữa phép đo, nên lượt đó chưa xác định được ngưỡng bão hòa của cụm. [Báo cáo quét tải](../../results/scale/calib-20261119-165549/report.md)
+- **Độ trễ.** P95 và P99 đo từ Windows bao gồm cả thời gian truyền giữa máy phát và AWS, kể cả phần đi qua tunnel SSH nếu dùng. Dùng các số đo đầu cuối này để so sánh phương án trên cùng đường đo và trong điều kiện mạng tương đương.
+
 ## 7. Kết luận và hướng phát triển
 
 ### Lỗi cứng (Đạt)

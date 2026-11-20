@@ -6,6 +6,7 @@ import asyncio
 import json
 import logging
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
@@ -26,6 +27,7 @@ from .config import (
     RuntimeSettings,
     decode_config,
     join_address,
+    split_consul_addresses,
 )
 
 LOG = logging.getLogger(__name__)
@@ -59,19 +61,60 @@ class MembershipReader(Protocol):
 
 
 class ConsulRegistry:
+    """Read membership from the first Consul server that answers a consistent query.
+
+    Several addresses make the read independent of any one agent: losing the local
+    Consul must not look like losing quorum. A consistent read needs the Raft leader,
+    so when quorum is really gone every address fails and the lease still expires.
+    """
+
     def __init__(
-        self, address: str, *, membership_only: bool = False, client: httpx.AsyncClient | None = None
+        self,
+        address: str | Sequence[str],
+        *,
+        membership_only: bool = False,
+        client: httpx.AsyncClient | None = None,
     ):
-        self.address = address.rstrip("/")
+        addresses = split_consul_addresses(address) if isinstance(address, str) else list(address)
+        if not addresses:
+            raise ValueError("at least one Consul address required")
+        self.addresses = [item.rstrip("/") for item in addresses]
+        self.preferred = 0
         self.membership_only = membership_only
-        self.client = client or httpx.AsyncClient(timeout=2.0, trust_env=False)
+        # Every address must get a turn inside one FETCH_TIMEOUT, so each attempt is bounded.
+        self.attempt_timeout = min(2.0, FETCH_TIMEOUT * 0.9 / len(self.addresses))
+        self.client = client or httpx.AsyncClient(timeout=self.attempt_timeout, trust_env=False)
+
+    @property
+    def address(self) -> str:
+        return self.addresses[self.preferred]
 
     async def read(self, policy: Membership) -> Membership:
+        last: Exception | None = None
+        for step in range(len(self.addresses)):
+            index = (self.preferred + step) % len(self.addresses)
+            try:
+                async with asyncio.timeout(self.attempt_timeout):
+                    members = await self._read_from(self.addresses[index], policy)
+            except (httpx.HTTPError, OSError, ValueError, TimeoutError) as error:
+                LOG.warning("registry_attempt_failed address=%s error=%r", self.addresses[index], error)
+                last = error
+                continue
+            if index != self.preferred:
+                LOG.warning(
+                    "registry_failover from=%s to=%s", self.addresses[self.preferred], self.addresses[index]
+                )
+                self.preferred = index
+            return members
+        assert last is not None
+        raise last
+
+    async def _read_from(self, address: str, policy: Membership) -> Membership:
         members = {}
         for name in sorted(policy):
             query = "?consistent" if self.membership_only else "?passing=true&consistent"
             async with self.client.stream(
-                "GET", f"{self.address}/v1/health/service/{quote(name, safe='')}{query}"
+                "GET", f"{address}/v1/health/service/{quote(name, safe='')}{query}"
             ) as response:
                 response.raise_for_status()
                 body = bytearray()

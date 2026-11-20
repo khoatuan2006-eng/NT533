@@ -1,6 +1,7 @@
 """Generic graph integration tests over real gRPC transports."""
 
 import asyncio
+import json
 import time
 from contextlib import asynccontextmanager
 from dataclasses import replace
@@ -96,6 +97,27 @@ async def test_injected_workload_runs_under_request_budget():
         assert workload.cancelled
     finally:
         await runtime.close()
+
+
+@pytest.mark.parametrize("mode, logged", [("all", {"ok", "error"}), ("errors", {"error"}), ("off", set())])
+async def test_request_log_mode_controls_per_request_lines(mode, logged, caplog):
+    config = ServiceConfig("gateway", {"one": "gateway:50051"}, delay_s=0)
+    runtime = await start_service(config, "one", {"gateway": config}, "127.0.0.1:0", request_log=mode)
+    try:
+        with caplog.at_level("INFO", logger="grpc_lb.processing"):
+            async with grpc.aio.insecure_channel(f"127.0.0.1:{runtime.port}") as channel:
+                stub = rpc.ProcessingServiceStub(channel)
+                await stub.Execute(request(target_service="gateway"))
+                with pytest.raises(grpc.aio.AioRpcError):
+                    await stub.Execute(request(target_service="wrong"))
+        statuses = {
+            json.loads(r.getMessage())["status"] for r in caplog.records if r.name == "grpc_lb.processing"
+        }
+        assert statuses == logged
+    finally:
+        await runtime.close()
+    with pytest.raises(ValueError):
+        Service(config, "one", {}, request_log="verbose")
 
 
 @pytest.mark.asyncio

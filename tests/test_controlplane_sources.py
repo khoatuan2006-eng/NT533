@@ -78,6 +78,79 @@ async def test_empty_and_node_only_health_do_not_admit_static_fallback(rows):
         await source.close()
 
 
+async def test_registry_fails_over_when_local_agent_is_down_and_sticks():
+    """Losing the local Consul agent while quorum holds must not expire the lease."""
+    hosts = []
+
+    def handler(request):
+        hosts.append(request.url.host)
+        if request.url.host == "local":
+            raise httpx.ConnectError("connection refused")
+        return httpx.Response(200, json=[ROW])
+
+    source = ConsulRegistry(
+        "http://local:8500,http://peer:8500",
+        client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
+    )
+    try:
+        assert await source.read(POLICY) == {"service-b": ["127.0.0.1:50101"]}
+        assert source.address == "http://peer:8500"
+        hosts.clear()
+        await source.read(POLICY)
+        assert hosts == ["peer"]  # no time lost on the dead agent once a peer answered
+    finally:
+        await source.close()
+
+
+async def test_registry_without_leader_anywhere_still_fails():
+    """Real quorum loss: every server refuses a consistent read, so the caller sees an error."""
+    source = ConsulRegistry(
+        ["http://one:8500", "http://two:8500", "http://three:8500"],
+        client=httpx.AsyncClient(
+            transport=httpx.MockTransport(lambda _: httpx.Response(500, text="No cluster leader"))
+        ),
+    )
+    try:
+        with pytest.raises(httpx.HTTPStatusError):
+            await source.read(POLICY)
+    finally:
+        await source.close()
+
+
+async def test_registry_attempt_timeout_leaves_time_for_every_address():
+    from grpc_lb.controlplane.config import FETCH_TIMEOUT
+
+    async def handler(request):
+        if request.url.host.startswith("stuck"):
+            await asyncio.Event().wait()
+        return httpx.Response(200, json=[ROW] if "service-b" in request.url.path else [])
+
+    source = ConsulRegistry(
+        ["http://stuck:8500", "http://stuck2:8500", "http://ok:8500"],
+        client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
+    )
+    source.attempt_timeout = 0.05
+    try:
+        assert await source.read({"service-b": [], "service-c": []}) == {
+            "service-b": ["127.0.0.1:50101"],
+            "service-c": [],
+        }
+        assert source.address == "http://ok:8500"
+    finally:
+        await source.close()
+    assert ConsulRegistry(["http://a", "http://b", "http://c"]).attempt_timeout * 3 < FETCH_TIMEOUT
+
+
+@pytest.mark.parametrize(
+    "value", ["", "http://a,", "http://a,http://a", "http://a,ftp://b", "http://a/v1", "http://a:0"]
+)
+def test_consul_address_list_validation(value):
+    from grpc_lb.controlplane.config import split_consul_addresses
+
+    with pytest.raises(ValueError):
+        split_consul_addresses(value)
+
+
 class FakeRegistry:
     def __init__(self):
         self.entered = asyncio.Event()
