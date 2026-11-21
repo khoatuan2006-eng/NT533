@@ -2,28 +2,30 @@
 
 Trang này mô tả bố trí hệ thống, hành vi của từng thành phần và nơi tìm nó trong code.
 
-## Bố trí trên ba node
+## Bố trí trên bốn node
 
 ![Kiến trúc logic: client gọi hai Envoy, Envoy chia tải vào service A, A gọi trực tiếp service B và C; Consul và control plane phát endpoint cho A qua xDS](../images/architecture-logical.svg)
 
-![Bố trí trên ba node: node1 có Consul, control plane, Envoy, a-1, b-1; node2 có Consul, control plane, Envoy, a-2, c-1, b-3; node3 có Consul, b-2, c-2; bộ phát tải nằm ngoài cụm](../images/architecture-nodes.svg)
+![Bố trí trên bốn node: node1 có Consul, control plane, Envoy, a-1, b-1; node2 có Consul, control plane, Envoy, a-2, c-1; node3 có Consul, a-3, b-2; node4 có Consul agent, a-4, c-2 và bộ đo](../images/architecture-nodes.svg)
 
 | Node | Thành phần |
 |---|---|
 | node1 | consul-1, envoy-1, controlplane-1, a-1, b-1 |
-| node2 | consul-2, envoy-2, controlplane-2, a-2, c-1, b-3 |
-| node3 | consul-3, b-2, c-2 |
+| node2 | consul-2, envoy-2, controlplane-2, a-2, c-1 |
+| node3 | consul-3, a-3, b-2 |
+| node4 | consul agent, a-4, c-2; bộ đo cũng chạy ở đây |
 
-- **Hai bản của cùng một thành phần không nằm chung node.** Mất một node bất kỳ thì thành phần nào cũng còn ít nhất một bản, và Consul còn 2/3.
+- **Mỗi node chạy hai instance**, và **hai bản của cùng một thành phần không nằm chung node.** Mất một node bất kỳ thì A, B, C đều còn, và Consul còn ít nhất 2/3 voter.
+- **A có 4 instance, B và C mỗi loại 2**: A là tầng nặng nhất, vì mỗi request A nhận một lời gọi rồi tự gọi thêm B và C.
 - **Node 1 gánh nặng nhất** (có cả Envoy lẫn control plane), nên "node 1 chết" là bài thử khó nhất.
-- **Bộ phát tải nằm ngoài cụm**, đi qua LB của cloud tới cả hai Envoy.
+- **Bộ đo chạy trên node4**, gọi cả hai Envoy qua mạng riêng của VPC. Tài khoản chỉ được 8 vCPU nên chưa có máy phát tải riêng; bộ đo lấy bớt CPU của a-4 và c-2, nên số năng lực đo được là mức tối thiểu.
 
-Mỗi node là một VM trên cloud UIT-IoT, chạy bằng Docker Compose.
+Mỗi node là một VM AWS EC2 `c7i-flex.large` (2 vCPU, 4 GiB) ở Sydney, chạy bằng Docker Compose. Mô tả cụm: `configs/cluster.aws-4node.json`. Trước ngày 21/11 nhóm đo trên ba VM `t3.small` với bố trí 2 A, 3 B, 2 C; số của giai đoạn đó nằm trong các báo cáo vK.
 
 ## Đường đi của một request
 
-1. Bộ phát tải gửi request tới LB của cloud; LB chia cho envoy-1 và envoy-2.
-2. Envoy chọn a-1 hoặc a-2 (Round Robin, hoặc Least Request tùy phương án).
+1. Bộ phát tải chia request cho envoy-1 và envoy-2.
+2. Envoy chọn một trong bốn instance A (Round Robin, hoặc Least Request tùy phương án).
 3. A nhận request, kiểm tra hạn (deadline) và giới hạn đồng thời, rồi gọi B và C.
 4. A tự chọn instance B và C từ danh sách endpoint đang có, gọi thẳng tới instance đó.
 5. Mỗi request mang **một** quỹ thời gian cho hàng đợi, xử lý cục bộ và lời gọi phụ thuộc; phần còn lại được truyền xuống chặng sau.
@@ -81,11 +83,12 @@ gRPC Python không có Least Request cho caller xDS, nên Least Request ở tầ
 
 | File | Trách nhiệm |
 |---|---|
-| `labenv.py`, `labenv_ssh.py` | Điều khiển cụm: dừng instance hoặc node, phân mảnh, độ trễ, đổi phương án, khóa cụm |
+| `labenv.py`, `labenv_ssh.py` | Điều khiển cụm N node: dừng instance hoặc node, phân mảnh, làm chậm một node hoặc một instance, đổi phương án, khóa cụm |
 | `run_faults.py` | Chạy tình huống lỗi, tính gián đoạn và phục hồi, xuất báo cáo |
 | `run_load.py` | Quét mức tải theo phương án và kịch bản, xuất báo cáo |
 | `controlled_probe.py` | Bộ phát tải tốc độ cố định, ghi từng request |
-| `multihost.py` | Sinh cấu hình ba node, đóng gói, triển khai lên VM |
+| `multihost.py` | Sinh cấu hình N node từ spec, đóng gói, triển khai, kiểm tra, lấy mẫu CPU, tính quy mô |
+| `scale_probe.py` | Bộ phát tải nhiều tiến trình để quét năng lực |
 | `train_shape_rl.py`, `compare_shape_rl.py` | Huấn luyện RL trong mô phỏng; so RL trên gRPC thật ở máy cục bộ |
 
 Script của các giai đoạn trước nằm trong `scripts/legacy/` và kết quả cũ nằm trong `results/archive/`; cả hai không dùng trong đợt đo này. Sáu file M1 trong `src/grpc_lb/` (`server`, `client`, `loadgen`, `summarize`, `telemetry`, `contracts`) cũng không dùng trong đợt đo này.

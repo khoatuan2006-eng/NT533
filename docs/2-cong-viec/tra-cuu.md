@@ -12,21 +12,22 @@ Trang này để tra, không đọc từ đầu đến cuối. Thứ tự làm v
 
 - Bộ phát tải gửi tới LB của cloud, `192.168.120.109:80`.
 - SSH tới node2 và node3 tự đi qua node1.
-- Mô tả cụm: `configs/lab.cloud.json`; SSH: `configs/ssh-config`. Dùng chung cho cả nhóm.
+- Mô tả cụm: `results/aws-4node-cluster/lab.json` (sinh bởi `multihost.py render --spec configs/cluster.aws-4node.json`); SSH: `configs/ssh-config.aws-new`. Dùng chung cho cả nhóm. Bộ đo trên node4 dùng `configs/lab.vpc.json` ([hướng dẫn](huong-dan-chay.md#70-chạy-bộ-đo-trên-node4)).
 
 ## Lệnh điều khiển cụm
 
-Tất cả có dạng `.\.venv\Scripts\python.exe scripts/labenv.py --env configs/lab.cloud.json <lệnh>`.
+Tất cả có dạng `.\.venv\Scripts\python.exe scripts/labenv.py --env $LAB <lệnh>`.
 
 | Lệnh | Tác dụng | Thực hiện trên VM bằng |
 |---|---|---|
-| `check` | Kiểm tra kết nối tới ba node | SSH |
-| `status` | Liệt kê 14 thành phần và trạng thái | `docker compose ps` |
+| `check` | Kiểm tra kết nối tới mọi node | SSH |
+| `status` | Liệt kê các thành phần (16 trên cụm bốn node) và trạng thái | `docker compose ps` |
 | `stop <tên>` / `start <tên>` | Dừng / chạy lại một instance, ví dụ `b-2` | `docker compose stop/start` |
 | `stop-node <node>` / `start-node <node>` | Node chết / sống lại | Dừng mọi container của lab trên VM đó; VM vẫn bật |
 | `partition --a <node…> --b <node…>` | Phân mảnh mạng giữa hai nhóm | `iptables` chặn IP nội bộ của nhóm bên kia |
 | `degrade <node> --delay-ms N` | Thêm độ trễ | `tc netem`, chỉ cho gói gửi tới node khác của lab |
 | `degrade <node> --loss-percent N` | Rớt gói | `tc netem` |
+| `degrade-instance <instance> --delay-ms N` | Chỉ một instance trả lời chậm, ví dụ `b-2` | `tc netem` cho gói gửi từ cổng của instance đó, cả qua card mạng lẫn loopback |
 | `heal` | Gỡ mọi luật mạng | — |
 | `up --variant <tên>` | Đổi phương án | Ghi lại cấu hình, tạo lại service liên quan |
 | `lock-status` / `unlock` | Xem / gỡ khóa cụm | — |
@@ -96,11 +97,12 @@ Mỗi ô (phương án, kịch bản, mức tải) đo 30 giây; thứ tự phư
 | Kịch bản | Điều kiện |
 |---|---|
 | `even` | Mọi node bình thường |
-| `slow-node3` | Node 3 thêm 50 ms độ trễ: b-2 và c-2 trả lời chậm |
+| `slow-node3` | Node 3 thêm 50 ms độ trễ: mọi thứ trên node3 chậm (trên cụm bốn node gồm cả a-3) |
+| `slow-b2` | Chỉ b-2 trả lời chậm thêm 50 ms: tình huống "một backend chậm" trên cụm bốn node |
 
 Một ô **đạt** khi mọi lần lặp có: lỗi ≤ 1%, goodput ≥ 98% tải đặt, P99 của request thành công < 3 giây, và bộ phát tải không bỏ request. **Điểm bão hòa** là mức tải cao nhất còn đạt; nếu mọi mức đều đạt thì chưa thấy điểm bão hòa.
 
-**Phần b-2** là tỷ lệ request B do b-2 (trên node 3) phục vụ. B có ba instance nên Round Robin cho khoảng 33%; chiến lược né được backend chậm cho số thấp hơn ở `slow-node3`.
+**Phần b-2** là tỷ lệ request B do b-2 phục vụ. Round Robin chia đều: 33% với ba B, 50% với hai B (cụm bốn node). Chiến lược né được backend chậm cho số thấp hơn ở `slow-node3` và `slow-b2`. β cố định và RL không xuống dưới 5% vì sàn an toàn; khi đúng khoảng 5% request chậm, P95 nằm ở ranh giới, nên so bằng Phần b-2, P50 và P90.
 
 Tham số: `--variants` (mặc định `xds static static-lr`), `--scenarios`, `--rates` (50 100 200 400), `--profiles` (thay cho `--rates`, xem dưới), `--repetitions` (3), `--duration` (30), `--settle` (0; dùng 90 khi có RL), `--slow-ms` (50), `--report <thư-mục>`.
 

@@ -33,6 +33,7 @@ SERVICES = {"a": "service-a", "b": "service-b", "c": "service-c"}
 # Instance n of a service listens on PORT_BASE + n (a-1 -> 50101, b-3 -> 50203).
 PORT_BASE = {"service-a": 50100, "service-b": 50200, "service-c": 50300}
 MAX_INSTANCES_PER_SERVICE = 99
+RESERVED_PORTS = f"{min(PORT_BASE.values()) + 1}-{max(PORT_BASE.values()) + MAX_INSTANCES_PER_SERVICE}"
 INSTANCE = re.compile(r"(?P<kind>[abc])-(?P<number>[1-9][0-9]?)")
 # The three-node fault lab. Two copies of one component never share a node.
 PLACEMENT = {
@@ -532,7 +533,11 @@ class SshDeployment:
         )
         if not self.run(host, "sha256sum /tmp/loadbalance-release.tar.gz\n").startswith(digest + " "):
             raise RuntimeError("Uploaded release checksum mismatch")
-        script = """sudo mkdir -p /opt/loadbalance
+        script = f"""# Service ports sit inside Linux's ephemeral range: an outgoing connection may take one
+# as its source port and a restarting instance then fails with 'Address already in use'.
+echo 'net.ipv4.ip_local_reserved_ports = {RESERVED_PORTS}' | sudo tee /etc/sysctl.d/90-loadbalance.conf >/dev/null
+sudo sysctl -q -w net.ipv4.ip_local_reserved_ports={RESERVED_PORTS}
+sudo mkdir -p /opt/loadbalance
 sudo install -m 0644 /tmp/loadbalance-release.tar.gz /opt/loadbalance/release.tar.gz
 sudo tar -xzf /tmp/loadbalance-release.tar.gz -C /opt/loadbalance
 if ! command -v docker >/dev/null || ! sudo docker compose version >/dev/null 2>&1 || ! sudo docker buildx version >/dev/null 2>&1; then

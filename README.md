@@ -1,6 +1,6 @@
 # grpc-lb
 
-Hệ thống cân bằng tải hai tầng cho các service gRPC, kèm bộ công cụ gây lỗi và đo đạc trên cụm ba node.
+Hệ thống cân bằng tải hai tầng cho các service gRPC, kèm bộ công cụ gây lỗi và đo đạc trên cụm nhiều node. Cụm chốt là bốn VM AWS `c7i-flex.large`, chịu ổn định 1.500 RPS (90.000 RPM).
 
 - **Tầng ngoài:** Envoy chia request vào service điều phối A.
 - **Tầng trong:** A tự chọn instance của service xử lý B, C (mô hình lookaside); danh sách instance do control plane phát qua gRPC xDS, lấy từ Consul.
@@ -25,7 +25,7 @@ Hệ thống cân bằng tải hai tầng cho các service gRPC, kèm bộ công
 ## Yêu cầu
 
 - Python 3.11 trở lên, Windows với PowerShell.
-- Để chạy trên cụm: VPN UIT-IoT và file khóa SSH của nhóm.
+- Để chạy trên cụm: file khóa SSH của nhóm cho các VM AWS.
 - Để dựng bản một máy: Docker trong WSL.
 
 ## Cài đặt
@@ -46,14 +46,14 @@ python -m venv .venv
 
 ## Chạy
 
-Cụm gồm ba VM, mỗi VM chạy phần của mình bằng Docker Compose. Script chạy trên máy cá nhân và điều khiển cụm qua SSH.
+Cụm gồm bốn VM, mỗi VM chạy phần của mình bằng Docker Compose. Script triển khai chạy trên máy cá nhân và điều khiển cụm qua SSH; bộ đo chạy trên node4, trong VPC. `$LAB` là `results/aws-4node-cluster/lab.json`, do `multihost.py render` sinh ra.
 
 | Việc | Lệnh |
 |---|---|
-| Kiểm tra kết nối tới cụm | `scripts/labenv.py --env configs/lab.cloud.json check` |
-| Xem trạng thái các thành phần | `scripts/labenv.py --env configs/lab.cloud.json status` |
-| Chạy tình huống lỗi | `scripts/run_faults.py --env configs/lab.cloud.json` |
-| Quét mức tải theo chiến lược | `scripts/run_load.py --env configs/lab.cloud.json` |
+| Kiểm tra kết nối tới cụm | `scripts/labenv.py --env $LAB check` |
+| Xem trạng thái các thành phần | `scripts/labenv.py --env $LAB status` |
+| Chạy tình huống lỗi | `scripts/run_faults.py --env $LAB` |
+| Quét mức tải theo chiến lược | `scripts/run_load.py --env $LAB` |
 | Triển khai code lên cụm | `scripts/multihost.py render`, `bundle`, `deploy`, rồi `verify` |
 | Quét năng lực, mở rộng N node | `scripts/scale_probe.py`, `scripts/multihost.py stats`, `plan` |
 | So RL trên máy cục bộ | `scripts/compare_shape_rl.py --model configs/shape-model.json --output-dir <thư-mục>` |

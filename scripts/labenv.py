@@ -19,6 +19,7 @@ import argparse
 import contextlib
 import json
 import os
+import re
 import shlex
 import subprocess
 import sys
@@ -88,10 +89,35 @@ class LabEnvironment(Protocol):
     def start_node(self, node: str) -> None: ...
     def partition(self, side_a: list[str], side_b: list[str]) -> None: ...
     def degrade(self, node: str, *, delay_ms: int = 0, loss_percent: float = 0) -> None: ...
+    def degrade_instance(self, instance: str, *, delay_ms: int) -> None: ...
     def heal(self) -> None: ...
     def consul_leader(self) -> str: ...
     def provenance(self) -> dict: ...
     def lock(self, purpose: str): ...
+
+
+def lab_nodes(lab) -> list[str]:
+    """Node names of an environment: the VMs of a multi-VM lab, else the three logical nodes."""
+    nodes = getattr(lab, "nodes", None)
+    return list(nodes) if nodes else list(NODES)
+
+
+def lab_instances(lab) -> int:
+    """How many A/B/C instances answer behind the ingress: the multi-VM lab's own count, else
+    the single-host topology's."""
+    services = getattr(lab, "services", None)
+    if services:
+        return sum(1 for name in services if re.fullmatch(r"[abc]-[0-9]+", name))
+    topology = json.loads((ROOT / "configs/topology.compose.json").read_text(encoding="utf-8"))
+    return sum(len(service["instances"]) for service in topology["services"].values())
+
+
+def others(lab, node: str) -> list[str]:
+    """Every node except one: the far side of a partition that isolates it."""
+    names = lab_nodes(lab)
+    if node not in names:
+        raise ValueError(f"unknown lab node: {node}")
+    return [name for name in names if name != node]
 
 
 def posix_path(path: Path | str) -> str:
@@ -333,6 +359,14 @@ class ComposeLab:
         rows = self._select(node=node, running=True)
         self.sh("set -e\n" + "\n".join(self._in_namespace(row, [netem]) for row in rows), root=True)
 
+    def degrade_instance(self, instance: str, *, delay_ms: int) -> None:
+        """Delay everything one container sends: its replies reach every caller late."""
+        if delay_ms <= 0:
+            raise ValueError("delay_ms must be positive")
+        rows = self._select(services=[instance], running=True)
+        netem = f"tc qdisc replace dev eth0 root netem delay {int(delay_ms)}ms"
+        self.sh("set -e\n" + "\n".join(self._in_namespace(row, [netem]) for row in rows), root=True)
+
     def heal(self) -> None:
         """Remove every partition and degradation; safe to call when none is active."""
         cleanup = [
@@ -446,18 +480,32 @@ def main():
     commands.add_parser("unlock", help="Gỡ khóa bị bỏ lại (chỉ khi chắc chắn không ai đang chạy)")
     for name in ("stop", "start"):
         commands.add_parser(name).add_argument("services", nargs="+")
+    # The environment checks node names: a multi-VM lab has as many nodes as its description.
     for name in ("stop-node", "start-node"):
-        commands.add_parser(name).add_argument("node", choices=NODES)
+        commands.add_parser(name).add_argument("node")
     cut = commands.add_parser("partition")
-    cut.add_argument("--a", nargs="+", choices=NODES, required=True)
-    cut.add_argument("--b", nargs="+", choices=NODES, required=True)
+    cut.add_argument("--a", nargs="+", required=True)
+    cut.add_argument("--b", nargs="+", required=True)
     slow = commands.add_parser("degrade")
-    slow.add_argument("node", choices=NODES)
+    slow.add_argument("node")
     slow.add_argument("--delay-ms", type=int, default=0)
     slow.add_argument("--loss-percent", type=float, default=0)
+    slow_one = commands.add_parser("degrade-instance", help="Làm chậm phản hồi của một instance, ví dụ b-2")
+    slow_one.add_argument("instance")
+    slow_one.add_argument("--delay-ms", type=int, required=True)
     args = parser.parse_args()
     lab = make_lab(wsl=args.wsl, compose=args.compose, env=args.env)
-    mutating = {"up", "heal", "stop", "start", "stop-node", "start-node", "partition", "degrade"}
+    mutating = {
+        "up",
+        "heal",
+        "stop",
+        "start",
+        "stop-node",
+        "start-node",
+        "partition",
+        "degrade",
+        "degrade-instance",
+    }
     if args.command in mutating and hasattr(lab, "ensure_free"):
         # Do not disturb a teammate's run on the shared cluster.
         lab.ensure_free()
@@ -502,6 +550,8 @@ def main():
         lab.partition(args.a, args.b)
     elif args.command == "degrade":
         lab.degrade(args.node, delay_ms=args.delay_ms, loss_percent=args.loss_percent)
+    elif args.command == "degrade-instance":
+        lab.degrade_instance(args.instance, delay_ms=args.delay_ms)
 
 
 if __name__ == "__main__":

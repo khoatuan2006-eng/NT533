@@ -23,14 +23,14 @@ from typing import Callable
 
 import grpc
 from controlled_probe import Probe, interruption, report_environment, summarize
-from labenv import NODES, VARIANTS, LabEnvironment, make_lab
+from labenv import VARIANTS, LabEnvironment, lab_instances, lab_nodes, make_lab, others
 
 from grpc_lb.generated import processing_pb2 as pb
 from grpc_lb.generated import processing_pb2_grpc as rpc
 
 ROOT = Path(__file__).resolve().parents[1]
-# Every instance of the shared topology (a-1, a-2, b-1, b-2, b-3, c-1, c-2): the lab is ready
-# only when requests have reached all of them.
+# Every instance of the single-host topology (a-1, a-2, b-1, b-2, b-3, c-1, c-2). A multi-VM
+# lab has its own count (see lab_instances): the lab is ready only when requests reached all.
 INSTANCES = sum(
     len(service["instances"])
     for service in json.loads((ROOT / "configs/topology.compose.json").read_text(encoding="utf-8"))[
@@ -84,26 +84,26 @@ SCENARIOS: dict[str, Scenario] = {
         "fail-closed",
     ),
     "node3-down": Scenario(
-        "Node 3 chết (consul-3, b-2, c-2)",
+        "Node 3 chết (mọi container trên node3)",
         lambda lab: lab.stop_node("node3"),
         lambda lab: lab.start_node("node3"),
         "continue",
     ),
     "node1-down": Scenario(
-        "Node 1 chết (envoy-1, controlplane-1, consul-1, a-1, b-1)",
+        "Node 1 chết (envoy-1, controlplane-1, consul-1 và các instance trên node1)",
         lambda lab: lab.stop_node("node1"),
         lambda lab: lab.start_node("node1"),
         "continue",
     ),
     "partition-node3": Scenario(
-        "Cô lập node 3 khỏi node 1 và node 2",
-        lambda lab: lab.partition(["node3"], ["node1", "node2"]),
+        "Cô lập node 3 khỏi mọi node còn lại",
+        lambda lab: lab.partition(["node3"], others(lab, "node3")),
         lambda lab: lab.heal(),
         "continue",
     ),
     "partition-node1": Scenario(
-        "Cô lập node 1 (có Envoy) khỏi node 2 và node 3",
-        lambda lab: lab.partition(["node1"], ["node2", "node3"]),
+        "Cô lập node 1 (có Envoy) khỏi mọi node còn lại",
+        lambda lab: lab.partition(["node1"], others(lab, "node1")),
         lambda lab: lab.heal(),
         "observe",
         min_after=150,
@@ -123,7 +123,7 @@ SCENARIOS: dict[str, Scenario] = {
 }
 
 
-async def wait_ready(address: str, timeout: float = 180) -> None:
+async def wait_ready(address: str, timeout: float = 180, *, expected: int = INSTANCES) -> None:
     """Block until the whole call graph answers: 30 consecutive OKs covering every instance."""
     deadline = time.monotonic() + timeout
     seen: set[str] = set()
@@ -150,7 +150,7 @@ async def wait_ready(address: str, timeout: float = 180) -> None:
             except grpc.aio.AioRpcError:
                 streak = 0
                 seen.clear()
-            if streak >= 30 and len(seen) >= INSTANCES:
+            if streak >= 30 and len(seen) >= expected:
                 return
             await asyncio.sleep(0.1)
     raise TimeoutError(f"lab not ready after {timeout:.0f}s; instances seen: {sorted(seen)}")
@@ -158,7 +158,7 @@ async def wait_ready(address: str, timeout: float = 180) -> None:
 
 async def run_once(lab: LabEnvironment, name: str, mode: str, output: Path, args) -> dict:
     scenario = SCENARIOS[name]
-    await wait_ready(lab.address)
+    await wait_ready(lab.address, expected=lab_instances(lab))
     parameters = SimpleNamespace(
         address=lab.address,
         output=output,
@@ -370,7 +370,7 @@ def main():
             {
                 "started_unix_s": time.time(),
                 "provenance": lab.provenance(),
-                "nodes": NODES,
+                "nodes": lab_nodes(lab),
                 "parameters": {k: str(v) if isinstance(v, Path) else v for k, v in vars(args).items()},
             },
             indent=2,

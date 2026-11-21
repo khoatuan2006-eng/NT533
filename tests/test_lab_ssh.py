@@ -193,3 +193,56 @@ def test_rl_variant_runs_the_controller_only_where_caller_and_controlplane_share
     assert '"EXPERIMENTAL_RL_POLICY": "shape-fixed"' in node1 and '"EXPERIMENTAL_RL_BETA": "2"' in node1
     with pytest.raises(ValueError):
         lab.up("static", rl="shape-fixed")
+
+
+def test_degrade_instance_delays_only_that_instance_port_on_both_paths():
+    lab = FakeSsh()
+    lab.degrade_instance("b-2", delay_ms=50)
+    node, script = lab.sent[0]
+    # b-2 answers from port 50202 on node3; callers elsewhere use the NIC, a caller on node3 loopback.
+    assert node == "node3" and "netem delay 50ms" in script
+    assert script.count("match ip sport 50202 0xffff") == 2
+    assert 'dev "$dev" root handle 1: prio' in script and "dev lo root handle 1: prio" in script
+    assert f"sleep {labenv_ssh.FAULT_TTL_S}" in script and "tc qdisc del dev lo root" in script
+    with pytest.raises(ValueError):
+        lab.degrade_instance("b-9", delay_ms=50)
+    with pytest.raises(ValueError):
+        lab.degrade_instance("b-2", delay_ms=0)
+
+
+def test_heal_also_clears_loopback_delay():
+    lab = FakeSsh()
+    lab.heal()
+    assert all("tc qdisc del dev lo root" in script for _, script in lab.sent)
+
+
+def test_node_helpers_follow_the_lab_description():
+    four = json.loads(json.dumps(DESCRIPTION))
+    four["nodes"]["node4"] = {
+        "ssh": "198.51.100.4",
+        "ip": "192.168.1.250",
+        "services": {"a-4": "a-4", "c-3": "c-3"},
+    }
+    lab = labenv_ssh.SshLab(four)
+    assert labenv.lab_nodes(lab) == ["node1", "node2", "node3", "node4"]
+    assert labenv.others(lab, "node3") == ["node1", "node2", "node4"]
+    assert labenv.lab_instances(lab) == labenv.lab_instances(FakeSsh()) + 2
+    with pytest.raises(ValueError):
+        labenv.others(lab, "node9")
+
+
+def test_heal_and_new_faults_cancel_earlier_self_removal_timers():
+    # A fault removes itself after FAULT_TTL_S. Runs of a suite are shorter than that, so a timer
+    # from an earlier run must not survive into a later run and strip that run's fault midway.
+    lab = FakeSsh()
+    lab.degrade_instance("b-2", delay_ms=50)
+    lab.degrade("node3", delay_ms=100)
+    lab.partition(["node3"], ["node1", "node2"])
+    for _, script in lab.sent:
+        cancel = script.index(labenv_ssh.CANCEL_TIMERS)
+        assert cancel < script.index("sudo ")
+        assert f": {labenv_ssh.TTL_MARK}; sleep {labenv_ssh.FAULT_TTL_S}" in script
+        assert cancel < script.index(labenv_ssh.TTL_MARK + ";")
+    lab.sent.clear()
+    lab.heal()
+    assert all(script.startswith(labenv_ssh.CANCEL_TIMERS) for _, script in lab.sent)

@@ -24,18 +24,30 @@ RL là một chiến lược trong nhánh lỗi mềm, không phải câu hỏi 
 | Khám phá dịch vụ | Consul và xDS; caller giữ cấu hình hợp lệ gần nhất |
 | Deadline xuyên chuỗi gọi | Một quỹ thời gian cho hàng đợi, xử lý cục bộ và lời gọi phụ thuộc |
 
-## Tình trạng (12/11/2026)
+## Tình trạng (21/11/2026)
 
 | Hạng mục | Tình trạng |
 |---|---|
 | Hệ thống: Envoy, service A/B/C, control plane xDS, Consul, HA | Đã xây xong |
 | Chiến lược: Round Robin, Least Request, β cố định, RL | Đã xây xong |
-| Công cụ: gây lỗi, phát tải, triển khai, báo cáo tự động | Đã xây xong; phần điều khiển VM qua SSH chưa chạy trên VM thật |
-| Triển khai bản hiện tại lên ba VM | **Chưa làm** |
-| Số đo trên cụm cho cả hai nhánh | **Chưa có** |
-| Báo cáo | **Chưa viết** |
+| Công cụ: gây lỗi, phát tải, triển khai N node, báo cáo tự động | Đã xây xong và chạy trên VM thật |
+| Cụm chốt | 4 VM AWS `c7i-flex.large` (8 vCPU), 4 A, 2 B, 2 C ([bố trí](kien-truc.md)) |
+| Số đo trên cụm chốt | Đủ 6 bước kiểm nghiệm (bảng dưới) |
+| Lỗi cứng ngoài Consul leader trên cụm chốt | **Chưa đo lại**; số có trên cụm ba VM `t3.small` |
+| Báo cáo | Đang viết |
 
-Các lượt đã chạy trong `results/` đều trên bản dựng một máy; chúng xác nhận công cụ hoạt động và không dùng làm số báo cáo. Việc còn lại và người làm: [phân công](../2-cong-viec/phan-cong.md).
+Số đo trên cụm chốt, ngày 21/11/2026. Bộ đo chạy trên node4, trong VPC.
+
+| Bước | Kết quả |
+|---|---|
+| 1. Chất lượng | 289/289 test đạt |
+| 2. Triển khai | 4/4 node, `verify` báo Sẵn sàng |
+| 3. Dừng Consul leader | 5/5 lượt đạt, 11.000/11.000 RPC, gián đoạn 0 s |
+| 4. Năng lực | **1.500 RPS (90.000 RPM)**, 0 lỗi, P99 khoảng 66 ms, đạt 3/3 lượt 60 s và 1 lượt 300 s; 1.800 RPS không đạt khi node4 (có bộ đo) hết CPU |
+| 5. Quy mô cho 1 triệu RPM | Ước tính 46 node × 4 vCPU = 184 vCPU (64 A, 32 B, 32 C, 5 node ingress); ngoại suy tuyến tính |
+| 6. Chiến lược khi b-2 chậm thêm 50 ms | β cố định và RL đưa phần tải của b-2 xuống mức sàn 5%, ngang nhau; P50 khoảng 22 ms, P90 khoảng 29 ms, so với Round Robin 68 ms và 72 ms. Least Request còn khoảng 19% tải trên b-2 |
+
+Trên cụm ba VM `t3.small` trước đó, mức đạt là 200 RPS; trên bốn VM `t3.small` là 1.000 RPS, với lỗi dồn thành đợt 1–2 giây ở đầu mỗi phút, trùng lúc VM bị lấy CPU (steal 30–60%). `c7i-flex` không có hiện tượng này.
 
 ## Ngoài phạm vi
 
