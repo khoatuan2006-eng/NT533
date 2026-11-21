@@ -1,4 +1,4 @@
-"""Three-VM lab driver: the same fault and load suites, driven over SSH.
+"""Multi-VM lab driver: the same fault and load suites, driven over SSH.
 
 Each node is one VM running its part of the stack with Docker Compose, as deployed by
 scripts/multihost.py. This driver implements the LabEnvironment interface from labenv.py:
@@ -7,6 +7,7 @@ scripts/multihost.py. This driver implements the LabEnvironment interface from l
   node down       stop every lab container on that VM (the VM itself stays up)
   partition       iptables DROP rules between the nodes' private addresses
   degrade         tc netem on traffic towards the other lab nodes only
+  degrade_instance  tc netem on the replies of one instance (matched by its port)
   heal            flush the rules; every rule also expires on its own (see FAULT_TTL_S)
 
 The environment is described by a JSON file, see configs/lab.cloud.json.
@@ -24,10 +25,17 @@ import sys
 import time
 from pathlib import Path
 
+from multihost import PORT_BASE, instance_service
+
 ROOT = Path(__file__).resolve().parents[1]
 # Network faults remove themselves after this long, so a lost SSH session cannot leave
 # the VMs cut off from each other.
 FAULT_TTL_S = 900
+# Marks those self-removal timers. A timer outlives the fault it guards, so heal and every new
+# fault cancel the pending ones: otherwise a timer left by an earlier fault fires in the middle
+# of a later run and silently removes that run's fault.
+TTL_MARK = "loadbalance-fault-ttl"
+CANCEL_TIMERS = f"pkill -f {TTL_MARK} 2>/dev/null || true"
 CHAIN = "LABFAULT"
 # One person at a time: the whole team shares these three VMs.
 LOCK_PATH = "/var/tmp/loadbalance-lab.lock"
@@ -38,7 +46,7 @@ class LabBusy(RuntimeError):
 
 
 class SshLab:
-    """Lab on three VMs. Service names are the lab's (consul-1, envoy-2, b-1, ...)."""
+    """Lab on several VMs. Service names are the lab's (consul-1, envoy-2, b-1, ...)."""
 
     def __init__(self, description: dict, *, base: Path = ROOT):
         try:
@@ -288,7 +296,7 @@ class SshLab:
     # ---- network faults ------------------------------------------------------
     def _expire(self, command: str) -> str:
         # Double quotes: $dev is expanded now, by the shell that knows it.
-        return f'(nohup sh -c "sleep {FAULT_TTL_S}; {command}" >/dev/null 2>&1 &)'
+        return f'(nohup sh -c ": {TTL_MARK}; sleep {FAULT_TTL_S}; {command}" >/dev/null 2>&1 &)'
 
     def partition(self, side_a: list[str], side_b: list[str]) -> None:
         """Drop all traffic between two groups of nodes, in both directions."""
@@ -302,6 +310,7 @@ class SshLab:
         blocked = [self.nodes[name]["ip"] for name in side_b]
         script = [
             "set -e",
+            CANCEL_TIMERS,
             f"sudo iptables -N {CHAIN} 2>/dev/null || true",
             # FORWARD too: the bridged Envoy container leaves the VM through it.
             *(
@@ -330,6 +339,7 @@ class SshLab:
         )
         script = [
             "set -e",
+            CANCEL_TIMERS,
             f"dev=$(ip -o route get {peers[0]} | sed -n 's/.* dev \\([^ ]*\\).*/\\1/p')",
             # All traffic stays in band 1; only packets to lab peers are steered into the netem band.
             'sudo tc qdisc replace dev "$dev" root handle 1: prio bands 3 priomap 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0',
@@ -342,6 +352,35 @@ class SshLab:
         ]
         self.ssh(node, "\n".join(script))
 
+    def degrade_instance(self, instance: str, *, delay_ms: int) -> None:
+        """Delay the replies of one service instance only, wherever its callers are.
+
+        Every container uses the host network, so the instance is told apart by the port it
+        answers from. Callers on other VMs reach it through the VM's interface, a caller on the
+        same VM through loopback: both get the delay, everything else on the VM does not.
+        """
+        if delay_ms <= 0:
+            raise ValueError("delay_ms must be positive")
+        if instance not in self.services:
+            raise ValueError(f"unknown lab service: {instance}")
+        service, number = instance_service(instance)
+        port = PORT_BASE[service] + number
+        node = self.services[instance][0]
+        peer = next(info["ip"] for name, info in self.nodes.items() if name != node)
+        script = [
+            "set -e",
+            CANCEL_TIMERS,
+            f"dev=$(ip -o route get {peer} | sed -n 's/.* dev \\([^ ]*\\).*/\\1/p')",
+        ]
+        for dev in ('"$dev"', "lo"):
+            script += [
+                f"sudo tc qdisc replace dev {dev} root handle 1: prio bands 3 priomap 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+                f"sudo tc qdisc replace dev {dev} parent 1:3 handle 30: netem delay {int(delay_ms)}ms",
+                f"sudo tc filter add dev {dev} protocol ip parent 1:0 prio 3 u32 match ip sport {port} 0xffff flowid 1:3",
+            ]
+        script.append(self._expire("sudo tc qdisc del dev $dev root; sudo tc qdisc del dev lo root"))
+        self.ssh(node, "\n".join(script))
+
     def heal(self) -> None:
         """Remove every partition and degradation; safe to call when none is active."""
         peers = {
@@ -351,9 +390,11 @@ class SshLab:
         errors = []
         for node in self._ordered(self.nodes):
             script = (
+                f"{CANCEL_TIMERS}\n"
                 f"sudo iptables -F {CHAIN} 2>/dev/null\n"
                 f"dev=$(ip -o route get {peers[node]} | sed -n 's/.* dev \\([^ ]*\\).*/\\1/p')\n"
-                'sudo tc qdisc del dev "$dev" root 2>/dev/null\ntrue'
+                'sudo tc qdisc del dev "$dev" root 2>/dev/null\n'
+                "sudo tc qdisc del dev lo root 2>/dev/null\ntrue"
             )
             try:
                 self.ssh(node, script)

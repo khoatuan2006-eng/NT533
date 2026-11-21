@@ -51,9 +51,25 @@ Quy tắc so sánh đầy đủ: [tra cứu](../2-cong-viec/tra-cuu.md#quy-tắc
 |---|---|---|---|
 | Mô phỏng | `train_shape_rl.py` | RL có hơn β cố định trên nhiều loại kịch bản không | Cần chạy lại một lần để chốt số (xem dưới) |
 | gRPC thật, máy cục bộ | `compare_shape_rl.py` | Kết quả mô phỏng có giữ trên gRPC thật không | Chưa có lượt đủ lần lặp |
-| Cụm ba VM | `run_load.py` với `xds-rl`, `xds-beta` | RL có né b-2 chậm trên hệ thật không | Chưa đo |
+| Cụm bốn VM | `run_load.py` với `xds-rl`, `xds-beta`, kịch bản `slow-b2` | RL có né b-2 chậm trên hệ thật không | Đã đo (dưới) |
 
 **Số mô phỏng cần chốt.** Báo cáo mô phỏng còn trên máy (`results/shape-rl/simulation.md`) ghi RL hơn β cố định tốt nhất +0,012 trên tập kiểm tra, nhưng model của lượt đó khác `configs/shape-model.json`. Trước khi đưa số mô phỏng vào báo cáo, chạy lại huấn luyện một lần và xác nhận model sinh ra trùng model đang triển khai ([phân công](../2-cong-viec/phan-cong.md), việc K2).
+
+## Kết quả trên cụm
+
+Cụm bốn VM `c7i-flex.large`, ngày 21/11/2026. Chỉ b-2 trả lời chậm thêm 50 ms (`slow-b2`); hồ sơ `step-up x3` (300 → 600 → 1.200 RPS) và `spike x2` (300 → 1.200 → 300 RPS); mỗi ô 3 lần lặp, trung vị.
+
+| Phương án | Phần b-2 | P50 (step-up / spike) | P90 (step-up / spike) |
+|---|---:|---:|---:|
+| Round Robin | 50% | 68,5 / 53,4 ms | 72,4 / 71,1 ms |
+| Least Request | khoảng 19% | 22,6 / 20,7 ms | 71,1 / 70,6 ms |
+| β cố định | khoảng 5% | 22,3 / 20,5 ms | 28,8 / 25,9 ms |
+| RL | khoảng 5% | 22,2 / 20,4 ms | 28,6 / 26,2 ms |
+
+- RL và β cố định cùng chạm sàn 5% và ngang nhau; khoảng min–max của hai bên chồng nhau.
+- P95 không dùng để so: khi đúng khoảng 5% request chậm, P95 nằm ở ranh giới và nhảy giữa hai nhóm theo chênh lệch rất nhỏ của phần tải b-2.
+- Khi các backend như nhau (`even`), mọi phương án ngang nhau, P95 khoảng 23–24 ms.
+- Ở `slow-node3` trên cụm ba VM `t3.small` ngày 19/11 cũng thấy RL ngang β cố định.
 
 ## Điều đã biết trước khi đo
 
@@ -66,5 +82,5 @@ Quy tắc so sánh đầy đủ: [tra cứu](../2-cong-viec/tra-cuu.md#quy-tắc
 
 - Mô phỏng coi mỗi backend là hàng đợi M/M/c; chỉ xấp xỉ backend thật.
 - Lượt gRPC cục bộ chạy mọi thứ trong một tiến trình trên Windows.
-- Cụm chỉ có ba instance B.
+- Cụm chốt chỉ có hai instance B; trên cụm ba VM trước đó là ba.
 - Model học ngoại tuyến rồi đóng băng, không tự thích nghi khi môi trường đổi lâu dài.

@@ -255,3 +255,22 @@ def test_every_instance_of_the_shared_topology_runs_in_the_compose_lab():
     b_nodes = [node for node, names in nodes.items() if any(n.startswith("b-") for n in names)]
     assert sorted(b_nodes) == ["node1", "node2", "node3"]  # one B instance per node
     assert run_faults.INSTANCES == 7
+
+
+def test_slow_b2_delays_one_instance_and_partitions_cover_every_other_node():
+    calls = []
+    lab = SimpleNamespace(
+        nodes={"node1": {}, "node2": {}, "node3": {}, "node4": {}},
+        heal=lambda: calls.append(("heal",)),
+        degrade=lambda node, **kw: calls.append(("degrade", node, kw)),
+        degrade_instance=lambda instance, **kw: calls.append(("degrade_instance", instance, kw)),
+        partition=lambda a, b: calls.append(("partition", a, b)),
+    )
+    run_load.prepare(lab, "slow-b2", 50)
+    assert calls == [("heal",), ("degrade_instance", "b-2", {"delay_ms": 50})]
+    calls.clear()
+    run_faults.SCENARIOS["partition-node3"].inject(lab)
+    assert calls == [("partition", ["node3"], ["node1", "node2", "node4"])]
+    # The single-host lab keeps its three logical nodes and its own instance count.
+    assert labenv.lab_nodes(FakeLab()) == ["node1", "node2", "node3"]
+    assert labenv.lab_instances(FakeLab()) == run_faults.INSTANCES

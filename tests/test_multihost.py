@@ -213,3 +213,19 @@ def test_ssh_stdin_preserves_linux_line_endings(monkeypatch, tmp_path):
     ssh = MODULE["SshDeployment"](tmp_path / "key", tmp_path / "hosts")
     assert ssh.run("192.168.1.45", "sha256sum /tmp/release.tar.gz\r\n") == "checksum verified\n"
     assert received == [b"sha256sum /tmp/release.tar.gz\n"]
+
+
+def test_deploy_reserves_every_service_port_before_starting_containers(monkeypatch, tmp_path):
+    scripts = []
+    monkeypatch.setattr(MODULE["subprocess"], "run", lambda *a, **k: SimpleNamespace(returncode=0))
+    ssh = MODULE["SshDeployment"](tmp_path / "key", tmp_path / "hosts")
+    monkeypatch.setattr(ssh, "run", lambda host, script, **k: scripts.append(script) or "abc  /tmp/x\n")
+    ssh.upload("192.168.1.45", tmp_path / "release.tar.gz", "abc", "node1", builds=[])
+    setup = next(script for script in scripts if "sysctl" in script)
+    assert "net.ipv4.ip_local_reserved_ports=50101-50399" in setup
+    assert setup.index("sysctl") < setup.index("docker")
+    low, high = map(int, MODULE["RESERVED_PORTS"].split("-"))
+    ports = [
+        base + n for base in MODULE["PORT_BASE"].values() for n in (1, MODULE["MAX_INSTANCES_PER_SERVICE"])
+    ]
+    assert all(low <= port <= high for port in ports)

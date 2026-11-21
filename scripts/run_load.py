@@ -20,7 +20,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from controlled_probe import Probe, report_environment, summarize
-from labenv import VARIANTS, LabEnvironment, make_lab
+from labenv import VARIANTS, LabEnvironment, lab_instances, make_lab
 from load_profile import (
     PRESETS,
     SETTLE_P95_FACTOR,
@@ -38,14 +38,18 @@ ROOT = Path(__file__).resolve().parents[1]
 MAX_ERROR_FRACTION = 0.01
 MIN_GOODPUT_FRACTION = 0.98
 MAX_P99_MS = 3000
-SCENARIOS = ("even", "slow-node3")
+SCENARIOS = ("even", "slow-node3", "slow-b2")
 
 
 def prepare(lab: LabEnvironment, scenario: str, slow_ms: int) -> None:
     lab.heal()
     if scenario == "slow-node3":
-        # b-2 and c-2 answer slowly: the "uneven backends" case.
+        # Everything on node3 answers slowly. On the first three-node lab that was b-2 and c-2;
+        # where node3 also runs an A instance, use slow-b2 for the "one slow backend" case.
         lab.degrade("node3", delay_ms=slow_ms)
+    elif scenario == "slow-b2":
+        # Only b-2 answers slowly, whatever else shares its node: the "uneven backends" case.
+        lab.degrade_instance("b-2", delay_ms=slow_ms)
 
 
 def parameters(lab: LabEnvironment, output: Path, load: float | Profile, args) -> SimpleNamespace:
@@ -78,7 +82,7 @@ async def run_cell(lab: LabEnvironment, directory: Path, variant: str, scenario:
     output = directory / f"{stem}.json"
     await asyncio.to_thread(prepare, lab, scenario, args.slow_ms)
     try:
-        await wait_ready(lab.address)
+        await wait_ready(lab.address, expected=lab_instances(lab))
         if args.settle:
             # Weight controllers act on 10 s windows: give them load and time to react, unmeasured.
             # A profile settles at its first phase's rate, so the measured run starts from steady state.
@@ -257,8 +261,8 @@ def report(directory: Path) -> str:
     lines += [
         "",
         "Nếu mọi mức đều đạt thì chưa tìm thấy điểm bão hòa: tăng `--rates` rồi chạy lại.",
-        "“Phần b-2” là tỷ lệ request B do b-2 (node 3) xử lý; Round Robin cho khoảng 33% (ba instance B), "
-        "phương án né backend chậm cho số thấp hơn ở kịch bản slow-node3.",
+        "“Phần b-2” là tỷ lệ request B do b-2 xử lý; Round Robin chia đều cho các instance B "
+        "(33% với ba B, 50% với hai B), phương án né backend chậm cho số thấp hơn ở slow-node3 và slow-b2.",
         report_environment(
             directory,
             "Lab chạy trên một máy, bộ phát tải cũng chung máy: so sánh tương đối giữa các phương án, "
@@ -329,7 +333,12 @@ def main():
         help="Seconds of unmeasured load before each cell, same for every variant (use 90 with xds-rl/xds-beta)",
     )
     parser.add_argument("--workload", choices=["light", "heavy"], default="light")
-    parser.add_argument("--slow-ms", type=int, default=50, help="Delay added to node3 in slow-node3")
+    parser.add_argument(
+        "--slow-ms",
+        type=int,
+        default=50,
+        help="Delay added in slow-node3 (all of node3) and slow-b2 (b-2 only)",
+    )
     parser.add_argument("--max-inflight", type=int, default=512)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--output", type=Path, help="Run directory (default: results/lab-load/<timestamp>)")
