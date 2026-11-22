@@ -274,3 +274,13 @@ def test_slow_b2_delays_one_instance_and_partitions_cover_every_other_node():
     # The single-host lab keeps its three logical nodes and its own instance count.
     assert labenv.lab_nodes(FakeLab()) == ["node1", "node2", "node3"]
     assert labenv.lab_instances(FakeLab()) == run_faults.INSTANCES
+
+
+def test_slow_b2_b3_delays_two_replicas():
+    calls = []
+    lab = SimpleNamespace(
+        heal=lambda: calls.append(("heal",)),
+        degrade_instance=lambda instance, **kw: calls.append((instance, kw["delay_ms"])),
+    )
+    run_load.prepare(lab, "slow-b2-b3", 50)
+    assert calls == [("heal",), ("b-2", 50), ("b-3", 50)]

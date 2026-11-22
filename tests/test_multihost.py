@@ -152,8 +152,12 @@ def test_spec_rejects_missing_tier_and_duplicate_instance(tmp_path):
         node["instances"] = [i for i in (node["instances"] if isinstance(node["instances"], list) else [])]
     raw["nodes"]["node1"]["instances"] = ["a-1", "b-1"]
     (tmp_path / "no-c.json").write_text(json.dumps(raw))
-    with pytest.raises(ValueError, match="service-c"):
-        ClusterSpec.from_file(tmp_path / "no-c.json")
+    # C is optional (A then calls B only); A and B are not.
+    assert ClusterSpec.from_file(tmp_path / "no-c.json").nodes["node1"].instances == ["a-1", "b-1"]
+    raw["nodes"]["node1"]["instances"] = ["a-1"]
+    (tmp_path / "no-b.json").write_text(json.dumps(raw))
+    with pytest.raises(ValueError, match="service-b"):
+        ClusterSpec.from_file(tmp_path / "no-b.json")
 
 
 def test_connectivity_checks_cover_what_each_role_needs(tmp_path):
@@ -229,3 +233,32 @@ def test_deploy_reserves_every_service_port_before_starting_containers(monkeypat
         base + n for base in MODULE["PORT_BASE"].values() for n in (1, MODULE["MAX_INSTANCES_PER_SERVICE"])
     ]
     assert all(low <= port <= high for port in ports)
+
+
+def test_spec_without_c_drops_it_from_the_call_graph(tmp_path):
+    ips = ["10.0.0.11", "10.0.0.12", "10.0.0.13", "10.0.0.14"]
+    raw = {
+        "schema_version": 1,
+        "nodes": {
+            f"node{n}": {"ip": ip, "vcpus": 2, "instances": [f"a-{n}", f"b-{n}"]}
+            for n, ip in enumerate(ips, 1)
+        },
+        "consul_servers": ["node1", "node2", "node3"],
+        "controlplanes": ["node1", "node2"],
+        "ingress": ["node1", "node2"],
+    }
+    path = tmp_path / "4a4b.json"
+    path.write_text(json.dumps(raw), encoding="utf-8")
+    spec = ClusterSpec.from_file(path)
+    out = tmp_path / "cluster"
+    ClusterDeployment(spec).render(out)
+    topology = json.loads((out / "topology.json").read_text())
+    assert set(topology["services"]) == {"service-a", "service-b"}
+    assert topology["services"]["service-a"]["dependencies"] == ["service-b"]
+    assert json.loads((out / "discovery.json").read_text())["services"] == {"service-b": []}
+    load_topology(out / "topology.json")  # still a valid call graph
+    for node in raw["nodes"].values():
+        node["instances"] = node["instances"][:1]
+    path.write_text(json.dumps(raw), encoding="utf-8")
+    with pytest.raises(ValueError, match="service-b"):
+        ClusterSpec.from_file(path)

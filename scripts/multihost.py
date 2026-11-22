@@ -181,7 +181,8 @@ class ClusterSpec:
                 seen.add(instance)
                 counts[service] += 1
         for service, count in counts.items():
-            if not count:
+            # C is optional: without it, A calls B only (the single-dependency layout).
+            if not count and service != "service-c":
                 raise ValueError(f"spec places no instance of {service}")
         for role, members in (
             ("consul_servers", self.consul_servers),
@@ -325,6 +326,13 @@ class ClusterDeployment:
             service["instances"] = dict(
                 sorted(service["instances"].items(), key=lambda i: instance_service(i[0])[1])
             )
+        # A service the spec places nowhere leaves the call graph instead of failing every request.
+        absent = [name for name, service in topology["services"].items() if not service["instances"]]
+        for name in absent:
+            del topology["services"][name]
+        for service in topology["services"].values():
+            if "dependencies" in service:
+                service["dependencies"] = [d for d in service["dependencies"] if d not in absent]
         self._write(directory / "topology.json", topology)
         self._write(
             directory / "bootstrap.json",
@@ -342,7 +350,10 @@ class ClusterDeployment:
         )
         self._write(
             directory / "discovery.json",
-            {"schema_version": 1, "services": {"service-b": [], "service-c": []}},
+            {
+                "schema_version": 1,
+                "services": {name: [] for name in ("service-b", "service-c") if name in topology["services"]},
+            },
         )
         a_endpoints = spec.endpoints("service-a")
         a_concurrency = topology["services"]["service-a"].get("concurrency", 50)
