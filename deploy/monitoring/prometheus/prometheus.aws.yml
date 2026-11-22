@@ -1,0 +1,31 @@
+# Prometheus config chạy với network_mode: host trên AWS Node 1
+global:
+  scrape_interval: 2s
+  evaluation_interval: 2s
+  scrape_timeout: 2s
+
+scrape_configs:
+  # Envoy Ingress: Node 1 ở 127.0.0.1:9901 vì Envoy bind vào loopback
+  - job_name: envoy-ingress
+    metrics_path: /stats/prometheus
+    static_configs:
+      - targets:
+          - "127.0.0.1:9901"      # Envoy Node 1 (trực tiếp qua localhost của Node 1)
+          - "172.31.30.73:9901"   # Envoy Node 2
+        labels:
+          cluster: "grpc-lb"
+          tier: "ingress"
+
+  # Consul Cluster
+  - job_name: consul-cluster
+    metrics_path: /v1/agent/metrics
+    params:
+      format: [prometheus]
+    static_configs:
+      - targets:
+          - "127.0.0.1:8500"      # Consul Node 1
+          - "172.31.30.73:8500"   # Consul Node 2
+          - "172.31.26.182:8500"  # Consul Node 3
+        labels:
+          cluster: "grpc-lb"
+          tier: "control-plane"

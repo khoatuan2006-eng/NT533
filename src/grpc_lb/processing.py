@@ -6,13 +6,14 @@ import asyncio
 import json
 import logging
 import time
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 import grpc
 
 from .dependencies import NoBackend, Pool
 from .generated import processing_pb2 as pb
 from .generated import processing_pb2_grpc as rpc
+from .prom_metrics import record_call
 from .topology import ServiceConfig
 from .workload import SimulatedWorkload, Workload, WorkloadUnavailable
 
@@ -62,7 +63,23 @@ class Service(rpc.ProcessingServiceServicer):
                 visited_services=[*request.visited_services, self.config.service_id],
                 remaining_hops=request.remaining_hops - 1,
             )
-            return await self.pools[name].call(child, max(0, end - time.monotonic()))
+            t0 = time.perf_counter()
+            try:
+                res = await self.pools[name].call(child, max(0, end - time.monotonic()))
+                target = res.instance_id or name
+                duration_s = time.perf_counter() - t0
+                record_call(caller=self.instance_id, target=target, status="ok", duration_s=duration_s)
+                return res
+            except Exception as exc:
+                duration_s = time.perf_counter() - t0
+                target = name
+                if isinstance(exc, grpc.aio.AioRpcError):
+                    for key, val in exc.trailing_metadata() or ():
+                        if key == "x-instance-id":
+                            target = unquote(val)
+                            break
+                record_call(caller=self.instance_id, target=target, status="error", duration_s=duration_s)
+                raise
 
         if self.config.mode == "parallel":
             tasks = [asyncio.create_task(invoke(name)) for name in self.pools]

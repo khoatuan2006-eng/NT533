@@ -1,0 +1,13 @@
+# Auto-provision dashboards from JSON files on disk.
+apiVersion: 1
+
+providers:
+  - name: grpc-lb
+    orgId: 1
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

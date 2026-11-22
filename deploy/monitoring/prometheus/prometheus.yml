@@ -1,0 +1,57 @@
+# Prometheus configuration for grpc-lb cluster monitoring.
+#
+# BEFORE RUNNING: Replace <NODE1_IP>, <NODE2_IP>, <NODE3_IP> with the actual
+# public IPs of your AWS EC2 instances, or use localhost ports if you set up
+# SSH tunnels (see README.md).
+#
+# SSH tunnel example (run on your machine):
+#   ssh -F configs/ssh-config.aws-new -L 19901:<node1-private-ip>:9901 <node1-public-ip> -N &
+#   ssh -F configs/ssh-config.aws-new -L 29901:<node2-private-ip>:9901 <node2-public-ip> -N &
+#   Then use targets: ["host.docker.internal:19901", "host.docker.internal:29901"]
+
+global:
+  scrape_interval: 2s      # Fast scrape to capture short fault events (10-20s)
+  evaluation_interval: 2s
+  scrape_timeout: 2s
+
+# ---------------------------------------------------------------------------
+# Scrape jobs
+# ---------------------------------------------------------------------------
+scrape_configs:
+
+  # --- Envoy Proxy Ingress (Node 1 & Node 2) ---
+  # Envoy exposes Prometheus metrics at :9901/stats/prometheus
+  - job_name: envoy-ingress
+    metrics_path: /stats/prometheus
+    static_configs:
+      - targets:
+          # Option A: Direct public IP (requires Security Group open on port 9901)
+          # - "<NODE1_IP>:9901"
+          # - "<NODE2_IP>:9901"
+          # Option B: Via SSH tunnel (recommended, more secure)
+          - "host.docker.internal:19901"   # tunnel to node1 envoy-1
+          - "host.docker.internal:29901"   # tunnel to node2 envoy-2
+        labels:
+          cluster: "grpc-lb"
+          tier: "ingress"
+
+  # --- Consul Cluster (Node 1, 2, 3 are Raft voters) ---
+  # Consul exposes metrics at :8500/v1/agent/metrics?format=prometheus
+  # Requires telemetry.prometheus_retention_time set in Consul config.
+  - job_name: consul-cluster
+    metrics_path: /v1/agent/metrics
+    params:
+      format: [prometheus]
+    static_configs:
+      - targets:
+          # Option A: Direct public IP
+          # - "<NODE1_IP>:8500"
+          # - "<NODE2_IP>:8500"
+          # - "<NODE3_IP>:8500"
+          # Option B: Via SSH tunnel
+          - "host.docker.internal:18500"   # tunnel to node1 consul-1
+          - "host.docker.internal:28500"   # tunnel to node2 consul-2
+          - "host.docker.internal:38500"   # tunnel to node3 consul-3
+        labels:
+          cluster: "grpc-lb"
+          tier: "control-plane"

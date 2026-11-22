@@ -1,0 +1,110 @@
+# Prometheus config chạy trên AWS Node 4 với network_mode: host.
+# Node 4 cào metric qua mạng nội bộ VPC (IP private).
+#
+# Bố trí 4A + 4B (không có service C):
+#   Node 1: a-1, b-1, Envoy-1, Consul-1, ControlPlane-1
+#   Node 2: a-2, b-2, Envoy-2, Consul-2, ControlPlane-2
+#   Node 3: a-3, b-3, Consul-3
+#   Node 4: a-4, b-4, Consul agent, Prometheus, Grafana, node-exporter
+global:
+  scrape_interval: 2s
+  evaluation_interval: 2s
+  scrape_timeout: 2s
+
+scrape_configs:
+  # ---- Tầng 1: Envoy Ingress (Node 1 & Node 2) ----
+  - job_name: envoy-ingress
+    metrics_path: /stats/prometheus
+    static_configs:
+      - targets: ["172.31.20.204:9901"]
+        labels:
+          envoy: "Envoy 1 (Node 1)"
+          node: "Node 1"
+          cluster: "grpc-lb"
+          tier: "ingress"
+      - targets: ["172.31.30.73:9901"]
+        labels:
+          envoy: "Envoy 2 (Node 2)"
+          node: "Node 2"
+          cluster: "grpc-lb"
+          tier: "ingress"
+
+  # ---- Consul Cluster: 3 Raft voters + 1 agent ----
+  - job_name: consul-cluster
+    metrics_path: /v1/agent/metrics
+    params:
+      format: [prometheus]
+    static_configs:
+      - targets: ["172.31.20.204:8500"]
+        labels:
+          consul_node: "Consul 1 (Node 1)"
+          node: "Node 1"
+          cluster: "grpc-lb"
+          tier: "control-plane"
+      - targets: ["172.31.30.73:8500"]
+        labels:
+          consul_node: "Consul 2 (Node 2)"
+          node: "Node 2"
+          cluster: "grpc-lb"
+          tier: "control-plane"
+      - targets: ["172.31.26.182:8500"]
+        labels:
+          consul_node: "Consul 3 (Node 3)"
+          node: "Node 3"
+          cluster: "grpc-lb"
+          tier: "control-plane"
+      - targets: ["127.0.0.1:8500"]
+        labels:
+          consul_node: "Consul Agent (Node 4)"
+          node: "Node 4"
+          cluster: "grpc-lb"
+          tier: "control-plane"
+
+  # ---- Tài nguyên phần cứng: Node Exporter (CPU / RAM / Disk / Network) ----
+  - job_name: node-exporter
+    static_configs:
+      - targets: ["172.31.20.204:9100"]
+        labels:
+          node: "Node 1"
+          role: "Ingress & Control Plane"
+      - targets: ["172.31.30.73:9100"]
+        labels:
+          node: "Node 2"
+          role: "Ingress & Control Plane"
+      - targets: ["172.31.26.182:9100"]
+        labels:
+          node: "Node 3"
+          role: "Consul Server & Worker"
+      - targets: ["127.0.0.1:9100"]
+        labels:
+          node: "Node 4"
+          role: "Worker & Monitoring"
+
+  # ---- Tầng 2: Service A Metrics (gRPC Client calls to Service B) ----
+  - job_name: service-a-metrics
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["172.31.20.204:9200"]
+        labels:
+          caller: "a-1"
+          node: "Node 1"
+          cluster: "grpc-lb"
+          tier: "service-a"
+      - targets: ["172.31.30.73:9200"]
+        labels:
+          caller: "a-2"
+          node: "Node 2"
+          cluster: "grpc-lb"
+          tier: "service-a"
+      - targets: ["172.31.26.182:9200"]
+        labels:
+          caller: "a-3"
+          node: "Node 3"
+          cluster: "grpc-lb"
+          tier: "service-a"
+      - targets: ["127.0.0.1:9200"]
+        labels:
+          caller: "a-4"
+          node: "Node 4"
+          cluster: "grpc-lb"
+          tier: "service-a"

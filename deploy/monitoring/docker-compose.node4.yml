@@ -1,0 +1,48 @@
+# Chạy Prometheus & Grafana với network_mode: host trên AWS Node 4.
+# Nhờ host network, Prometheus có thể truy cập mọi dịch vụ qua mạng nội bộ VPC
+# mà không cần SSH tunnel hay mở Security Group.
+#
+# Lợi ích chạy trên Node 4:
+#   - Giải phóng CPU cho Node 1 (node nặng nhất: Envoy + ControlPlane + Consul + a-1 + b-1).
+#   - Scrape toàn bộ Envoy-1, Envoy-2, Consul-1/2/3 qua IP private.
+#
+# Lưu ý:
+#   - Node 4 cũng là nơi chạy bộ phát tải (run_load.py). Khi đo tải nặng,
+#     Prometheus + Grafana chiếm thêm ít CPU. Chấp nhận được vì Prom chỉ scrape 2s/lần.
+#   - Envoy trên Node 1 & 2 cần mở port 9901 ra VPC (không bind 127.0.0.1).
+
+services:
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    container_name: grpc-lb-prometheus
+    network_mode: host
+    volumes:
+      - ./prometheus/prometheus.node4.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: grpc-lb-grafana
+    network_mode: host
+    depends_on:
+      - prometheus
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    restart: unless-stopped
+
+volumes:
+  prometheus-data:
+  grafana-data:

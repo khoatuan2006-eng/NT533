@@ -414,6 +414,8 @@ class ClusterDeployment:
                 }
                 if spec.request_log != "all":
                     environment["REQUEST_LOG"] = spec.request_log
+                if service == "service-a":
+                    environment["METRICS_PORT"] = "9200"
                 services[instance] = {**common, "environment": environment}
             if node in spec.controlplanes:
                 # Local agent first, then every server: losing one agent is not losing quorum.
@@ -439,7 +441,7 @@ class ClusterDeployment:
                 )
                 services["ingress"] = {
                     "image": ENVOY_IMAGE,
-                    "ports": [f"{spec.ingress_port}:50050", "127.0.0.1:9901:9901"],
+                    "ports": [f"{spec.ingress_port}:50050", "9901:9901"],
                     "restart": "unless-stopped",
                     "command": ["-c", "/etc/envoy/envoy.yaml", "--concurrency", str(spec.envoy_concurrency)],
                     "volumes": ["./envoy.yaml:/etc/envoy/envoy.yaml:ro"],
@@ -612,6 +614,7 @@ def connectivity_checks(spec: ClusterSpec) -> dict[str, list[tuple[str, str, int
                 for _, instance, port in items:
                     if instance[0] in "bc":
                         checks[node].append((f"call {instance}", ip[owner], port))
+            checks[node].append((f"metrics-a {node}", ip[node], 9200))
         if node in spec.ingress:
             for instance, address, port in spec.endpoints("service-a"):
                 checks[node].append((f"envoy->{instance}", address, port))
