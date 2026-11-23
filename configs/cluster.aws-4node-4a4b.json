@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "comment": "Cụm 4 VM AWS c7i-flex.large – Bố trí 4A + 4B (không có service C). A chỉ gọi B.",
+  "nodes": {
+    "node1": {
+      "ip": "172.31.20.204",
+      "ssh": "3.25.139.183",
+      "vcpus": 2,
+      "instances": {
+        "service-a": 1,
+        "service-b": 1
+      }
+    },
+    "node2": {
+      "ip": "172.31.30.73",
+      "ssh": "3.26.2.87",
+      "vcpus": 2,
+      "instances": {
+        "service-a": 1,
+        "service-b": 1
+      }
+    },
+    "node3": {
+      "ip": "172.31.26.182",
+      "ssh": "15.135.223.24",
+      "vcpus": 2,
+      "instances": {
+        "service-a": 1,
+        "service-b": 1
+      }
+    },
+    "node4": {
+      "ip": "172.31.18.115",
+      "ssh": "3.107.13.147",
+      "vcpus": 2,
+      "instances": {
+        "service-a": 1,
+        "service-b": 1
+      }
+    }
+  },
+  "consul_servers": ["node1", "node2", "node3"],
+  "controlplanes": ["node1", "node2"],
+  "ingress": ["node1", "node2"],
+  "ingress_port": 80,
+  "envoy_concurrency": 2,
+  "request_log": "errors",
+  "envoy_access_log": "errors",
+  "ssh_config": "configs/ssh-config.aws-new"
+}

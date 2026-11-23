@@ -3,8 +3,11 @@
 import argparse
 import asyncio
 import logging
+import os
 import signal
 from pathlib import Path
+
+from grpc_lb.prom_metrics import start_metrics_server
 
 from .application import ControlPlane
 from .config import EndpointResolver, RuntimeSettings, decode_config
@@ -35,6 +38,10 @@ async def serve(settings: RuntimeSettings):
                 model_path=settings.rl_model or None,
                 policy=settings.rl_policy,
             )
+        port = os.environ.get("METRICS_PORT", "")
+        if port.isdigit():
+            # Beta, weights and fallback state of the weight controller, for Prometheus.
+            start_metrics_server(int(port))
         source = await create_source(settings)
         await ControlPlane(settings.listen_address, source, policy).run(stop)
     finally:

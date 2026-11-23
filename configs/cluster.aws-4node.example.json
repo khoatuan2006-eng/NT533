@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "comment": "Cụm chuẩn 4 VM AWS c7i-flex.large (Sydney) đo ngày 21/11/2026. Thay FILL-PUBLIC-IP bằng IP public mỗi lần bật lại VM.",
+  "nodes": {
+    "node1": {
+      "ip": "172.31.20.204",
+      "ssh": "FILL-PUBLIC-IP-NODE1",
+      "vcpus": 2,
+      "instances": {
+        "service-a": 1,
+        "service-b": 1
+      }
+    },
+    "node2": {
+      "ip": "172.31.30.73",
+      "ssh": "FILL-PUBLIC-IP-NODE2",
+      "vcpus": 2,
+      "instances": {
+        "service-a": 1,
+        "service-c": 1
+      }
+    },
+    "node3": {
+      "ip": "172.31.26.182",
+      "ssh": "FILL-PUBLIC-IP-NODE3",
+      "vcpus": 2,
+      "instances": {
+        "service-a": 1,
+        "service-b": 1
+      }
+    },
+    "node4": {
+      "ip": "172.31.18.115",
+      "ssh": "FILL-PUBLIC-IP-NODE4",
+      "vcpus": 2,
+      "instances": {
+        "service-a": 1,
+        "service-c": 1
+      }
+    }
+  },
+  "consul_servers": ["node1", "node2", "node3"],
+  "controlplanes": ["node1", "node2"],
+  "ingress": ["node1", "node2"],
+  "ingress_port": 80,
+  "envoy_concurrency": 2,
+  "request_log": "errors",
+  "envoy_access_log": "errors",
+  "ssh_config": "configs/ssh-config.aws-new"
+}

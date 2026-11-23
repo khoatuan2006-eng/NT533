@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from contextlib import AsyncExitStack
 from dataclasses import dataclass
 
@@ -11,6 +12,7 @@ from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 from .dependencies import DependencyPoolFactory, Pool
 from .generated import processing_pb2_grpc as rpc
 from .processing import Service
+from .prom_metrics import init_metrics, start_metrics_server
 from .service_identity import RPC_SERVICE, health_name
 from .topology import ServiceConfig, validate
 from .workload import Workload
@@ -78,6 +80,16 @@ async def start_service(
         for name in ("", RPC_SERVICE, health_name(config.service_id)):
             await checker.set(name, health_pb2.HealthCheckResponse.SERVING)
         await server.start()
+
+        metrics_port_str = os.environ.get("METRICS_PORT")
+        if metrics_port_str and metrics_port_str.isdigit():
+            start_metrics_server(int(metrics_port_str))
+            known_targets: list[str] = []
+            for dep in config.dependencies:
+                if dep in topology:
+                    known_targets.extend(topology[dep].instances.keys())
+            init_metrics(instance_id, known_targets or None)
+
         return RunningService(server, checker, port, pools, handler)
     except BaseException:
         async with AsyncExitStack() as cleanup:
