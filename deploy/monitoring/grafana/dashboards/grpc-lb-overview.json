@@ -1163,7 +1163,7 @@
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 30,
+            "fillOpacity": 10,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
@@ -1180,7 +1180,7 @@
             "spanNulls": false,
             "stacking": {
               "group": "A",
-              "mode": "percent"
+              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
@@ -1196,7 +1196,9 @@
               }
             ]
           },
-          "unit": "percentunit"
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
         },
         "overrides": []
       },
@@ -1209,11 +1211,8 @@
       "id": 11,
       "options": {
         "legend": {
-          "calcs": [
-            "mean",
-            "lastNotNull"
-          ],
-          "displayMode": "table",
+          "calcs": [],
+          "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
         },
@@ -1229,7 +1228,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(envoy_cluster_upstream_rq_total{envoy_cluster_name=\"entry_backends\", envoy!=\"\"}[30s])",
+          "expr": "rate(envoy_cluster_upstream_rq_total{envoy_cluster_name=\"entry_backends\", envoy!=\"\"}[30s]) / scalar(sum(rate(envoy_cluster_upstream_rq_total{envoy_cluster_name=\"entry_backends\", envoy!=\"\"}[30s])))",
           "legendFormat": "{{envoy}}",
           "refId": "A"
         }
@@ -2222,7 +2221,7 @@
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 30,
+            "fillOpacity": 10,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
@@ -2239,7 +2238,7 @@
             "spanNulls": false,
             "stacking": {
               "group": "A",
-              "mode": "percent"
+              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
@@ -2255,7 +2254,9 @@
               }
             ]
           },
-          "unit": "percentunit"
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
         },
         "overrides": []
       },
@@ -2268,11 +2269,8 @@
       "id": 401,
       "options": {
         "legend": {
-          "calcs": [
-            "mean",
-            "lastNotNull"
-          ],
-          "displayMode": "table",
+          "calcs": [],
+          "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
         },
@@ -2288,7 +2286,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (target) (rate(grpc_client_calls_sent_total[30s]))",
+          "expr": "sum by (target) (rate(grpc_client_calls_sent_total{target=~\"b-.*\"}[30s])) / scalar(sum(sum by (target) (rate(grpc_client_calls_sent_total{target=~\"b-.*\"}[30s]))))",
           "legendFormat": "Bản sao {{target}}",
           "refId": "A"
         }
@@ -2481,6 +2479,211 @@
       ],
       "title": "Ma trận phân phối lưu lượng (Service A -> Service B)",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 90
+      },
+      "id": 500,
+      "panels": [],
+      "title": "Bộ điều khiển trọng số A -> B (β cố định / RL)",
+      "type": "row"
+    },
+    {
+      "id": 501,
+      "type": "stat",
+      "title": "β đang áp dụng (theo control plane)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 91
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "grpc_lb_rl_beta",
+          "legendFormat": "{{node}} · {{policy}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "unit": "none",
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "description": "β = 0 là Round Robin; β càng lớn càng chuyển nhiều tải khỏi bản sao chậm. Trống khi phương án không dùng β (xds, static-lr)."
+    },
+    {
+      "id": 502,
+      "type": "stat",
+      "title": "Trạng thái bộ điều khiển",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 91
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max(grpc_lb_rl_fallback)",
+          "legendFormat": "trạng thái",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Đang chia theo độ trễ",
+                  "color": "green",
+                  "index": 0
+                }
+              }
+            },
+            {
+              "type": "value",
+              "options": {
+                "1": {
+                  "text": "Quay về Round Robin",
+                  "color": "orange",
+                  "index": 1
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Không dùng β / RL",
+                  "color": "blue",
+                  "index": 2
+                }
+              }
+            }
+          ],
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "description": "Quay về Round Robin khi số đo độ trễ cũ, thiếu, hoặc không khớp danh sách bản sao."
+    },
+    {
+      "id": 503,
+      "type": "timeseries",
+      "title": "Trọng số control plane giao cho từng bản sao B (%)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Trọng số mà control plane phát cho A qua xDS. So với 'Tỷ lệ phân phối tải Service B (%)' ở hàng trên: hai biểu đồ phải đi cùng chiều.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 91
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "avg by (replica) (grpc_lb_rl_weight_percent)",
+          "legendFormat": "{{replica}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      }
     }
   ],
   "refresh": "5s",
@@ -2531,7 +2734,7 @@
   "timezone": "browser",
   "title": "Hệ thống cân bằng tải gRPC hai tầng (NT533)",
   "uid": "nt533-grpc-lb",
-  "version": 1,
+  "version": 2,
   "weekStart": "",
   "description": "Giám sát hiệu năng hệ thống cân bằng tải gRPC trên cụm 4 máy chủ AWS"
 }

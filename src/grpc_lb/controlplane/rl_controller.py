@@ -18,6 +18,7 @@ from pathlib import Path
 
 from envoy.config.endpoint.v3 import endpoint_pb2
 
+from grpc_lb.prom_metrics import record_rl_fallback, record_rl_window
 from grpc_lb.rl import BETAS, BanditTable, QAgent, ShapeCore, reward
 
 from .resources import EDS
@@ -268,6 +269,7 @@ class ShapeController:
                 self.fallback_reason = reason
             self.members, self.sequence = (), -1
             self.core.reset(0)
+            record_rl_fallback(self.service, self.policy)
             return snapshot
 
     def _apply(self, snapshot):
@@ -308,6 +310,9 @@ class ShapeController:
                         "weights": dict(zip(members, self.core.weights, strict=True)),
                     }
                 )
+            )
+            record_rl_window(
+                self.service, self.policy, self.core.beta, dict(zip(members, self.core.weights, strict=True))
             )
         return weighted_snapshot(snapshot, self.service, dict(zip(members, self.core.weights, strict=True)))
 

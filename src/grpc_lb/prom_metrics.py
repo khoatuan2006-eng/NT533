@@ -10,7 +10,7 @@ LOG = logging.getLogger(__name__)
 
 # Fallback dummy class if prometheus_client is not installed
 try:
-    from prometheus_client import Counter, Histogram, start_http_server
+    from prometheus_client import Counter, Gauge, Histogram, start_http_server
 
     HAVE_PROMETHEUS = True
 except ImportError:
@@ -26,7 +26,14 @@ except ImportError:
         def observe(self, amount: float) -> None:
             pass
 
+        def set(self, value: float) -> None:
+            pass
+
+        def clear(self) -> None:
+            pass
+
     Counter = _DummyMetric  # type: ignore[misc, assignment]
+    Gauge = _DummyMetric  # type: ignore[misc, assignment]
     Histogram = _DummyMetric  # type: ignore[misc, assignment]
 
     def start_http_server(port: int, addr: str = "0.0.0.0") -> None:  # type: ignore[misc]
@@ -48,9 +55,59 @@ if HAVE_PROMETHEUS:
         ["caller", "target"],
         buckets=(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0),
     )
+    # Weight controller in the control plane (xds-beta / xds-rl): what it decided for A -> B.
+    RL_BETA = Gauge(
+        "grpc_lb_rl_beta",
+        "Beta the weight controller is applying (0 = Round Robin, larger = moves more load off slow replicas)",
+        ["service", "policy"],
+    )
+    RL_WEIGHT = Gauge(
+        "grpc_lb_rl_weight_percent",
+        "Weight the controller gives each endpoint; the weights of a service sum to 100",
+        ["service", "endpoint", "replica"],
+    )
+    RL_FALLBACK = Gauge(
+        "grpc_lb_rl_fallback",
+        "1 while the controller has fallen back to Round Robin because its telemetry is not usable",
+        ["service", "policy"],
+    )
 else:
     CALLS_SENT = Counter()
     CALL_DURATION = Histogram()
+    RL_BETA = Gauge()
+    RL_WEIGHT = Gauge()
+    RL_FALLBACK = Gauge()
+
+# Instance n of a service listens on 50100/50200/50300 + n (see scripts/multihost.py).
+_PORT_TIERS = {501: "a", 502: "b", 503: "c"}
+
+
+def replica_name(endpoint: str) -> str:
+    """b-2 for 172.31.30.73:50202; the endpoint itself when the port follows no known layout."""
+    _, _, port = endpoint.rpartition(":")
+    if port.isdigit() and int(port) // 100 in _PORT_TIERS and int(port) % 100:
+        return f"{_PORT_TIERS[int(port) // 100]}-{int(port) % 100}"
+    return endpoint
+
+
+def record_rl_window(service: str, policy: str, beta: float, weights: dict[str, float]) -> None:
+    """Publish one controller decision: its beta and the weight of every endpoint."""
+    try:
+        RL_BETA.labels(service=service, policy=policy).set(beta)
+        RL_FALLBACK.labels(service=service, policy=policy).set(0)
+        for endpoint, weight in weights.items():
+            RL_WEIGHT.labels(service=service, endpoint=endpoint, replica=replica_name(endpoint)).set(weight)
+    except Exception as exc:
+        LOG.debug("Failed to record controller metric: %s", exc)
+
+
+def record_rl_fallback(service: str, policy: str) -> None:
+    """The controller handed the service back to Round Robin: its weights no longer apply."""
+    try:
+        RL_WEIGHT.clear()
+        RL_FALLBACK.labels(service=service, policy=policy).set(1)
+    except Exception as exc:
+        LOG.debug("Failed to record controller metric: %s", exc)
 
 
 def record_call(

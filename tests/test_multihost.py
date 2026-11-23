@@ -55,7 +55,8 @@ def test_three_node_placement_and_network_addresses(tmp_path):
             service["network_mode"] == "host" for name, service in services.items() if name != "ingress"
         )
         if "ingress" in services:
-            assert services["ingress"]["ports"] == ["80:50050", "127.0.0.1:9901:9901"]
+            # Envoy admin is published so Prometheus on node4 can scrape it; the security group keeps it in the VPC.
+            assert services["ingress"]["ports"] == ["80:50050", "9901:9901"]
             assert "network_mode" not in services["ingress"]
         assert ("controlplane" in services) == (index < 3)
     envoy = (tmp_path / "node1/envoy.yaml").read_text()

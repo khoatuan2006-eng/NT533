@@ -108,3 +108,19 @@ scrape_configs:
           node: "Node 4"
           cluster: "grpc-lb"
           tier: "service-a"
+
+  # ---- Bộ điều khiển trọng số trong control plane (β, trọng số A -> B, quay về Round Robin) ----
+  # Chỉ có số khi cụm chạy phương án xds-beta hoặc xds-rl.
+  - job_name: controlplane-metrics
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["172.31.20.204:9201"]
+        labels:
+          node: "Node 1"
+          cluster: "grpc-lb"
+          tier: "controlplane"
+      - targets: ["172.31.30.73:9201"]
+        labels:
+          node: "Node 2"
+          cluster: "grpc-lb"
+          tier: "controlplane"

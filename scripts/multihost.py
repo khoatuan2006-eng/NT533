@@ -47,6 +47,8 @@ ENVOY_IMAGE = "envoyproxy/envoy:v1.35.5"
 LOGGING = {"driver": "json-file", "options": {"max-size": "50m", "max-file": "3"}}
 CONSUL_PORTS = {"rpc": 8300, "serf": 8301, "http": 8500}
 XDS_PORT = 18000
+SERVICE_A_METRICS_PORT = 9200  # each A instance; one A per node
+CONTROLPLANE_METRICS_PORT = 9201
 REMOTE_DIR = "/opt/loadbalance/cluster"
 PROJECT = "lb-cloud"
 
@@ -415,7 +417,7 @@ class ClusterDeployment:
                 if spec.request_log != "all":
                     environment["REQUEST_LOG"] = spec.request_log
                 if service == "service-a":
-                    environment["METRICS_PORT"] = "9200"
+                    environment["METRICS_PORT"] = str(SERVICE_A_METRICS_PORT)
                 services[instance] = {**common, "environment": environment}
             if node in spec.controlplanes:
                 # Local agent first, then every server: losing one agent is not losing quorum.
@@ -432,6 +434,8 @@ class ClusterDeployment:
                         "CONSUL_HTTP_ADDR": ",".join(consul),
                         "CONSUL_ACTIVE_HEALTH": "1",
                         "XDS_LISTEN_ADDRESS": f"{address}:{XDS_PORT}",
+                        # Weight controller metrics (beta, weights, fallback) for Prometheus.
+                        "METRICS_PORT": str(CONTROLPLANE_METRICS_PORT),
                     },
                     "logging": LOGGING,
                 }
@@ -614,7 +618,9 @@ def connectivity_checks(spec: ClusterSpec) -> dict[str, list[tuple[str, str, int
                 for _, instance, port in items:
                     if instance[0] in "bc":
                         checks[node].append((f"call {instance}", ip[owner], port))
-            checks[node].append((f"metrics-a {node}", ip[node], 9200))
+            checks[node].append((f"metrics-a {node}", ip[node], SERVICE_A_METRICS_PORT))
+        if node in spec.controlplanes:
+            checks[node].append((f"metrics-controlplane {node}", ip[node], CONTROLPLANE_METRICS_PORT))
         if node in spec.ingress:
             for instance, address, port in spec.endpoints("service-a"):
                 checks[node].append((f"envoy->{instance}", address, port))

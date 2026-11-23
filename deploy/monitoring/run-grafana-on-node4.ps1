@@ -104,6 +104,8 @@ scp -i "$Key" -o StrictHostKeyChecking=accept-new "deploy/monitoring/docker-comp
 scp -i "$Key" -o StrictHostKeyChecking=accept-new "deploy/monitoring/prometheus/prometheus.node4.yml" "$User@$Node4`:~/monitoring/prometheus/prometheus.node4.yml" 2>$null
 scp -i "$Key" -o StrictHostKeyChecking=accept-new -r "deploy/monitoring/grafana/provisioning" "$User@$Node4`:~/monitoring/grafana/" 2>$null
 scp -i "$Key" -o StrictHostKeyChecking=accept-new -r "deploy/monitoring/grafana/dashboards" "$User@$Node4`:~/monitoring/grafana/" 2>$null
+# scp -r tu Windows tao thu muc quyen 700; Grafana (uid 472) va Prometheus (uid 65534) khong doc duoc.
+ssh -i "$Key" -o StrictHostKeyChecking=accept-new "$User@$Node4" "chmod -R a+rX ~/monitoring/grafana ~/monitoring/prometheus" 2>$null
 
 Write-Host "   Da upload xong cau hinh." -ForegroundColor Green
 

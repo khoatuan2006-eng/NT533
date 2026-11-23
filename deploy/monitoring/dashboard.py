@@ -14,18 +14,13 @@ Serves a modern Grafana-style Dark Theme Web Dashboard at http://localhost:3000
 
 from __future__ import annotations
 
-import collections
 import http.server
 import json
-import re
 import socketserver
-import subprocess
-import sys
 import threading
 import time
 import urllib.error
 import urllib.request
-from pathlib import Path
 
 PORT = 3000
 HISTORY_LEN = 60  # Keep 60 data points (2 minutes at 2s interval)

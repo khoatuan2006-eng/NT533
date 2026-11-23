@@ -36,7 +36,7 @@ RUN pip install --no-cache-dir \
     "protobuf==7.36.2" \
     "xds-protos==1.84.0" \
     "httpx==0.28.1" \
-    "prometheus-client>=0.20.0"
+    "prometheus-client==0.26.0"
 
 # ── Copy source ───────────────────────────────────────────────────────────────
 COPY api/            ./api/
