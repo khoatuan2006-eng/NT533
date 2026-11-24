@@ -174,8 +174,11 @@ def main() -> None:
     )
     parser.add_argument("--quiet", action="store_true", help="Only print the summaries")
     args = parser.parse_args()
-    if not 0 < args.rate <= 50 or args.timeout <= 0 or args.summary_every <= 0 or args.duration < 0:
-        parser.error("0 < rate <= 50, positive timeout and summary interval, duration >= 0")
+    if args.rate <= 0 or args.timeout <= 0 or args.summary_every <= 0 or args.duration < 0:
+        parser.error("positive rate, timeout and summary interval, duration >= 0")
+    if args.rate > 50 and not args.quiet:
+        print(f"[Lưu ý] Tốc độ {args.rate:g} req/s quá lớn để in từng dòng, tự động bật --quiet (chỉ in bảng tổng kết).\n")
+        args.quiet = True
     if sys.platform == "win32":
         os.system("")  # turn on ANSI colours in the Windows console
     stats = Stats()

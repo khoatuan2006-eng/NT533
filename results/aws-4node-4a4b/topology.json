@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "entry_service": "service-a",
+  "services": {
+    "service-a": {
+      "instances": {
+        "a-1": "172.31.20.204:50101",
+        "a-2": "172.31.30.73:50102",
+        "a-3": "172.31.26.182:50103",
+        "a-4": "172.31.18.115:50104"
+      },
+      "dependencies": [
+        "service-b"
+      ],
+      "mode": "sequential",
+      "delay_s": 0.005,
+      "concurrency": 50,
+      "timeout_s": 5
+    },
+    "service-b": {
+      "instances": {
+        "b-1": "172.31.20.204:50201",
+        "b-2": "172.31.30.73:50202",
+        "b-3": "172.31.26.182:50203",
+        "b-4": "172.31.18.115:50204"
+      },
+      "delay_s": 0.005,
+      "heavy_multiplier": 5,
+      "failure_rate": 0
+    }
+  }
+}

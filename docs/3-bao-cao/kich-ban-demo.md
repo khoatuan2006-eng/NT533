@@ -49,8 +49,8 @@ python scripts/demo_client.py --targets <IP node1>:80 <IP node2>:80 --rate 5
 **Màn hình hiện:** mỗi giây khoảng 5 dòng, mỗi dòng là một request, ví dụ:
 
 ```text
-10:02:11 laptop #12  qua 3.25.139.183:80     182.4 ms  a-3 → b-1
-10:02:11 laptop #13  qua 3.26.2.87:80        179.9 ms  a-1 → b-4
+10:02:11 laptop #12  qua 3.27.239.78:80      182.4 ms  a-3 → b-1
+10:02:11 laptop #13  qua 13.239.63.219:80     179.9 ms  a-1 → b-4
 ```
 
 Vài giây một lần có dòng tổng kết `tầng B: b-1 25%  b-2 25%  b-3 25%  b-4 25%`.

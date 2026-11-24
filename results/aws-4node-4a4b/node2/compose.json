@@ -1,0 +1,159 @@
+{
+  "services": {
+    "consul": {
+      "image": "hashicorp/consul:2.1.0",
+      "network_mode": "host",
+      "restart": "unless-stopped",
+      "command": [
+        "agent",
+        "-server",
+        "-bootstrap-expect=3",
+        "-node=lb-node2",
+        "-bind=172.31.30.73",
+        "-advertise=172.31.30.73",
+        "-client=127.0.0.1 172.31.30.73",
+        "-datacenter=lb-cloud",
+        "-retry-join=172.31.20.204",
+        "-retry-join=172.31.30.73",
+        "-retry-join=172.31.26.182"
+      ],
+      "volumes": [
+        "consul-data:/consul/data",
+        "../../configs/consul-ha.json:/consul/config/ha.json:ro"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "50m",
+          "max-file": "3"
+        }
+      }
+    },
+    "a-2": {
+      "image": "loadbalance-workload:cloud",
+      "build": {
+        "context": "../..",
+        "dockerfile": "deploy/Dockerfile"
+      },
+      "network_mode": "host",
+      "restart": "unless-stopped",
+      "command": [
+        "python",
+        "-m",
+        "grpc_lb.microservices"
+      ],
+      "volumes": [
+        "../topology.json:/app/configs/topology.json:ro",
+        "../bootstrap.json:/app/configs/bootstrap.json:ro"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "50m",
+          "max-file": "3"
+        }
+      },
+      "environment": {
+        "SERVICE_ID": "service-a",
+        "INSTANCE_ID": "a-2",
+        "LISTEN_ADDRESS": "172.31.30.73:50102",
+        "SERVICE_ADVERTISE_ADDRESS": "172.31.30.73:50102",
+        "TOPOLOGY_PATH": "/app/configs/topology.json",
+        "DISCOVERY_MODE": "xds",
+        "GRPC_XDS_BOOTSTRAP": "/app/configs/bootstrap.json",
+        "CONSUL_HTTP_ADDR": "http://127.0.0.1:8500",
+        "DRAIN_FILE": "/tmp/drain",
+        "REQUEST_LOG": "errors",
+        "METRICS_PORT": "9200"
+      }
+    },
+    "b-2": {
+      "image": "loadbalance-workload:cloud",
+      "build": {
+        "context": "../..",
+        "dockerfile": "deploy/Dockerfile"
+      },
+      "network_mode": "host",
+      "restart": "unless-stopped",
+      "command": [
+        "python",
+        "-m",
+        "grpc_lb.microservices"
+      ],
+      "volumes": [
+        "../topology.json:/app/configs/topology.json:ro",
+        "../bootstrap.json:/app/configs/bootstrap.json:ro"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "50m",
+          "max-file": "3"
+        }
+      },
+      "environment": {
+        "SERVICE_ID": "service-b",
+        "INSTANCE_ID": "b-2",
+        "LISTEN_ADDRESS": "172.31.30.73:50202",
+        "SERVICE_ADVERTISE_ADDRESS": "172.31.30.73:50202",
+        "TOPOLOGY_PATH": "/app/configs/topology.json",
+        "DISCOVERY_MODE": "xds",
+        "GRPC_XDS_BOOTSTRAP": "/app/configs/bootstrap.json",
+        "CONSUL_HTTP_ADDR": "http://127.0.0.1:8500",
+        "DRAIN_FILE": "/tmp/drain",
+        "REQUEST_LOG": "errors"
+      }
+    },
+    "controlplane": {
+      "image": "loadbalance-controlplane:cloud",
+      "build": {
+        "context": "../..",
+        "dockerfile": "deploy/Dockerfile.controlplane"
+      },
+      "network_mode": "host",
+      "restart": "unless-stopped",
+      "volumes": [
+        "../discovery.json:/config/discovery.json:ro"
+      ],
+      "environment": {
+        "CONSUL_HTTP_ADDR": "http://127.0.0.1:8500,http://172.31.20.204:8500,http://172.31.26.182:8500",
+        "CONSUL_ACTIVE_HEALTH": "1",
+        "XDS_LISTEN_ADDRESS": "172.31.30.73:18000"
+      },
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "50m",
+          "max-file": "3"
+        }
+      }
+    },
+    "ingress": {
+      "image": "envoyproxy/envoy:v1.35.5",
+      "ports": [
+        "80:50050",
+        "9901:9901"
+      ],
+      "restart": "unless-stopped",
+      "command": [
+        "-c",
+        "/etc/envoy/envoy.yaml",
+        "--concurrency",
+        "2"
+      ],
+      "volumes": [
+        "./envoy.yaml:/etc/envoy/envoy.yaml:ro"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "50m",
+          "max-file": "3"
+        }
+      }
+    }
+  },
+  "volumes": {
+    "consul-data": {}
+  }
+}

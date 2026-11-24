@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "nodes": {
+    "node1": {
+      "ip": "172.31.20.204",
+      "ssh": "3.27.239.78",
+      "vcpus": 2,
+      "instances": [
+        "a-1",
+        "b-1"
+      ]
+    },
+    "node2": {
+      "ip": "172.31.30.73",
+      "ssh": "13.239.63.219",
+      "vcpus": 2,
+      "instances": [
+        "a-2",
+        "b-2"
+      ]
+    },
+    "node3": {
+      "ip": "172.31.26.182",
+      "ssh": "3.27.243.249",
+      "vcpus": 2,
+      "instances": [
+        "a-3",
+        "b-3"
+      ]
+    },
+    "node4": {
+      "ip": "172.31.18.115",
+      "ssh": "3.27.108.199",
+      "vcpus": 2,
+      "instances": [
+        "a-4",
+        "b-4"
+      ]
+    }
+  },
+  "consul_servers": [
+    "node1",
+    "node2",
+    "node3"
+  ],
+  "controlplanes": [
+    "node1",
+    "node2"
+  ],
+  "ingress": [
+    "node1",
+    "node2"
+  ],
+  "ingress_port": 80,
+  "envoy_concurrency": 2,
+  "concurrency": {},
+  "request_log": "errors",
+  "envoy_access_log": "errors",
+  "address": "",
+  "ssh_config": "configs/ssh-config.aws-new"
+}

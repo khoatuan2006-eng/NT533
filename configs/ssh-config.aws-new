@@ -8,14 +8,14 @@ Host *
     StrictHostKeyChecking accept-new
     ConnectTimeout 10
 
-Host node1 lb-new-node1 3.25.139.183
-    HostName 3.25.139.183
+Host node1 lb-new-node1 3.27.239.78
+    HostName 3.27.239.78
 
-Host node2 lb-new-node2 3.26.2.87
-    HostName 3.26.2.87
+Host node2 lb-new-node2 13.239.63.219
+    HostName 13.239.63.219
 
-Host node3 lb-new-node3 15.135.223.24
-    HostName 15.135.223.24
+Host node3 lb-new-node3 3.27.243.249
+    HostName 3.27.243.249
 
-Host node4 lb-new-node4 3.107.13.147
-    HostName 3.107.13.147
+Host node4 lb-new-node4 3.27.108.199
+    HostName 3.27.108.199

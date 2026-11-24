@@ -1,0 +1,109 @@
+{
+  "services": {
+    "consul": {
+      "image": "hashicorp/consul:2.1.0",
+      "network_mode": "host",
+      "restart": "unless-stopped",
+      "command": [
+        "agent",
+        "-node=lb-node4",
+        "-bind=172.31.18.115",
+        "-advertise=172.31.18.115",
+        "-client=127.0.0.1",
+        "-datacenter=lb-cloud",
+        "-retry-join=172.31.20.204",
+        "-retry-join=172.31.30.73",
+        "-retry-join=172.31.26.182"
+      ],
+      "volumes": [
+        "consul-data:/consul/data",
+        "../../configs/consul-ha.json:/consul/config/ha.json:ro"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "50m",
+          "max-file": "3"
+        }
+      }
+    },
+    "a-4": {
+      "image": "loadbalance-workload:cloud",
+      "build": {
+        "context": "../..",
+        "dockerfile": "deploy/Dockerfile"
+      },
+      "network_mode": "host",
+      "restart": "unless-stopped",
+      "command": [
+        "python",
+        "-m",
+        "grpc_lb.microservices"
+      ],
+      "volumes": [
+        "../topology.json:/app/configs/topology.json:ro",
+        "../bootstrap.json:/app/configs/bootstrap.json:ro"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "50m",
+          "max-file": "3"
+        }
+      },
+      "environment": {
+        "SERVICE_ID": "service-a",
+        "INSTANCE_ID": "a-4",
+        "LISTEN_ADDRESS": "172.31.18.115:50104",
+        "SERVICE_ADVERTISE_ADDRESS": "172.31.18.115:50104",
+        "TOPOLOGY_PATH": "/app/configs/topology.json",
+        "DISCOVERY_MODE": "xds",
+        "GRPC_XDS_BOOTSTRAP": "/app/configs/bootstrap.json",
+        "CONSUL_HTTP_ADDR": "http://127.0.0.1:8500",
+        "DRAIN_FILE": "/tmp/drain",
+        "REQUEST_LOG": "errors",
+        "METRICS_PORT": "9200"
+      }
+    },
+    "b-4": {
+      "image": "loadbalance-workload:cloud",
+      "build": {
+        "context": "../..",
+        "dockerfile": "deploy/Dockerfile"
+      },
+      "network_mode": "host",
+      "restart": "unless-stopped",
+      "command": [
+        "python",
+        "-m",
+        "grpc_lb.microservices"
+      ],
+      "volumes": [
+        "../topology.json:/app/configs/topology.json:ro",
+        "../bootstrap.json:/app/configs/bootstrap.json:ro"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "50m",
+          "max-file": "3"
+        }
+      },
+      "environment": {
+        "SERVICE_ID": "service-b",
+        "INSTANCE_ID": "b-4",
+        "LISTEN_ADDRESS": "172.31.18.115:50204",
+        "SERVICE_ADVERTISE_ADDRESS": "172.31.18.115:50204",
+        "TOPOLOGY_PATH": "/app/configs/topology.json",
+        "DISCOVERY_MODE": "xds",
+        "GRPC_XDS_BOOTSTRAP": "/app/configs/bootstrap.json",
+        "CONSUL_HTTP_ADDR": "http://127.0.0.1:8500",
+        "DRAIN_FILE": "/tmp/drain",
+        "REQUEST_LOG": "errors"
+      }
+    }
+  },
+  "volumes": {
+    "consul-data": {}
+  }
+}
