@@ -6,7 +6,7 @@ Hệ thống cân bằng tải hai tầng cho các service gRPC, kèm bộ công
 - **Tầng trong:** A tự chọn instance của service xử lý B, C (mô hình lookaside); danh sách instance do control plane phát qua gRPC xDS, lấy từ Consul.
 - **Chiến lược:** Round Robin, Least Request, và trọng số theo latency (β cố định hoặc RL chọn β).
 
-![Kiến trúc logic: client gọi hai Envoy, Envoy chia tải vào service A, A gọi trực tiếp service B và C; Consul và control plane phát endpoint cho A qua xDS](docs/images/architecture-logical.svg)
+![Kiến trúc logic: client gọi hai Envoy qua Internet, Envoy chia tải vào bốn bản sao A, A tự chọn một trong bốn bản sao B theo trọng số; control plane đọc Consul, tính trọng số bằng β hoặc RL và phát cho A qua xDS; Prometheus và Grafana trên node4 giám sát mọi thành phần](docs/images/architecture-logical.svg)
 
 ## Cấu trúc repo
 

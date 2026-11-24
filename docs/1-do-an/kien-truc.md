@@ -4,9 +4,9 @@ Trang này mô tả bố trí hệ thống, hành vi của từng thành phần 
 
 ## Bố trí trên bốn node
 
-![Kiến trúc logic: client gọi hai Envoy, Envoy chia tải vào service A, A gọi trực tiếp service B và C; Consul và control plane phát endpoint cho A qua xDS](../images/architecture-logical.svg)
+![Kiến trúc logic: client gọi hai Envoy qua Internet, Envoy chia tải vào bốn bản sao A, A tự chọn một trong bốn bản sao B theo trọng số; control plane đọc Consul, tính trọng số bằng β hoặc RL và phát cho A qua xDS; Prometheus và Grafana trên node4 giám sát mọi thành phần](../images/architecture-logical.svg)
 
-![Bố trí trên bốn node: node1 có Consul, control plane, Envoy, a-1, b-1; node2 có Consul, control plane, Envoy, a-2, c-1; node3 có Consul, a-3, b-2; node4 có Consul agent, a-4, c-2 và bộ đo](../images/architecture-nodes.svg)
+![Bố trí trên bốn node: node1 có Consul, control plane, Envoy, a-1, b-1; node2 có Consul, control plane, Envoy, a-2, b-2; node3 có Consul, a-3, b-3; node4 có Consul client, a-4, b-4, Prometheus và Grafana; mọi node chạy node_exporter](../images/architecture-nodes.svg)
 
 | Node | Thành phần |
 |---|---|
